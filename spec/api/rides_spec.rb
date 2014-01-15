@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Stowaway::Ride do
+describe Stowaway::Rides do
   shared_examples_for 'admin endpoints' do
     let(:prefix) { "/api/#{version}/rides/admin" }
 

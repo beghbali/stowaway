@@ -34,8 +34,17 @@ group :doc do
   gem 'sdoc', require: false
 end
 
+group :development do
+  gem 'debugger'
+end
+
 group :development, :test do
   gem 'rspec-rails', '~> 3.0.0.beta'
+end
+
+group :test do
+  gem 'factory_girl_rails'
+  gem 'faker'
 end
 
 # Use ActiveModel has_secure_password

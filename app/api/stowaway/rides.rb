@@ -1,5 +1,5 @@
 module Stowaway
-  class Ride < Grape::API
+  class Rides < Grape::API
     version :v1
     format :json
 
