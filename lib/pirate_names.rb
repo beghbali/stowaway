@@ -1,0 +1,374 @@
+module PirateNames
+  module Person
+    ADJECTIVES = %w(gloomy
+dangerous
+burning scary
+heavy
+pale junior
+upside-down
+sailing
+treasure chest 
+wooden
+meek
+nervous coins 
+positive
+shy
+golden  sword 
+smart
+open
+metallic
+map 
+slushy
+detailed
+thirsty island 
+isolated
+silly
+messy parrot 
+plastic
+talkative
+snoopy
+cannon 
+merry
+heavy
+pitiful anchor 
+rusty
+ripe
+major pirate hook 
+poor
+pointy
+fat 
+Sleazy
+Sneaky
+Deceitful
+Ignorant
+Rotten
+Greedy
+Rude
+Scruffy
+Ragged
+Clever
+Brave
+Fearless
+Brassy
+Brave
+Bright
+Briney
+Cautious
+Cheeky
+Clever
+Crazy
+Creaky
+Critical
+Crooked
+Crusty
+Curious
+Daring
+Dashing
+Drunken
+Extra
+Fearless
+Feisty
+Fit
+Foolhardy
+Generous
+Gentle
+Germy
+Glad
+Glum
+Good
+Gritty
+Gruff
+Haggard
+Happy
+Heartless
+Honest
+Humble
+Kind
+Lawful
+Lazy
+Little
+Loud
+Lovesick
+Meek
+Old
+Patient
+Petty
+Plucky
+Pretty
+Quiet
+Refined
+Reliable
+Reticent
+Romantic
+Sad
+Salty
+Sensitive
+Shy
+Silly
+Smart
+Smiley
+Smiling
+Spritely
+Stinky
+Stooped
+Striking
+Strong
+Studious
+Sweet
+Timid
+Unkempt
+Wild
+Witty
+Young)
+
+   NAMES = %w(
+    abandon
+adventure
+ahoy
+anchor
+armada
+arms
+asea
+ashore
+assault
+attack
+aye-aye
+B
+bad
+bandanna
+bandit
+bandolier
+barbaric
+barrel
+battle
+beach
+behead
+boatswain
+bos'n
+bounty
+brawl
+brutal
+buccaneer
+C
+cannon
+capsize
+captain
+capture
+cargo
+cave
+challenge
+chest
+coast
+coastline
+coins
+compass
+confiscate
+conquest
+contraband
+corpse
+corsair
+course
+crew
+criminal
+crook
+crow's nest
+cruel
+curse
+cutlass
+cutthroat
+D
+dagger
+danger
+daring
+dead reckoning
+deck
+deck hands
+desert island
+dishonest
+doubloon
+E
+earring
+escape
+evil
+explore
+eye patch
+F
+fear
+fearsome
+ferocious
+fight
+first mate
+flag
+fleet
+flotsam and jetsam
+fortune
+G
+galleon
+gangplank
+gear
+gibbet
+gold
+greed
+gun
+gunner
+gunpowder
+H
+haul
+heist
+high seas
+hijack
+hook
+hold
+horizon
+hostile
+hull
+hurricane
+I
+illegal
+ill-gotten
+infamous
+island
+J
+jetsam
+jewels
+Jolly Roger
+K
+keel
+keelhaul
+kidnap
+kill
+knife
+L
+land
+land-ho
+landlubber
+lash
+lawless
+legend
+limey
+Long John Silver
+lookout
+loot
+lore
+lucre
+M
+maggot
+malaria
+map
+marauder
+matiner
+maroon
+mast
+mates
+mayhem
+menace
+merchant
+musket
+mutiny
+N
+nautical
+navigate
+New World
+notorious
+O
+ocean
+old salt
+Old World
+outcasts
+overboard
+P
+parley
+parrot
+pegleg
+pieces of eight
+pillage
+pirate
+pistol
+plank
+plunder
+predatory
+privateer
+prowl
+Q
+quartermaster
+quarters
+quest
+R
+raid
+ransack
+rat
+rations
+realm
+reckoning
+revenge
+revolt
+riches
+rigging
+roam
+rob
+robber
+rope
+rudder
+ruffian
+rum
+ruthless
+S
+sabotage
+sail
+sailing
+sailor
+saclawag
+scar
+scurvy
+S Cont.
+seas
+seaweed
+sextant
+ship
+shipmate
+shiver-me-timbers
+shore
+silver
+skiff
+skull and bones
+spoils
+steal
+swab the deck
+swagger
+swashbuckling
+sword
+T
+thief
+thievery
+thug
+tides
+torture
+trade
+treachery
+treasure
+treasure island
+truce
+U
+unlawful
+unscrupulous
+V
+vandalize
+vanquish
+vessel
+vicious
+vile
+villain
+violence
+violent
+W
+walk the plank
+weapons
+X
+X marks the spot
+Y
+yellow fever
+yo-ho-ho)
+    def generate_pirate_name
+    end
+  end
+end

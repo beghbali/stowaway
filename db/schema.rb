@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140115100147) do
+ActiveRecord::Schema.define(version: 20140119012725) do
 
   create_table "users", force: true do |t|
     t.string   "first_name"
@@ -24,6 +24,12 @@ ActiveRecord::Schema.define(version: 20140115100147) do
     t.datetime "expires_at"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "email_provider"
+    t.string   "gender"
+    t.string   "location"
+    t.boolean  "verified"
+    t.string   "profile_url"
+    t.string   "stowaway_email"
   end
 
 end
