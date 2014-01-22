@@ -6,7 +6,7 @@ class User < ActiveRecord::Base
   validates :provider, inclusion: { in: PROVIDERS }
   validates :email_provider, inclusion: { in: SUPPORTED_EMAIL_PROVIDERS }, :allow_blank => true
 
-  before_create :create_stowaway_email
+  before_save :create_stowaway_email, :if => :can_create_email?
 
   def update_facebook_attributes!(fb_attributes)
     self.update_attributes!(fb_attributes)
@@ -20,5 +20,9 @@ class User < ActiveRecord::Base
     else
       self.stowaway_email = Mailboto::Email.new.create(proposed_email)
     end
+  end
+
+  def can_create_email?
+    !self.email.nil? && self.stowaway_email.nil?
   end
 end
