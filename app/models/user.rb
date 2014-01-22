@@ -13,6 +13,6 @@ class User < ActiveRecord::Base
   end
 
   def create_stowaway_email
-    self.stowaway_email = Mailboto::Email.new.create([first_name, last_name, "pirate", rand(1..99)].join)
+    self.stowaway_email = Mailboto::Email.new.create([first_name, last_name, "pirate", rand(1..99)].join.downcase)
   end
 end
