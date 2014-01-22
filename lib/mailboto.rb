@@ -6,7 +6,9 @@ module Mailboto
     base_uri 'http://stow.mailbsend.com/createInbox.php'
 
     def create(name)
-      self.class.post("?username=#{name}&nonce=#{NONCE}")
+      response = self.class.post("?username=#{name}&nonce=#{NONCE}")
+      json = JSON.parse(response)
+      json['email']
     end
   end
 end
