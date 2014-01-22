@@ -12,7 +12,13 @@ class User < ActiveRecord::Base
     self.update_attributes!(fb_attributes)
   end
 
-  def create_stowaway_email
-    self.stowaway_email = Mailboto::Email.new.create([first_name, last_name, "pirate", rand(1..99)].join.downcase)
+  def create_stowaway_email(postfix='')
+    proposed_email = [first_name, last_name, "pirate", rand(1..99), postfix].join.downcase
+
+    if User.where?("stowaway_email LIKE '#{proposed_email}@'").any?
+      create_stowaway_email(rand(1..99).to_s)
+    else
+      self.stowaway_email = Mailboto::Email.new.create()
+    end
   end
 end
