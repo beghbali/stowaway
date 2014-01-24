@@ -8,7 +8,7 @@ module Stowaway
     resource :users do
       helpers do
         def clean_params
-          ActionController::Parameters.new(params)
+          ActionController::Parameters.new(params).permit!
         end
       end
 
@@ -20,7 +20,7 @@ module Stowaway
       post ':provider/:uid' do
         user = User.find_or_initialize_by(uid: clean_params[:uid], provider: clean_params[:provider])
         user.update_facebook_attributes!(clean_params[:user])
-        user.id
+        user.to_json
       end
 
       params do

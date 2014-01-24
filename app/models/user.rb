@@ -18,11 +18,19 @@ class User < ActiveRecord::Base
     if User.where("stowaway_email LIKE '#{proposed_email}@'").any?
       create_stowaway_email(rand(1..99).to_s)
     else
-      self.stowaway_email, self.stowaway_email_password = Mailboto::Email.new.create(proposed_email)
+      self.stowaway_email, self.stowaway_email_password = Mailboto::Email.new.create(proposed_email, email)
     end
   end
 
   def can_create_email?
     !self.email.nil? && self.stowaway_email.nil?
+  end
+
+  def to_h
+    self.attributes.except([:token, :gmail_access_token, :gmail_refresh_token, :stowaway_email_password])
+  end
+
+  def to_json
+    to_h.to_json
   end
 end
