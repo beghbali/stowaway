@@ -29,6 +29,7 @@ module Stowaway
       put ':id' do
         user = User.find(clean_params[:id])
         user.update_attributes(clean_params[:user])
+        user.to_json
       end
 
       namespace :admin do
