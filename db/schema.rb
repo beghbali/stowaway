@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140121093535) do
+ActiveRecord::Schema.define(version: 20140124004727) do
 
   create_table "users", force: true do |t|
     t.string   "first_name"
@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(version: 20140121093535) do
     t.string   "stowaway_email"
     t.string   "gmail_access_token"
     t.string   "gmail_refresh_token"
+    t.string   "stowaway_email_password"
   end
 
 end

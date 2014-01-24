@@ -18,7 +18,7 @@ class User < ActiveRecord::Base
     if User.where("stowaway_email LIKE '#{proposed_email}@'").any?
       create_stowaway_email(rand(1..99).to_s)
     else
-      self.stowaway_email = Mailboto::Email.new.create(proposed_email)
+      self.stowaway_email, self.stowaway_email_password = Mailboto::Email.new.create(proposed_email)
     end
   end
 
