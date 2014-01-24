@@ -32,6 +32,14 @@ module Stowaway
         user.to_json
       end
 
+      params do
+        requires :id, type: Integer, desc: "stowaway user id"
+      end
+      get ':id' do
+        user = User.find(clean_params[:id])
+        user.to_json
+      end
+
       namespace :admin do
         desc "the number of users"
         get 'count' do
