@@ -17,7 +17,7 @@ module Stowaway
         requires :uid, type: String, desc: "user uid in the provider domain"
         requires :provider, type: String, desc: "authentication provider(e.g. facebook)", values: User::PROVIDERS
       end
-      post ':provider/:uid' do
+      post do
         user = User.find_or_initialize_by(uid: clean_params[:uid], provider: clean_params[:provider])
         user.update_facebook_attributes!(clean_params[:user])
         user.to_json
