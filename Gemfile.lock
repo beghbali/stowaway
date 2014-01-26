@@ -1,3 +1,12 @@
+GIT
+  remote: git@github.com:nu7hatch/gmail.git
+  revision: 717f797c64355ae38c11503767dafa3822f37cc7
+  specs:
+    gmail (0.4.0)
+      gmail_xoauth (>= 0.3.0)
+      mail (>= 2.2.1)
+      mime (>= 0.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -59,6 +68,8 @@ GEM
       railties (>= 3.0.0)
     faker (1.2.0)
       i18n (~> 0.5)
+    gmail_xoauth (0.4.1)
+      oauth (>= 0.3.6)
     grape (0.6.1)
       activesupport
       builder
@@ -87,11 +98,13 @@ GEM
     mail (2.5.4)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
+    mime (0.2.0)
     mime-types (1.25.1)
     minitest (4.7.5)
     multi_json (1.8.4)
     multi_xml (0.5.5)
     mysql2 (0.3.14)
+    oauth (0.4.7)
     polyglot (0.3.3)
     rack (1.5.2)
     rack-accept (0.4.5)
@@ -181,6 +194,7 @@ DEPENDENCIES
   debugger
   factory_girl_rails
   faker
+  gmail!
   grape
   httparty
   jbuilder (~> 1.2)

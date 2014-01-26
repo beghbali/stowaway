@@ -1,4 +1,8 @@
 class User < ActiveRecord::Base
+  include PublicId
+
+  has_public_id
+
   PROVIDERS = %w(facebook)
   SUPPORTED_EMAIL_PROVIDERS = %w(gmail yahoo other)
 
@@ -33,4 +37,5 @@ class User < ActiveRecord::Base
   def to_json
     to_h.to_json
   end
+
 end

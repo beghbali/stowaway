@@ -26,6 +26,7 @@ gem 'jbuilder', '~> 1.2'
 
 gem 'grape'
 gem 'httparty'
+gem 'gmail', git: "git@github.com:nu7hatch/gmail.git"
 
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
