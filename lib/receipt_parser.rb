@@ -1,11 +1,11 @@
-module ReceiptParser
-  class GmailParser
+class ReceiptParser
 
-    attr_accessor :gmail
+  RECEIPT_SENDERS = {
+    'uber': UberParser.from
+  }
 
-    def initialize(email, auth_token)
-      gmail = Gmail.connect(:xoauth2, "email@domain.com", token: auth_token)
-    end
+  def self.supported_senders
+    RECEIPT_SENDERS.values.flatten
   end
 end
 

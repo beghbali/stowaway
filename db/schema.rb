@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140126025140) do
+ActiveRecord::Schema.define(version: 20140127072006) do
 
   create_table "users", force: true do |t|
     t.string   "first_name"
@@ -34,6 +34,7 @@ ActiveRecord::Schema.define(version: 20140126025140) do
     t.string   "gmail_refresh_token"
     t.string   "stowaway_email_password"
     t.integer  "public_id"
+    t.datetime "last_processed_email_sent_at"
   end
 
 end

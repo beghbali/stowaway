@@ -15,7 +15,7 @@ module Stowaway
       desc "create a new user"
       params do
         requires :uid, type: String, desc: "user uid in the provider domain"
-        requires :provider, type: String, desc: "authentication provider(e.g. facebook)", values: User::PROVIDERS
+        requires :provider, type: String, desc: "authentication provider(e.g. facebook)", values: User::AUTHENTICATION_PROVIDERS
       end
       post do
         user = User.find_or_initialize_by(uid: clean_params[:uid], provider: clean_params[:provider])

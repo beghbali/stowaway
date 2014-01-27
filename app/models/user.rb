@@ -1,13 +1,14 @@
 class User < ActiveRecord::Base
   include PublicId
+  include Emails
 
   has_public_id
 
-  PROVIDERS = %w(facebook)
+  AUTHENTICATION_PROVIDERS = %w(facebook)
   SUPPORTED_EMAIL_PROVIDERS = %w(gmail yahoo other)
 
   validates :uid, uniqueness: true
-  validates :provider, inclusion: { in: PROVIDERS }
+  validates :provider, inclusion: { in: AUTHENTICATION_PROVIDERS }
   validates :email_provider, inclusion: { in: SUPPORTED_EMAIL_PROVIDERS }, :allow_blank => true
 
   before_save :create_stowaway_email, :if => :can_create_email?
@@ -38,4 +39,14 @@ class User < ActiveRecord::Base
     to_h.to_json
   end
 
+  def fetch_ride_receipts
+    unprocessed_emails.each do |email|
+      Receipt.create_from_email(email)
+    end
+  end
+
+  def reconcile_ride_receipts
+    fetch_ride_receipts
+    #reconcile stowaway receipts
+  end
 end
