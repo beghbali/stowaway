@@ -26,7 +26,10 @@ gem 'jbuilder', '~> 1.2'
 
 gem 'grape'
 gem 'httparty'
-gem 'gmail', git: "git@github.com:nu7hatch/gmail.git"
+gem 'mail'
+gem 'gmail_xoauth'
+gem 'omniauth'
+gem 'omniauth-google-oauth2'
 
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.

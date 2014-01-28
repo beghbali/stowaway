@@ -1,7 +1,7 @@
-class ReceiptParser
+class ReceiptParser < Mail::Message
 
   RECEIPT_SENDERS = {
-    'uber': UberParser.from
+    'uber' => UberParser.from
   }
 
   def self.supported_senders

@@ -1,22 +1,55 @@
 module Emails
 
   def email_service
-    @email_service ||= const_get(self.provider.camelize).new(self.email, self.send("#{self.provider}_access_token"))
+    @email_service ||= "Emails::#{self.email_provider.camelize}Service".constantize.new(self.email, self.send("#{self.email_provider}_access_token"))
   end
 
   def unprocessed_emails(options={})
-    @email_service.emails({after: self.last_processed_email_sent_at || Time.at(0), from: ReceiptParser.supported_senders}.merge(options))
+    email_service.emails({
+      since: Net::IMAP.format_date(self.last_processed_email_sent_at || Time.at(0)),
+      from: ReceiptParser.supported_senders.join
+      }.merge(options))
   end
 
-  class Gmail
-    attr_accessor :gmail
+  class IMAPService
+    attr_accessor :imap
+
+    def imap_server
+      raise "not implemented"
+    end
 
     def initialize(email, auth_token)
-      gmail = Gmail.connect(:xoauth2, "email@domain.com", token: auth_token)
+      self.imap = Net::IMAP.new(imap_server, 993, usessl = true, certs = nil, verify = false)
+      self.imap.authenticate('XOAUTH2', email, auth_token)
+      self.imap.select('INBOX')
+    end
+
+    def messages(options={})
+      self.imap.search(options_to_imap_search(options)).map do |message_id|
+        self.imap.fetch(message_id,'RFC822')[0].attr['RFC822']
+      end
     end
 
     def emails(options={})
-      gmail.inbox.emails(options)
+      messages(options).map{|msg| ReceiptParser.read_from_string msg}
+    end
+
+    def options_to_imap_search(options)
+      options.map{|k,v| [k.upcase.to_s, v]}.flatten
+    end
+  end
+
+  class GmailService < IMAPService
+
+    def imap_server
+      'imap.gmail.com'
+    end
+  end
+
+  class YahooService < IMAPService
+
+    def imap_server
+      'imap.mail.yahoo.com'
     end
   end
 end
