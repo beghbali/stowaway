@@ -1,6 +1,9 @@
 class Receipt
   def self.create_from_email(email)
-    pp email.subject
-    pp email.text_part.body.to_s
+    parser = ReceiptParser.parser_for(email)
+    raise ReceiptParser::UnknownSenderError.new(mail.from) if parser.nil?
+
+    pp parser.new(email).parse
+    # self.create(parser.new(email).parse)
   end
 end

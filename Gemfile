@@ -30,6 +30,7 @@ gem 'mail'
 gem 'gmail_xoauth'
 gem 'omniauth'
 gem 'omniauth-google-oauth2'
+gem 'ruby-units'
 
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.

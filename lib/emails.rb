@@ -7,7 +7,8 @@ module Emails
   def unprocessed_emails(options={})
     email_service.emails({
       since: Net::IMAP.format_date(self.last_processed_email_sent_at || Time.at(0)),
-      from: ReceiptParser.supported_senders.join
+      from: ReceiptParser.supported_senders.join,
+      subject: ReceiptParser.expected_subjects.product(["OR"]).flatten.reverse.drop(1)  #array of subjects with ORs in between
       }.merge(options))
   end
 
@@ -31,7 +32,7 @@ module Emails
     end
 
     def emails(options={})
-      messages(options).map{|msg| ReceiptParser.read_from_string msg}
+      messages(options).map{|msg| Mail.read_from_string msg}
     end
 
     def options_to_imap_search(options)
