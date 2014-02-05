@@ -16,6 +16,7 @@ ActiveRecord::Schema.define(version: 20140203062036) do
   create_table "receipts", force: true do |t|
     t.string   "generated_by"
     t.string   "billed_to"
+    t.integer  "user_id"
     t.datetime "ride_requested_at"
     t.string   "pickup_location"
     t.string   "dropoff_location"

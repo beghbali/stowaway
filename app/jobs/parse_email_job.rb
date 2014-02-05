@@ -7,7 +7,9 @@ class ParseEmailJob
     email = Mail::Message.new message['email']
 
     Receipt.transaction do
-      Receipt.create_from_email(email)
+      receipt = Receipt.build_from_email(email)
+      receipt.user_id = user.id
+      receipt.save!
       user.last_processed_email_sent_at = [user.last_processed_email_sent_at, email.date].max
       user.save
     end

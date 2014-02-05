@@ -14,17 +14,9 @@ Stowaway::Application.routes.draw do
   # Example resource route (maps HTTP verbs to controller actions automatically):
   #   resources :products
 
-  # Example resource route with options:
-  #   resources :products do
-  #     member do
-  #       get 'short'
-  #       post 'toggle'
-  #     end
-  #
-  #     collection do
-  #       get 'sold'
-  #     end
-  #   end
+  resources :users do
+    resources :receipts
+  end
 
   # Example resource route with sub-resources:
   #   resources :products do

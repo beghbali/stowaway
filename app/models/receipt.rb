@@ -1,19 +1,27 @@
 class Receipt < ActiveRecord::Base
-  def self.create_from_email(email)
+  belongs_to :user
+  validate :did_not_generate_same_receipt_before
+
+  def self.build_from_email(email)
     parser = ReceiptParser.parser_for(email)
     raise ReceiptParser::UnknownSenderError.new(mail.from) if parser.nil?
 
     parsed_email = parser.new(email).parse
-    self.create(parsed_email) unless duplicate?(parsed_email)
+    self.new(parsed_email)
   end
 
-  def self.duplicate?(attributes)
-    self.exists?(billed_to: attributes[:billed_to],
-      total_amount: attributes[:total_amount],
-      ride_requested_at: duplication_time_range(attributes[:ride_requested_at]))
+  def around_requested_at
+    2.minutes.ago(self.ride_requested_at)..2.minutes.from_now(self.ride_requested_at)
   end
 
-  def self.duplication_time_range(time)
-    2.minutes.ago(time)..2.minutes.from_now(time)
+
+  def did_not_generate_same_receipt_before
+    errors.add(:base, "duplicate receipt") if self.duplicate?
+  end
+
+  def duplicate?
+    self.class.exists?(billed_to: self.billed_to,
+      total_amount: self.total_amount,
+      ride_requested_at: self.around_requested_at)
   end
 end

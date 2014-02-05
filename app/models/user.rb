@@ -3,6 +3,7 @@ class User < ActiveRecord::Base
   include Emails
 
   has_public_id
+  has_many :receipts
 
   AUTHENTICATION_PROVIDERS = %w(facebook)
   SUPPORTED_EMAIL_PROVIDERS = %w(gmail yahoo other)

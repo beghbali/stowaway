@@ -3,6 +3,7 @@ class CreateReceipts < ActiveRecord::Migration
     create_table :receipts do |t|
       t.string :generated_by
       t.string :billed_to
+      t.references :user
       t.datetime :ride_requested_at
       t.string :pickup_location
       t.string :dropoff_location
