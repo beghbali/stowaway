@@ -13,6 +13,7 @@ class User < ActiveRecord::Base
 
   before_save :create_stowaway_email, :if => :can_create_email?
 
+
   def update_facebook_attributes!(fb_attributes)
     self.update_attributes!(fb_attributes)
   end
@@ -41,7 +42,7 @@ class User < ActiveRecord::Base
 
   def fetch_ride_receipts
     unprocessed_emails.each do |email|
-      Receipt.create_from_email(email)
+      Resque.enqueue(ParseEmailJob, self.public_id, { email: email.encoded })
     end
   end
 

@@ -55,4 +55,5 @@ Stowaway::Application.routes.draw do
   #   end
 
   mount API => '/'
+  mount ResqueWeb::Engine => "/admin/jobs"
 end
