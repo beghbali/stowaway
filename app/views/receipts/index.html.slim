@@ -1,0 +1,32 @@
+table.table.table-striped
+  thead
+    tr
+      th Date
+      th From
+      th To
+      th Base Cost
+      th Distance Cost
+      th Time Cost
+      th Surge Cost
+      th Total Cost
+  tbody
+    -@user.receipts.each do |receipt|
+      tr
+        td = receipt.ride_requested_at.to_formatted_s(:short)
+        td = receipt.pickup_location
+        td = receipt.dropoff_location
+        td = receipt.base_amount
+        td = receipt.distance_amount
+        td = receipt.time_amount
+        td = "#{receipt.surge_amount}(x#{receipt.surge_multiple})" unless receipt.surge_amount.blank?
+        td = receipt.total_amount
+  tfooter
+    tr
+      td
+      td
+      td
+      td = @user.receipts.pluck(:base_amount).compact.reduce(:+)
+      td = @user.receipts.pluck(:distance_amount).compact.reduce(:+)
+      td = @user.receipts.pluck(:time_amount).compact.reduce(:+)
+      td = @user.receipts.pluck(:surge_amount).compact.reduce(:+)
+      td = @user.receipts.pluck(:total_amount).compact.reduce(:+)
