@@ -8,5 +8,13 @@ FactoryGirl.define do
     image_url Faker::Internet.url
     token     SecureRandom.hex(14)
     expires_at 3.days.from_now
+    email_provider ['gmail'].sample
+    gender ['female', 'male'].sample
+    location "#{Faker::Address.street_address} #{Faker::Address.city}, #{Faker::Address.state} #{Faker::Address.zip_code}"
+    verified [true, false].sample
+    profile_url Faker::Internet.url
+    gmail_access_token  SecureRandom.base64(32)
+    gmail_refresh_token  SecureRandom.base64(32)
+    stripe_token SecureRandom.base64(32)
   end
 end

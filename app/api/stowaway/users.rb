@@ -18,26 +18,25 @@ module Stowaway
         requires :provider, type: String, desc: "authentication provider(e.g. facebook)", values: User::AUTHENTICATION_PROVIDERS
       end
       post do
-        user = User.find_or_initialize_by(uid: clean_params[:uid], provider: clean_params[:provider])
-        user.update_facebook_attributes!(clean_params[:user])
-        user.to_json
+        user = User.find_or_initialize_by(uid: params[:uid], provider: params[:provider])
+        user.update_facebook_attributes!(clean_params[:user]) unless user.nil?
+        user
       end
 
       params do
         requires :id, type: Integer, desc: "stowaway user id"
       end
       put ':id' do
-        user = User.find(clean_params[:id])
-        user.update_attributes(clean_params[:user])
-        user.to_json
+        user = User.find_by_public_id(params[:id])
+        user.update(clean_params[:user]) unless user.nil?
+        user
       end
 
       params do
         requires :id, type: Integer, desc: "stowaway user id"
       end
       get ':id' do
-        user = User.find(clean_params[:id])
-        user.to_json
+        User.find_by_public_id(params[:id])
       end
 
       namespace :admin do
