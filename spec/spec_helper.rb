@@ -3,6 +3,7 @@ ENV["RAILS_ENV"] ||= 'test'
 require File.expand_path("../../config/environment", __FILE__)
 require 'rspec/rails'
 require 'rspec/autorun'
+require 'webmock/rspec'
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
@@ -47,4 +48,6 @@ RSpec.configure do |config|
   config.include Requests::JsonHelpers, type: :request
   config.include Requests::JsonHelpers, type: :api
   config.include FactoryGirl::Syntax::Methods
+
+  WebMock.disable_net_connect!(allow_localhost: true)
 end

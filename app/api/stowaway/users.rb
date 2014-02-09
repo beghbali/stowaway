@@ -19,7 +19,7 @@ module Stowaway
       end
       post do
         user = User.find_or_initialize_by(uid: params[:uid], provider: params[:provider])
-        user.update_facebook_attributes!(clean_params[:user])
+        user.update_facebook_attributes!(clean_params[:user]) unless user.nil?
         user
       end
 
@@ -28,7 +28,7 @@ module Stowaway
       end
       put ':id' do
         user = User.find_by_public_id(params[:id])
-        user.update(clean_params[:user])
+        user.update(clean_params[:user]) unless user.nil?
         user
       end
 
@@ -36,8 +36,7 @@ module Stowaway
         requires :id, type: Integer, desc: "stowaway user id"
       end
       get ':id' do
-        user = User.find_by_public_id(params[:id])
-        user
+        User.find_by_public_id(params[:id])
       end
 
       namespace :admin do
