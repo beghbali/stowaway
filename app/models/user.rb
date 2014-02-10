@@ -8,6 +8,8 @@ class User < ActiveRecord::Base
   AUTHENTICATION_PROVIDERS = %w(facebook)
   SUPPORTED_EMAIL_PROVIDERS = %w(gmail yahoo other)
 
+  has_many :requests
+
   validates :uid, uniqueness: true
   validates :provider, inclusion: { in: AUTHENTICATION_PROVIDERS }
   validates :email_provider, inclusion: { in: SUPPORTED_EMAIL_PROVIDERS }, allow_blank: true
