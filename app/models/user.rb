@@ -10,7 +10,8 @@ class User < ActiveRecord::Base
 
   validates :uid, uniqueness: true
   validates :provider, inclusion: { in: AUTHENTICATION_PROVIDERS }
-  validates :email_provider, inclusion: { in: SUPPORTED_EMAIL_PROVIDERS }, :allow_blank => true
+  validates :email_provider, inclusion: { in: SUPPORTED_EMAIL_PROVIDERS }, allow_blank: true
+  validates :gender, inclusion: { in: %w(male female) }, allow_blank: true
 
   before_save :create_stowaway_email, :if => :can_create_email?
 
@@ -20,9 +21,9 @@ class User < ActiveRecord::Base
   end
 
   def create_stowaway_email(postfix='')
-    proposed_email = [first_name, last_name, "pirate", rand(1..99), postfix].join.downcase
+    proposed_email = [first_name, last_name, "pirate", postfix].join.downcase
 
-    if User.where("stowaway_email LIKE '#{proposed_email}@'").any?
+    if User.exists?(stowaway_email: "#{proposed_email}@getstowaway.com")
       create_stowaway_email(rand(1..99).to_s)
     else
       self.stowaway_email, self.stowaway_email_password = Mailboto::Email.new.create(proposed_email, email)

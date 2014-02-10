@@ -38,6 +38,8 @@ ActiveRecord::Schema.define(version: 20140203062036) do
     t.datetime "updated_at"
   end
 
+ActiveRecord::Schema.define(version: 20140209033500) do
+
   create_table "users", force: true do |t|
     t.string   "first_name"
     t.string   "last_name"
@@ -60,6 +62,7 @@ ActiveRecord::Schema.define(version: 20140203062036) do
     t.string   "stowaway_email_password"
     t.integer  "public_id"
     t.datetime "last_processed_email_sent_at"
+    t.string   "stripe_token"
   end
 
 end
