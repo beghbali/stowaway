@@ -5,7 +5,7 @@ module Stowaway
 
     desc "handles user management"
 
-    resource :users do
+    resources :users do
       helpers do
         def clean_params
           ActionController::Parameters.new(params).permit!
@@ -38,6 +38,29 @@ module Stowaway
       get ':id' do
         user = User.find(clean_params[:id])
         user.to_json
+      end
+
+      route_param :user_id do
+        resources :requests do
+
+          desc "request a ride/find crew"
+          params do
+            group :request do
+              requires :pickup_address, type: String, desc: "street address of the desired pickup location"
+              requires :dropoff_address, type: String, desc: "street address of the desired dropoff location"
+              requires :pickup_lat, type: Float, desc: "geocoded latitude of the desired pickup location"
+              requires :pickup_lng, type: Float, desc: "geocoded longitude of the desired pickup location"
+              requires :dropoff_lat, type: Float, desc: "geocoded latitude of the desired dropoff location"
+              requires :dropoff_lng, type: Float, desc: "geocoded longitude of the desired dropoff location"
+            end
+          end
+          post do
+            user = User.find(clean_params[:user_id])
+            error!('User not found', 404) if user.nil?
+            request = user.requests.create!(clean_params[:request])
+            request
+          end
+        end
       end
 
       namespace :admin do

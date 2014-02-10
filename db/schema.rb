@@ -11,7 +11,45 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140127072006) do
+ActiveRecord::Schema.define(version: 20140210101911) do
+
+  create_table "receipts", force: true do |t|
+    t.string   "generated_by"
+    t.string   "billed_to"
+    t.integer  "user_id"
+    t.datetime "ride_requested_at"
+    t.string   "pickup_location"
+    t.string   "dropoff_location"
+    t.string   "payment_card"
+    t.decimal  "total_amount",      precision: 8, scale: 2
+    t.decimal  "base_amount",       precision: 8, scale: 2
+    t.decimal  "distance_amount",   precision: 8, scale: 2
+    t.decimal  "time_amount",       precision: 8, scale: 2
+    t.decimal  "surge_amount",      precision: 8, scale: 2
+    t.float    "surge_multiple"
+    t.decimal  "other_amount",      precision: 8, scale: 2
+    t.string   "other_description"
+    t.string   "driver_name"
+    t.float    "distance"
+    t.integer  "duration"
+    t.float    "average_speed"
+    t.string   "map_url"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "requests", force: true do |t|
+    t.integer  "user_id"
+    t.string   "status",                                   default: "outstanding"
+    t.string   "pickup_address"
+    t.string   "dropoff_address"
+    t.decimal  "pickup_lat",      precision: 10, scale: 6
+    t.decimal  "pickup_lng",      precision: 10, scale: 6
+    t.decimal  "dropoff_lat",     precision: 10, scale: 6
+    t.decimal  "dropoff_lng",     precision: 10, scale: 6
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "users", force: true do |t|
     t.string   "first_name"
@@ -35,6 +73,7 @@ ActiveRecord::Schema.define(version: 20140127072006) do
     t.string   "stowaway_email_password"
     t.integer  "public_id"
     t.datetime "last_processed_email_sent_at"
+    t.string   "stripe_token"
   end
 
 end
