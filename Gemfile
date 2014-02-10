@@ -31,7 +31,12 @@ gem 'gmail_xoauth'
 gem 'omniauth'
 gem 'omniauth-google-oauth2'
 gem 'ruby-units'
-gem "resque", "~> 2.0.0.pre.1", github: "resque/resque"
+# gem "resque", "~> 2.0.0.pre.1", github: "resque/resque"
+gem 'resque'
+gem 'resque-web', require: 'resque_web'
+
+gem 'bootstrap-sass', '~> 3.1.0'
+gem 'slim-rails'
 
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
