@@ -36,12 +36,8 @@ class User < ActiveRecord::Base
     !self.email.nil? && self.stowaway_email.nil?
   end
 
-  def to_h
-    self.attributes.except([:token, :gmail_access_token, :gmail_refresh_token, :stowaway_email_password])
-  end
-
-  def to_json
-    to_h.to_json
+  def as_json(options = {})
+    super(except: [:id, :token, :gmail_access_token, :gmail_refresh_token, :stowaway_email_password, :stripe_token])
   end
 
   def fetch_ride_receipts
