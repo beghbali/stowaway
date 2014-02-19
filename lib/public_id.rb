@@ -11,8 +11,8 @@ module PublicId
       before_create :generate_public_id
     end
 
-    def find(public_id)
-      find_by_public_id(public_id)
+    def from_param(param)
+      find_by_public_id(param)
     end
   end
 

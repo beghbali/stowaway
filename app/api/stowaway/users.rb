@@ -51,10 +51,12 @@ module Stowaway
               requires :pickup_lng, type: Float, desc: "geocoded longitude of the desired pickup location"
               requires :dropoff_lat, type: Float, desc: "geocoded latitude of the desired dropoff location"
               requires :dropoff_lng, type: Float, desc: "geocoded longitude of the desired dropoff location"
+              requires :device_type, type: String, desc: "type of device sending request (ios, android)"
+              requires :device_token, type: String, desc: "device token obtained from apple/google for APNS/GCM service"
             end
           end
           post do
-            user = User.find(clean_params[:user_id])
+            user = User.find_by_public_id(clean_params[:user_id])
             error!('User not found', 404) if user.nil?
             request = user.requests.create!(clean_params[:request])
             request

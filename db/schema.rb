@@ -11,7 +11,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140210101911) do
+ActiveRecord::Schema.define(version: 20140219152133) do
+
   create_table "receipts", force: true do |t|
     t.string   "generated_by"
     t.string   "billed_to"
@@ -37,7 +38,6 @@ ActiveRecord::Schema.define(version: 20140210101911) do
     t.datetime "updated_at"
   end
 
-ActiveRecord::Schema.define(version: 20140209033500) do
   create_table "requests", force: true do |t|
     t.integer  "user_id"
     t.string   "status",                                   default: "outstanding"
@@ -47,6 +47,19 @@ ActiveRecord::Schema.define(version: 20140209033500) do
     t.decimal  "pickup_lng",      precision: 10, scale: 6
     t.decimal  "dropoff_lat",     precision: 10, scale: 6
     t.decimal  "dropoff_lng",     precision: 10, scale: 6
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "ride_id"
+    t.string   "designation"
+    t.integer  "public_id"
+    t.string   "device_type"
+    t.string   "device_token"
+  end
+
+  add_index "requests", ["designation"], name: "index_requests_on_designation", using: :btree
+  add_index "requests", ["status"], name: "index_requests_on_status", using: :btree
+
+  create_table "rides", force: true do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
   end
