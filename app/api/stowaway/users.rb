@@ -8,7 +8,7 @@ module Stowaway
     resources :users do
       helpers do
         def clean_params
-          ActionController::Parameters.new(params).permit!
+          ActionController::Parameters.new(params.except(:route_info)).permit!
         end
       end
 
@@ -28,7 +28,7 @@ module Stowaway
       end
       put ':id' do
         user = User.find_by_public_id(params[:id])
-        user.update(clean_params[:user]) unless user.nil?
+        user.update(clean_params) unless user.nil?
         user
       end
 
