@@ -10,7 +10,7 @@ describe 'onboarding' do
 
   shared_context 'existing user' do
     let(:existing_user_attributes) { new_user_attributes }
-    let(:user) { User.create existing_user_attributes }
+    let(:user) { FactoryGirl.create :user, existing_user_attributes }
     before do
       user
     end
@@ -68,13 +68,16 @@ describe 'onboarding' do
             let(:existing_user_attributes) { new_user_attributes.except(:email, :email_provider)}
           end
           context 'with a valid gmail/gmail hosted email address update a user' do
-            let(:data) { {user: new_user_attributes.slice(:email, :email_provider) } }
+            let(:data) { new_user_attributes.slice(:email, :email_provider) }
 
             before do
+              debugger;1
+
               put "/api/#{version}/users/#{user.public_id}", data.to_json, headers
+              user.reload
             end
 
-            subject(:existing_user) { User.last }
+            subject(:existing_user) { user }
 
             it 'should update the user' do
               expect(User.count).to eq(1)
@@ -104,7 +107,7 @@ describe 'onboarding' do
       include_context 'existing user' do
         let(:existing_user_attributes) { new_user_attributes.except(*fields) }
       end
-      let(:data) { {user: new_user_attributes.slice(*fields) } }
+      let(:data) { new_user_attributes.slice(*fields) }
 
       before do
         put "/api/#{version}/users/#{user.public_id}", data.to_json, headers

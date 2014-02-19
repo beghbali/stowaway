@@ -43,12 +43,9 @@ group :doc do
   gem 'sdoc', require: false
 end
 
-group :development do
-  gem 'debugger'
-end
-
 group :development, :test do
   gem 'rspec-rails', '~> 3.0.0.beta'
+  gem 'debugger'
 end
 
 group :test do
