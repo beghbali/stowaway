@@ -71,8 +71,6 @@ describe 'onboarding' do
             let(:data) { new_user_attributes.slice(:email, :email_provider) }
 
             before do
-              debugger;1
-
               put "/api/#{version}/users/#{user.public_id}", data.to_json, headers
               user.reload
             end

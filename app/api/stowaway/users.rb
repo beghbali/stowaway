@@ -56,7 +56,7 @@ module Stowaway
             end
           end
           post do
-            user = User.find(clean_params[:user_id])
+            user = User.find_by_public_id(clean_params[:user_id])
             error!('User not found', 404) if user.nil?
             request = user.requests.create!(clean_params[:request])
             request
