@@ -15,6 +15,7 @@ class User < ActiveRecord::Base
   validates :email_provider, inclusion: { in: SUPPORTED_EMAIL_PROVIDERS }, allow_blank: true
   validates :gender, inclusion: { in: %w(male female) }, allow_blank: true
 
+  before_create :generate_stowaway_email_address
   before_save :create_stowaway_email, :if => :can_create_email?
 
 
@@ -22,18 +23,22 @@ class User < ActiveRecord::Base
     self.update_attributes!(fb_attributes)
   end
 
-  def create_stowaway_email(postfix='')
-    proposed_email = [first_name, last_name, "pirate", postfix].join.downcase
+  def generate_stowaway_email_address(postfix='')
+    proposed_email = "#{[first_name, last_name, "pirate", postfix].join.downcase}@getstowaway.com"
 
-    if User.exists?(stowaway_email: "#{proposed_email}@getstowaway.com")
-      create_stowaway_email(rand(1..99).to_s)
-    else
-      self.stowaway_email, self.stowaway_email_password = Mailboto::Email.new.create(proposed_email, email)
+    if User.exists?(stowaway_email: proposed_email)
+      proposed_email = generate_stowaway_email_address(rand(1..99).to_s)
     end
+    self.stowaway_email = proposed_email
+  end
+
+  def create_stowaway_email(postfix='')
+    generate_stowaway_email_address if self.stowaway_email.nil?
+    self.stowaway_email, self.stowaway_email_password = Mailboto::Email.new.create(self.stowaway_email.split('@').first, email)
   end
 
   def can_create_email?
-    !self.email.nil? && self.stowaway_email.nil?
+    self.email_changed? && self.email_was.nil?
   end
 
   def to_h

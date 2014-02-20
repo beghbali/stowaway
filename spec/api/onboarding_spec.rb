@@ -52,8 +52,9 @@ describe 'onboarding' do
               end
             end
 
-            it 'ensure a stowaway email was not created' do
-              expect(user.stowaway_email).to be_nil
+            it 'ensure a stowaway email address was created' do
+              expect(user.stowaway_email).not_to be_nil
+              expect(user.stowaway_email).to include('@getstowaway.com')
               expect(user.stowaway_email_password).to be_nil
             end
           end
