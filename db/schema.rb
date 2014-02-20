@@ -11,8 +11,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+<<<<<<< HEAD
 ActiveRecord::Schema.define(version: 20140219152133) do
 
+=======
+ActiveRecord::Schema.define(version: 20140210101911) do
+>>>>>>> parent of dc396ca... Merge pull request #4 from TrexMarketing/feature/65420424/match-requests
   create_table "receipts", force: true do |t|
     t.string   "generated_by"
     t.string   "billed_to"
@@ -38,6 +42,7 @@ ActiveRecord::Schema.define(version: 20140219152133) do
     t.datetime "updated_at"
   end
 
+ActiveRecord::Schema.define(version: 20140209033500) do
   create_table "requests", force: true do |t|
     t.integer  "user_id"
     t.string   "status",                                   default: "outstanding"
@@ -49,6 +54,7 @@ ActiveRecord::Schema.define(version: 20140219152133) do
     t.decimal  "dropoff_lng",     precision: 10, scale: 6
     t.datetime "created_at"
     t.datetime "updated_at"
+<<<<<<< HEAD
     t.integer  "ride_id"
     t.string   "designation"
     t.integer  "public_id"
@@ -62,6 +68,8 @@ ActiveRecord::Schema.define(version: 20140219152133) do
   create_table "rides", force: true do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
+=======
+>>>>>>> parent of dc396ca... Merge pull request #4 from TrexMarketing/feature/65420424/match-requests
   end
 
   create_table "users", force: true do |t|

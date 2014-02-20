@@ -37,7 +37,6 @@ gem 'resque-web', require: 'resque_web'
 
 gem 'bootstrap-sass', '~> 3.1.0'
 gem 'slim-rails'
-gem 'geocoder'
 
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
