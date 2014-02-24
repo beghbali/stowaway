@@ -1,4 +1,5 @@
 class Ride < ActiveRecord::Base
+  include Notify::Notifier
   CAPACITY = 4
 
   has_many :requests

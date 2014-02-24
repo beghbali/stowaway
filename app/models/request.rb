@@ -1,4 +1,5 @@
 class Request < ActiveRecord::Base
+  include Notify::Notifiable
   STATUSES = %w(outstanding matched fulfilled cancelled timedout)
   DEVICE_TYPES = %w(ios android)
   PICKUP_RADIUS = 0.3
@@ -28,7 +29,7 @@ class Request < ActiveRecord::Base
   end
 
   def match_request
-    unless match_with_outstanding_requests
+      unless match_with_outstanding_requests
       match_with_existing_rides
     end
   end
