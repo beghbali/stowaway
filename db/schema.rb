@@ -11,7 +11,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140219152133) do
+ActiveRecord::Schema.define(version: 20140220165540) do
+
   create_table "receipts", force: true do |t|
     t.string   "generated_by"
     t.string   "billed_to"
@@ -39,13 +40,13 @@ ActiveRecord::Schema.define(version: 20140219152133) do
 
   create_table "requests", force: true do |t|
     t.integer  "user_id"
-    t.string   "status",                                   default: "outstanding"
+    t.string   "status",                                    default: "outstanding"
     t.string   "pickup_address"
     t.string   "dropoff_address"
-    t.decimal  "pickup_lat",      precision: 10, scale: 6
-    t.decimal  "pickup_lng",      precision: 10, scale: 6
-    t.decimal  "dropoff_lat",     precision: 10, scale: 6
-    t.decimal  "dropoff_lng",     precision: 10, scale: 6
+    t.decimal  "pickup_lat",      precision: 16, scale: 12
+    t.decimal  "pickup_lng",      precision: 16, scale: 12
+    t.decimal  "dropoff_lat",     precision: 16, scale: 12
+    t.decimal  "dropoff_lng",     precision: 16, scale: 12
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "ride_id"
