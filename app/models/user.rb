@@ -42,7 +42,7 @@ class User < ActiveRecord::Base
   end
 
   def as_json(options={})
-    super(options.merge(except: [:token, :gmail_access_token, :gmail_refresh_token, :stowaway_email_password]))
+    super(options.merge(except: [:id, :token, :gmail_access_token, :gmail_refresh_token, :stowaway_email_password, :stripe_token]))
   end
 
   def fetch_ride_receipts

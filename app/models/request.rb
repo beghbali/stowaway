@@ -61,5 +61,7 @@ class Request < ActiveRecord::Base
     save
   end
 
-  validates :device_type, inclusion: { in: DEVICE_TYPES }
+  def as_json(options = {})
+    super(except: [:id, :user_id])
+  end
 end

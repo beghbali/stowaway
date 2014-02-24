@@ -107,6 +107,7 @@ describe 'onboarding' do
         let(:existing_user_attributes) { new_user_attributes.except(*fields) }
       end
       let(:data) { new_user_attributes.slice(*fields) }
+      let(:hidden_fields) { [:id, :token, :gmail_access_token, :gmail_refresh_token, :stowaway_email_password, :stripe_token] }
 
       before do
         put "/api/#{version}/users/#{user.public_id}", data.to_json, headers
@@ -120,7 +121,10 @@ describe 'onboarding' do
 
       it 'should set all the fields correctly' do
         fields.each do |field|
-          expect(json[field]).to eq(user.send(field))
+          expect(user.send(field)).to eq(new_user_attributes[field])
+          unless hidden_fields.include?(field.to_sym)
+            expect(json[field]).to eq(user.send(field))
+          end
         end
       end
     end
@@ -153,7 +157,7 @@ describe 'onboarding' do
   end
 
   context 'as a new user' do
-    let(:new_user_attributes) { FactoryGirl.attributes_for(:user).except(:gmail_access_token, :gmail_refresh_token, :stripe_token)}
+    let(:new_user_attributes) { FactoryGirl.attributes_for(:user).with_indifferent_access }
     it_behaves_like 'the onboarding process'
   end
 

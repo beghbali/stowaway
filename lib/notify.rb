@@ -7,7 +7,7 @@ module Notify
   end
 
   module Notifiable
-    class MisconfiguredDeviceError < Error; end
+    class MisconfiguredDeviceError < ArgumentError; end
 
     def notify(options = {})
       raise MisconfiguredDeviceError.new("no device token specified") if self.device_token.blank?
