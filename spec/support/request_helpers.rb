@@ -11,7 +11,7 @@ module Requests
     end
 
     def mock_stowaway_email_creation
-      stub_request(:post, "http://stow.mailbsend.com/createInbox.php").with(query: hash_including({ nonce: '821222a91eb75f136ea40899'} )).
+      stub_request(:post, "http://getstowaway.com/createInbox.php").with(query: hash_including({ nonce: '821222a91eb75f136ea40899'} )).
          to_return(status: 200, body: ->(request) { mock_create_stowaway_email(request).to_json })
     end
 

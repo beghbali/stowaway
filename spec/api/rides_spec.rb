@@ -1,4 +1,5 @@
 require 'spec_helper'
+include Requests::Mocks
 
 describe Stowaway::Rides do
   before { mock_stowaway_email_creation }

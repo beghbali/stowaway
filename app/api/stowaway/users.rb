@@ -7,8 +7,21 @@ module Stowaway
 
     resources :users do
       helpers do
-        def clean_params
-          ActionController::Parameters.new(params.except(:route_info)).permit!
+        def new_user_params
+          ActionController::Parameters.new(params.except(:route_info)).permit(:uid, :provider, user: [:first_name, :last_name, :email, :image_url, :token,
+            :expires_at, :email_provider, :gender, :location, :verified, :profile_url, :gmail_access_token, :gmail_refresh_token,
+            :stripe_token])
+        end
+
+        def user_params
+          ActionController::Parameters.new(params.except(:route_info)).permit(:first_name, :last_name, :email, :image_url, :token,
+            :expires_at, :email_provider, :gender, :location, :verified, :profile_url, :gmail_access_token, :gmail_refresh_token,
+            :stripe_token)
+        end
+
+        def request_params
+          ActionController::Parameters.new(params.except(:route_info)).permit(request: [:pickup_address, :dropoff_address, :pickup_lat,
+            :pickup_lng, :dropoff_lat, :dropoff_lng, :device_type, :device_token])
         end
       end
 
@@ -18,8 +31,8 @@ module Stowaway
         requires :provider, type: String, desc: "authentication provider(e.g. facebook)", values: User::AUTHENTICATION_PROVIDERS
       end
       post do
-        user = User.find_or_initialize_by(uid: params[:uid], provider: params[:provider])
-        user.update_facebook_attributes!(clean_params[:user]) unless user.nil?
+        user = User.find_or_initialize_by(uid: new_user_params[:uid], provider: new_user_params[:provider])
+        user.update_facebook_attributes!(new_user_params[:user]) unless user.nil?
         user
       end
 
@@ -28,7 +41,7 @@ module Stowaway
       end
       put ':id' do
         user = User.find_by_public_id(params[:id])
-        user.update(clean_params) unless user.nil?
+        user.update(user_params) unless user.nil?
         user
       end
 
@@ -56,9 +69,9 @@ module Stowaway
             end
           end
           post do
-            user = User.find_by_public_id(clean_params[:user_id])
+            user = User.find_by_public_id(params[:user_id])
             error!('User not found', 404) if user.nil?
-            request = user.requests.create!(clean_params[:request])
+            request = user.requests.create!(request_params[:request])
             request
           end
         end
