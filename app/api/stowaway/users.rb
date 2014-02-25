@@ -74,6 +74,17 @@ module Stowaway
             request = user.requests.create!(request_params[:request])
             request
           end
+
+          desc "cancel a request"
+          params do
+            requires :id, type: Integer, desc: "request id"
+          end
+
+          delete do
+            request = Request.find(params[:id])
+            error!('Request not found', 404) if request.nil?
+            request.destroy
+          end
         end
       end
 

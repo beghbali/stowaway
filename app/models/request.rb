@@ -1,5 +1,7 @@
 class Request < ActiveRecord::Base
   include Notify::Notifiable
+  acts_as_paranoid
+
   STATUSES = %w(outstanding matched fulfilled cancelled timedout)
   DEVICE_TYPES = %w(ios android)
   PICKUP_RADIUS = 0.3
