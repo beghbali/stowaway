@@ -37,7 +37,7 @@ gem 'resque-web', require: 'resque_web'
 
 gem 'bootstrap-sass', '~> 3.1.0'
 gem 'slim-rails'
-gem 'geocoder'
+gem 'geocoder', git: "git@github.com:beghbali/geocoder.git"
 gem 'paranoia', '~> 2.0'
 
 group :doc do

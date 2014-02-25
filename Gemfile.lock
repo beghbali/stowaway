@@ -1,3 +1,9 @@
+GIT
+  remote: git@github.com:beghbali/geocoder.git
+  revision: 40ec80b30da20cf3094fe9bf003256f141f1f002
+  specs:
+    geocoder (1.1.9)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -66,7 +72,6 @@ GEM
       i18n (~> 0.5)
     faraday (0.9.0)
       multipart-post (>= 1.2, < 3)
-    geocoder (1.1.9)
     gmail_xoauth (0.4.1)
       oauth (>= 0.3.6)
     grape (0.6.1)
@@ -258,7 +263,7 @@ DEPENDENCIES
   debugger
   factory_girl_rails
   faker
-  geocoder
+  geocoder!
   gmail_xoauth
   grape
   httparty
