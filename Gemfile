@@ -39,6 +39,7 @@ gem 'bootstrap-sass', '~> 3.1.0'
 gem 'slim-rails'
 gem 'geocoder', git: "git@github.com:beghbali/geocoder.git"
 gem 'paranoia', '~> 2.0'
+gem 'pushmeup'
 
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.

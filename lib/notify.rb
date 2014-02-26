@@ -16,7 +16,7 @@ module Notify
       if device_type.to_sym == :ios
         APNS.send_notification(self.device_token, options)
       else
-        GCM.send_notification(self.device_token, options)
+        GCM.send_notification(self.device_token, options[:other])
       end
     end
   end

@@ -9,4 +9,12 @@ class Ride < ActiveRecord::Base
   def has_captain?
     false #reimplement when implementing captain bit
   end
+
+  def riders
+    self.requests
+  end
+
+  def as_json(options = {})
+    { requests: self.requests.reduce(Hash.new([])){|ride_h, req| ride_h[:requests] << req.as_json(format: :notification) } }
+  end
 end

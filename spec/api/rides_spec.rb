@@ -2,7 +2,7 @@ require 'spec_helper'
 include Requests::Mocks
 
 describe Stowaway::Rides do
-  before { mock_stowaway_email_creation }
+  before { mock_external_requests }
 
   shared_examples_for 'admin endpoints' do
     let(:prefix) { "/api/#{version}/rides/admin" }
@@ -56,7 +56,7 @@ describe Stowaway::Rides do
 
     describe "POST /api/<version>/users/<userid>/rides" do
       before do
-        post prefix, request: request_data.merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
+        post prefix, request: FactoryGirl.attributes_for(:request).merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
       end
 
       subject(:request) { Request.last }
@@ -84,7 +84,7 @@ describe Stowaway::Rides do
     version = 'v1'
 
     let(:user) { FactoryGirl.create :user }
-    let(:request_data) { FactoryGirl.attributes_for :request }
+    let(:request_data) { FactoryGirl.attributes_for :request, user: user }
 
     it_behaves_like 'admin endpoints'
     it_behaves_like 'accepting a ride request'

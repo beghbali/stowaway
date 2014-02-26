@@ -8,6 +8,7 @@ module Requests
   module Mocks
     def mock_external_requests
       mock_stowaway_email_creation
+      mock_gcm_push_notifications
     end
 
     def mock_stowaway_email_creation
@@ -21,6 +22,13 @@ module Requests
         email:"#{username}@getstowaway.com",
         password: SecureRandom.base64(8)
       }
+    end
+
+    def mock_gcm_push_notifications
+      stub_request(:post, "https://android.googleapis.com/gcm/send").
+               with(body: /.+/,
+                    headers: {'Authorization' => 'key=123abc456def', 'Content-Type' => 'application/json'}).
+               to_return(status: 200, body: "", headers: {})
     end
   end
 end

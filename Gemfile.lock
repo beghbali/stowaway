@@ -132,6 +132,9 @@ GEM
     paranoia (2.0.2)
       activerecord (~> 4.0)
     polyglot (0.3.3)
+    pushmeup (0.1.2)
+      httparty
+      json
     rack (1.5.2)
     rack-accept (0.4.5)
       rack (>= 0.4)
@@ -274,6 +277,7 @@ DEPENDENCIES
   omniauth
   omniauth-google-oauth2
   paranoia (~> 2.0)
+  pushmeup
   rails (= 4.0.2)
   resque
   resque-web

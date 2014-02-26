@@ -8,11 +8,13 @@ class Request < ActiveRecord::Base
   DROPOFF_RADIUS = 0.5
   DESIGNATIONS =  %w(stowaway captain)
 
+  belongs_to :user
   belongs_to :ride
   validates :status, inclusion: { in: STATUSES }
   validates :device_type, inclusion: { in: DEVICE_TYPES }
 
   after_create :match_request
+  after_save :notify_riders, if: :status_changed?
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
   geocoded_by :dropoff_address, latitude: :dropoff_lat, longitude: :dropoff_lng
@@ -22,9 +24,9 @@ class Request < ActiveRecord::Base
   end
 
   scope :same_route, ->(as) {
-      near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: :pickup_lat, longitude: :pickup_lng)
-      .near([as.dropoff_lat, as.dropoff_lng], PICKUP_RADIUS, latitude: :dropoff_lat, longitude: :dropoff_lng)
-      .where.not(:id => as.id)
+      near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: :pickup_lat, longitude: :pickup_lng).
+      near([as.dropoff_lat, as.dropoff_lng], PICKUP_RADIUS, latitude: :dropoff_lat, longitude: :dropoff_lng).
+      where.not(:id => as.id)
     }
 
   DESIGNATIONS.each do |designation|
@@ -64,7 +66,19 @@ class Request < ActiveRecord::Base
     save
   end
 
+  def notify_riders
+    unless self.ride.nil?
+      self.ride.riders.each do |rider|
+        rider.notify(other: { ride: self.ride.as_json })
+      end
+    end
+  end
+
   def as_json(options = {})
-    super(except: [:id, :user_id])
+    if options[:format] == :notification
+      serializable_hash(only: [:status, :designation]).merge(user_public_id: self.user.public_id)
+    else
+      super(except: [:id, :user_id])
+    end
   end
 end
