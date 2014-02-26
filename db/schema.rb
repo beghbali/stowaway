@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140225162012) do
+ActiveRecord::Schema.define(version: 20140226181904) do
 
   create_table "receipts", force: true do |t|
     t.string   "generated_by"
@@ -63,6 +63,7 @@ ActiveRecord::Schema.define(version: 20140225162012) do
   create_table "rides", force: true do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "location_channel"
   end
 
   create_table "users", force: true do |t|

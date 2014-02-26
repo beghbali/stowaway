@@ -76,6 +76,10 @@ describe Stowaway::Rides do
         expect(Ride.count).to eq(1)
         expect(ride.requests.count).to eq(2)
       end
+
+      it 'should generate a location channel for the ride' do
+        expect(ride.location_channel).to be
+      end
     end
   end
 

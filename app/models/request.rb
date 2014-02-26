@@ -76,7 +76,7 @@ class Request < ActiveRecord::Base
 
   def as_json(options = {})
     if options[:format] == :notification
-      serializable_hash(only: [:status, :designation]).merge(user_public_id: self.user.public_id)
+      super(only: [:status, :designation]).merge(user_public_id: self.user.public_id)
     else
       super(except: [:id, :user_id])
     end
