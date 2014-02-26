@@ -36,7 +36,11 @@ describe Stowaway::Rides do
       it 'creates a valid request' do
         expect(Request.count).to eq(1)
         request_data.each do |k,v|
-          expect(request.send(k)).to eq(v)
+          if request.send(k).is_a?(BigDecimal)
+            expect(request.send(k)).to be_within(0.00001).of(v.to_f)
+          else
+            expect(request.send(k)).to eq(v)
+          end
         end
         expect(request.status).to eq('outstanding')
       end
@@ -55,7 +59,7 @@ describe Stowaway::Rides do
         post prefix, request: request_data.merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
       end
 
-      subject(:request) { Request.last}
+      subject(:request) { Request.last }
       subject(:ride) { Ride.last }
 
       it 'responds successfully' do
@@ -64,7 +68,8 @@ describe Stowaway::Rides do
 
       it 'creates a valid request' do
         expect(Request.count).to eq(2)
-        expect(request.status).to eq('matched')
+        expect(Request.pluck(:status).uniq.count).to eq(1)
+        expect(Request.pluck(:status).uniq.first).to eq('matched')
       end
 
       it 'should create a ride' do

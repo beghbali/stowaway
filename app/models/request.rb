@@ -24,6 +24,7 @@ class Request < ActiveRecord::Base
   scope :same_route, ->(as) {
       near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: :pickup_lat, longitude: :pickup_lng)
       .near([as.dropoff_lat, as.dropoff_lng], PICKUP_RADIUS, latitude: :dropoff_lat, longitude: :dropoff_lng)
+      .where.not(:id => as.id)
     }
 
   DESIGNATIONS.each do |designation|
@@ -57,7 +58,7 @@ class Request < ActiveRecord::Base
   end
 
   def add_to(ride)
-    self.status = :matched
+    self.status = 'matched'
     self.designation = :stowaway if ride.has_captain?
     self.ride = ride
     save
