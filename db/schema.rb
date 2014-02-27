@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140226181904) do
+ActiveRecord::Schema.define(version: 20140227085803) do
 
   create_table "receipts", force: true do |t|
     t.string   "generated_by"
@@ -51,8 +51,6 @@ ActiveRecord::Schema.define(version: 20140226181904) do
     t.datetime "updated_at"
     t.integer  "ride_id"
     t.string   "designation"
-    t.string   "device_type"
-    t.string   "device_token"
     t.datetime "deleted_at"
   end
 
@@ -89,6 +87,8 @@ ActiveRecord::Schema.define(version: 20140226181904) do
     t.integer  "public_id"
     t.datetime "last_processed_email_sent_at"
     t.string   "stripe_token"
+    t.string   "device_type"
+    t.string   "device_token"
   end
 
 end

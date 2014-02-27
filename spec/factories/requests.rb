@@ -6,7 +6,5 @@ FactoryGirl.define do
     pickup_lng Faker::Address.longitude
     dropoff_lat Faker::Address.latitude
     dropoff_lng Faker::Address.longitude
-    device_type %w(ios android).sample
-    device_token SecureRandom.hex(8)
   end
 end

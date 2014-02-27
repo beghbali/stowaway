@@ -49,5 +49,5 @@ RSpec.configure do |config|
   config.include Requests::JsonHelpers, type: :api
   config.include FactoryGirl::Syntax::Methods
 
-  WebMock.disable_net_connect!(allow_localhost: true)
+  WebMock.disable_net_connect!(allow_localhost: false)
 end

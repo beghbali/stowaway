@@ -19,6 +19,9 @@ class Request < ActiveRecord::Base
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
   geocoded_by :dropoff_address, latitude: :dropoff_lat, longitude: :dropoff_lng
 
+  delegate :device_token, to: :user
+  delegate :device_type, to: :user
+
   STATUSES.each do |status|
     scope status, -> { where(status: status) }
   end

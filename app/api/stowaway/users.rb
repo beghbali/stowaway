@@ -7,21 +7,28 @@ module Stowaway
 
     resources :users do
       helpers do
+        def permitted_user_params
+          [
+            :first_name, :last_name, :email, :image_url, :token, :expires_at, :email_provider, :gender,
+            :location, :verified, :profile_url, :gmail_access_token, :gmail_refresh_token, :stripe_token,
+            :device_type, :device_token
+          ]
+        end
+
+        def permitted_request_params
+          [ :pickup_address, :dropoff_address, :pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng ]
+        end
+
         def new_user_params
-          ActionController::Parameters.new(params.except(:route_info)).permit(:uid, :provider, user: [:first_name, :last_name, :email, :image_url, :token,
-            :expires_at, :email_provider, :gender, :location, :verified, :profile_url, :gmail_access_token, :gmail_refresh_token,
-            :stripe_token])
+          ActionController::Parameters.new(params.except(:route_info)).permit(:uid, :provider, user: permitted_user_params)
         end
 
         def user_params
-          ActionController::Parameters.new(params.except(:route_info)).permit(:first_name, :last_name, :email, :image_url, :token,
-            :expires_at, :email_provider, :gender, :location, :verified, :profile_url, :gmail_access_token, :gmail_refresh_token,
-            :stripe_token)
+          ActionController::Parameters.new(params.except(:route_info)).permit(permitted_user_params)
         end
 
         def request_params
-          ActionController::Parameters.new(params.except(:route_info)).permit(request: [:pickup_address, :dropoff_address, :pickup_lat,
-            :pickup_lng, :dropoff_lat, :dropoff_lng, :device_type, :device_token])
+          ActionController::Parameters.new(params.except(:route_info)).permit(request: permitted_request_params)
         end
       end
 
@@ -64,8 +71,6 @@ module Stowaway
               requires :pickup_lng, type: Float, desc: "geocoded longitude of the desired pickup location"
               requires :dropoff_lat, type: Float, desc: "geocoded latitude of the desired dropoff location"
               requires :dropoff_lng, type: Float, desc: "geocoded longitude of the desired dropoff location"
-              requires :device_type, type: String, desc: "type of device sending request (ios, android)"
-              requires :device_token, type: String, desc: "device token obtained from apple/google for APNS/GCM service"
             end
           end
           post do

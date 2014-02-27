@@ -16,5 +16,7 @@ FactoryGirl.define do
     gmail_access_token  SecureRandom.base64(32)
     gmail_refresh_token  SecureRandom.base64(32)
     stripe_token SecureRandom.base64(32)
+    device_type %w(ios android).sample
+    device_token SecureRandom.hex(8)
   end
 end
