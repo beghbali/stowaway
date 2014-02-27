@@ -9,7 +9,7 @@ describe Stowaway::Users do
     }
   end
 
-  before { mock_stowaway_email_creation }
+  before { mock_external_requests }
 
   shared_examples_for 'admin endpoints' do
     let(:prefix) { "/api/#{version}/users/admin" }

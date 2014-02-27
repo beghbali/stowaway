@@ -6,7 +6,7 @@ describe 'onboarding' do
 
   let(:headers) { {'CONTENT_TYPE' => "application/json", 'ACCEPT' => 'application/json'} }
 
-  before { mock_stowaway_email_creation }
+  before { mock_external_requests }
 
   shared_context 'existing user' do
     let(:existing_user_attributes) { new_user_attributes }

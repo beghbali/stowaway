@@ -17,7 +17,7 @@ class Ride < ActiveRecord::Base
   end
 
   def as_json(options = {})
-    self.attributes.slice(:location_channel).merge(requests: self.requests.reduce(Hash.new([])){|ride_h, req| ride_h[:requests] << req.as_json(format: :notification) })
+    super(only: [:location_channel]).merge(requests: self.requests.map{ |request| request.as_json(format: :notification) })
   end
 
   def generate_location_channel

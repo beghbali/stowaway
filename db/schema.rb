@@ -51,6 +51,7 @@ ActiveRecord::Schema.define(version: 20140227085803) do
     t.datetime "updated_at"
     t.integer  "ride_id"
     t.string   "designation"
+    t.integer  "public_id"
     t.datetime "deleted_at"
   end
 

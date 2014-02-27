@@ -56,7 +56,7 @@ describe Stowaway::Rides do
 
     describe "POST /api/<version>/users/<userid>/rides" do
       before do
-        post prefix, request: FactoryGirl.attributes_for(:request).merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
+        post prefix, request: request_data.except(:id).merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
       end
 
       subject(:request) { Request.last }
@@ -64,6 +64,15 @@ describe Stowaway::Rides do
 
       it 'responds successfully' do
         expect(response.status.to_i).to eq(201)
+      end
+
+      it 'responds with a valid ride' do
+        expect(json[:location_channel]).to be
+        expect(json[:requests].count).to eq(2)
+        expect(json[:requests].map{|r| r[:status]}.uniq).to eq(["matched"])
+        json[:requests].each do |req|
+          expect(req[:uid]).to be
+        end
       end
 
       it 'creates a valid request' do
@@ -75,6 +84,7 @@ describe Stowaway::Rides do
       it 'should create a ride' do
         expect(Ride.count).to eq(1)
         expect(ride.requests.count).to eq(2)
+        expect(request.ride).to be
       end
 
       it 'should generate a location channel for the ride' do
@@ -88,13 +98,13 @@ describe Stowaway::Rides do
     version = 'v1'
 
     let(:user) { FactoryGirl.create :user }
-    let(:request_data) { FactoryGirl.attributes_for :request, user: user }
+    let(:request_data) { FactoryGirl.attributes_for :request }
 
     it_behaves_like 'admin endpoints'
     it_behaves_like 'accepting a ride request'
 
     context 'with another rider with similar route' do
-      let(:existing_request) { FactoryGirl.create :request, request_data }
+      let(:existing_request) { FactoryGirl.create :request, user: FactoryGirl.create(:user) }
 
       before do
         existing_request

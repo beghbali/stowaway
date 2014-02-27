@@ -13,7 +13,7 @@ class Request < ActiveRecord::Base
   validates :status, inclusion: { in: STATUSES }
   validates :device_type, inclusion: { in: DEVICE_TYPES }
 
-  after_create :match_request
+  before_create :match_request
   after_save :notify_riders, if: :status_changed?
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
@@ -66,7 +66,7 @@ class Request < ActiveRecord::Base
     self.status = 'matched'
     self.designation = :stowaway if ride.has_captain?
     self.ride = ride
-    save
+    save unless new_record?
   end
 
   def notify_riders
@@ -79,7 +79,7 @@ class Request < ActiveRecord::Base
 
   def as_json(options = {})
     if options[:format] == :notification
-      super(only: [:status, :designation]).merge(user_public_id: self.user.public_id)
+      super(only: [:status, :designation, :created_at]).merge(user_public_id: self.user.public_id, uid: self.user.uid)
     else
       super(except: [:id, :user_id])
     end

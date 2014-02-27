@@ -3,7 +3,7 @@ FactoryGirl.define do
     first_name Faker::Name.first_name
     last_name  Faker::Name.last_name
     provider  'facebook'
-    uid       SecureRandom.hex(10)
+    sequence(:uid) {|n| rand(n*1000).to_s }
     email     Faker::Internet.email
     image_url Faker::Internet.url
     token     SecureRandom.hex(14)
