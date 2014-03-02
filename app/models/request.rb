@@ -84,7 +84,7 @@ class Request < ActiveRecord::Base
 
   def as_json(options = {})
     if options[:format] == :notification
-      super(only: [:public_id, :status, :designation, methods: :requested_at]).merge(user_public_id: self.user.public_id, uid: self.user.uid)
+      super(only: [:public_id, :status, :designation], methods: :requested_at).merge(user_public_id: self.user.public_id, uid: self.user.uid)
     else
       super(except: [:id, :user_id])
     end
