@@ -77,7 +77,7 @@ module Stowaway
             user = User.find_by_public_id(params[:user_id])
             error!('User not found', 404) if user.nil?
             request = user.requests.create!(request_params[:request])
-            request.ride.try(:reload)
+            request.ride.try(:reload) || {}
           end
 
           desc "cancel a request"
