@@ -1,4 +1,5 @@
 class User < ActiveRecord::Base
+  include Notify::Notifiable
   include PublicId
   include Emails
 
@@ -7,6 +8,7 @@ class User < ActiveRecord::Base
 
   AUTHENTICATION_PROVIDERS = %w(facebook)
   SUPPORTED_EMAIL_PROVIDERS = %w(gmail yahoo other)
+  DEVICE_TYPES = %w(ios android)
 
   has_many :requests
 
@@ -14,6 +16,7 @@ class User < ActiveRecord::Base
   validates :provider, inclusion: { in: AUTHENTICATION_PROVIDERS }
   validates :email_provider, inclusion: { in: SUPPORTED_EMAIL_PROVIDERS }, allow_blank: true
   validates :gender, inclusion: { in: %w(male female) }, allow_blank: true
+  validates :device_type, inclusion: { in: DEVICE_TYPES }, allow_blank: true
 
   before_create :generate_stowaway_email_address
   before_save :create_stowaway_email, :if => :can_create_email?

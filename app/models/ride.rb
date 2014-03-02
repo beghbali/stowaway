@@ -1,5 +1,8 @@
 class Ride < ActiveRecord::Base
   include Notify::Notifier
+  include PublicId
+
+  has_public_id
   CAPACITY = 4
 
   has_many :requests
@@ -13,11 +16,12 @@ class Ride < ActiveRecord::Base
   end
 
   def riders
-    self.requests
+    self.requests.map(&:user)
   end
 
   def as_json(options = {})
-    super(only: [:location_channel]).merge(requests: self.requests.map{ |request| request.as_json(format: :notification) })
+    reqs = options[:requests] || self.requests
+    super(only: [:location_channel, :public_id]).merge(requests: reqs.map{|req| req.as_json(format: :notification) })
   end
 
   def generate_location_channel

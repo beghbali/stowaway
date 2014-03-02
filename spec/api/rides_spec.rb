@@ -57,6 +57,8 @@ describe Stowaway::Rides do
     describe "POST /api/<version>/users/<userid>/rides" do
       before do
         post prefix, request: request_data.except(:id).merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
+        allow(existing_request.user).to receive(:notify).and_return(true)
+        allow(request.user).to receive(:notify).and_return(true)
       end
 
       subject(:request) { Request.last }
@@ -89,6 +91,10 @@ describe Stowaway::Rides do
 
       it 'should generate a location channel for the ride' do
         expect(ride.location_channel).to be
+      end
+
+      it 'should send a notification only to the first rider' do
+        expect(existing_request.user).to receive(:notify)
       end
     end
   end

@@ -11,21 +11,6 @@ describe Stowaway::Users do
 
   before { mock_external_requests }
 
-  shared_examples_for 'admin endpoints' do
-    let(:prefix) { "/api/#{version}/users/admin" }
-
-    describe "GET /api/<version>/admin/count" do
-      before do
-        FactoryGirl.create :user
-        get [prefix, "count"].join("/")
-      end
-
-      it 'shows correct count' do
-        expect(json['count']).to eq(1)
-      end
-    end
-  end
-
   shared_examples_for 'user CRUD endpoints' do
     let(:prefix) { "/api/#{version}/users"}
 
@@ -91,8 +76,6 @@ describe Stowaway::Users do
   context 'v1' do
     let(:version) { 'v1' }
     version = 'v1'
-
-    it_behaves_like 'admin endpoints'
 
     context 'with facebook auth' do
       let(:provider) { 'facebook' }

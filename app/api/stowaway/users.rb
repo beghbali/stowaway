@@ -82,7 +82,7 @@ module Stowaway
 
           desc "cancel a request"
           params do
-            requires :id, type: Integer, desc: "request id"
+            requires :id, type: Integer, desc: "request public id"
           end
 
           delete do
@@ -90,13 +90,6 @@ module Stowaway
             error!('Request not found', 404) if request.nil?
             request.destroy
           end
-        end
-      end
-
-      namespace :admin do
-        desc "the number of users"
-        get 'count' do
-          { count: User.count }
         end
       end
     end

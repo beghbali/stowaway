@@ -1,9 +1,11 @@
 class Request < ActiveRecord::Base
-  include Notify::Notifiable
+  include PublicId
+
+  has_public_id
+
   acts_as_paranoid
 
   STATUSES = %w(outstanding matched fulfilled cancelled timedout)
-  DEVICE_TYPES = %w(ios android)
   PICKUP_RADIUS = 0.3
   DROPOFF_RADIUS = 0.5
   DESIGNATIONS =  %w(stowaway captain)
@@ -11,7 +13,6 @@ class Request < ActiveRecord::Base
   belongs_to :user
   belongs_to :ride
   validates :status, inclusion: { in: STATUSES }
-  validates :device_type, inclusion: { in: DEVICE_TYPES }
 
   before_create :match_request
   after_save :notify_riders, if: :status_changed?
@@ -71,15 +72,19 @@ class Request < ActiveRecord::Base
 
   def notify_riders
     unless self.ride.nil?
-      self.ride.riders.each do |rider|
-        rider.notify(other: { ride: self.ride.as_json })
+      (self.ride.riders - [self]).each do |rider|
+        rider.notify(other: { ride: self.ride.as_json(requests: [self]) })
       end
     end
   end
 
+  def requested_at
+    self.created_at.to_i
+  end
+
   def as_json(options = {})
     if options[:format] == :notification
-      super(only: [:status, :designation, :created_at]).merge(user_public_id: self.user.public_id, uid: self.user.uid)
+      super(only: [:public_id, :status, :designation, methods: :requested_at]).merge(user_public_id: self.user.public_id, uid: self.user.uid)
     else
       super(except: [:id, :user_id])
     end
