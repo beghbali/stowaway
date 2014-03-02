@@ -54,7 +54,7 @@ class Request < ActiveRecord::Base
   end
 
   def match_with_existing_rides
-    matches = self.class.matched.same_route(self).select("requests.*, COUNT(requests.ride_id) as spaces_taken").order(spaces_taken: :asc)
+    matches = self.class.matched.same_route(self).select("requests.*, COUNT(requests.ride_id) as spaces_taken").order('spaces_taken ASC')
 
     if matches.any?
       ride = matches.first.ride
