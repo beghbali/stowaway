@@ -15,7 +15,7 @@ class Request < ActiveRecord::Base
   validates :status, inclusion: { in: STATUSES }
 
   before_create :match_request
-  after_save :notify_riders, if: :status_changed?
+  # after_save :notify_riders, if: :status_changed?
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
   geocoded_by :dropoff_address, latitude: :dropoff_lat, longitude: :dropoff_lng
