@@ -38,17 +38,15 @@ class Request < ActiveRecord::Base
   end
 
   def match_request
-      unless match_with_outstanding_requests
-      match_with_existing_rides
-    end
+    match_with_outstanding_requests || match_with_existing_rides
   end
 
   def match_with_outstanding_requests
     matches = self.class.outstanding.order(created_at: :asc).same_route(self).limit(Ride::CAPACITY - 1)
 
     if matches.any?
-      ride = Ride.create
-      (matches + [self]).map{ |rider| rider.add_to(ride) }
+      self.create_ride
+      (matches + [self]).map{ |rider| rider.add_to(self.ride) }
     end
     ride
   end
@@ -72,8 +70,8 @@ class Request < ActiveRecord::Base
 
   def notify_riders
     unless self.ride.nil?
-      (self.ride.riders - [self]).each do |rider|
-        rider.notify(other: { ride: self.ride.as_json(requests: [self]) })
+      self.ride.reload.riders.each do |rider|
+        rider.notify(other: self.ride.as_json(requests: [self]) )
       end
     end
   end

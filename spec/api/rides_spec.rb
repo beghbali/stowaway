@@ -56,9 +56,8 @@ describe Stowaway::Rides do
 
     describe "POST /api/<version>/users/<userid>/rides" do
       before do
+        expect(APNS).to receive(:send_notification).exactly(existing_requests.count + 1).times
         post prefix, request: request_data.except(:id).merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
-        allow(existing_request.user).to receive(:notify).and_return(true)
-        allow(request.user).to receive(:notify).and_return(true)
       end
 
       subject(:request) { Request.last }
@@ -70,7 +69,7 @@ describe Stowaway::Rides do
 
       it 'responds with a valid ride' do
         expect(json[:location_channel]).to be
-        expect(json[:requests].count).to eq(2)
+        expect(json[:requests].count).to eq(existing_requests.count + 1)
         expect(json[:requests].map{|r| r[:status]}.uniq).to eq(["matched"])
         json[:requests].each do |req|
           expect(req[:uid]).to be
@@ -78,23 +77,19 @@ describe Stowaway::Rides do
       end
 
       it 'creates a valid request' do
-        expect(Request.count).to eq(2)
+        expect(Request.count).to eq(existing_requests.count + 1)
         expect(Request.pluck(:status).uniq.count).to eq(1)
         expect(Request.pluck(:status).uniq.first).to eq('matched')
       end
 
       it 'should create a ride' do
         expect(Ride.count).to eq(1)
-        expect(ride.requests.count).to eq(2)
+        expect(ride.requests.count).to eq(existing_requests.count + 1)
         expect(request.ride).to be
       end
 
       it 'should generate a location channel for the ride' do
         expect(ride.location_channel).to be
-      end
-
-      it 'should send a notification only to the first rider' do
-        expect(existing_request.user).to receive(:notify)
       end
     end
   end
@@ -111,12 +106,28 @@ describe Stowaway::Rides do
 
     context 'with another rider with similar route' do
       let(:existing_request) { FactoryGirl.create :request, user: FactoryGirl.create(:user) }
+      let(:existing_requests) { [ existing_request ] }
 
       before do
-        existing_request
+        allow(APNS).to receive(:send_notification).and_return(true)
+        existing_requests
       end
 
       it_behaves_like 'matching outstanding requests with similar routes'
+
+      context 'with a third rider joining existing ride' do
+        let(:existing_requests) do
+          list = []
+          2.times do
+            list << FactoryGirl.create(:request, user: FactoryGirl.create(:user))
+          end
+          list
+        end
+
+        let(:existing_request) { existing_requests.first }
+
+        it_behaves_like 'matching outstanding requests with similar routes'
+      end
     end
   end
 end
