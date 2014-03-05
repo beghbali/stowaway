@@ -56,7 +56,7 @@ describe Stowaway::Rides do
 
     describe "POST /api/<version>/users/<userid>/rides" do
       before do
-        expect(APNS).to receive(:send_notification).exactly(existing_requests.count + 1).times
+        expect(APNS).to receive(:send_notification).exactly(3).times
         post prefix, request: request_data.except(:id).merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
       end
 
@@ -83,7 +83,6 @@ describe Stowaway::Rides do
       end
 
       it 'should create a ride' do
-        debugger;2
         expect(Ride.count).to eq(1)
         expect(ride.requests.count).to eq(existing_requests.count + 1)
         expect(request.ride).to be
@@ -92,6 +91,7 @@ describe Stowaway::Rides do
       it 'should generate a location channel for the ride' do
         expect(ride.location_channel).to be
       end
+
     end
   end
 

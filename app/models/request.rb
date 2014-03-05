@@ -15,7 +15,7 @@ class Request < ActiveRecord::Base
   validates :status, inclusion: { in: STATUSES }
 
   before_create :match_request
-  # after_save :notify_riders, if: :status_changed?
+  after_save :notify_riders, if: :status_changed?
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
   geocoded_by :dropoff_address, latitude: :dropoff_lat, longitude: :dropoff_lng
@@ -52,7 +52,10 @@ class Request < ActiveRecord::Base
   end
 
   def match_with_existing_rides
-    matches = self.class.matched.same_route(self).select("requests.*, COUNT(requests.ride_id) as spaces_taken").order('spaces_taken ASC')
+    matches = self.class.matched.same_route(self).
+                select("requests.*, COUNT(requests.ride_id) as spaces_taken").
+                having('COUNT(requests.ride_id) < ?', Ride::CAPACITY).
+                order('spaces_taken ASC')
 
     if matches.any?
       ride = matches.first.ride
