@@ -81,12 +81,24 @@ module Stowaway
             request.ride.try(:reload) || request
           end
 
+          desc "finalize a request"
+          params do
+            requires :id, type: Integer, desc: "request public id"
+          end
+
+          put ':id' do
+            request = Request.find(params[:id])
+            error!('Request not found', 404) if request.nil?
+            request.finalize
+            request.ride || request
+          end
+
           desc "cancel a request"
           params do
             requires :id, type: Integer, desc: "request public id"
           end
 
-          delete do
+          delete ':id' do
             request = Request.find(params[:id])
             error!('Request not found', 404) if request.nil?
             request.destroy

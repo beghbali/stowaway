@@ -12,9 +12,11 @@ class Request < ActiveRecord::Base
 
   belongs_to :user
   belongs_to :ride
+  has_many :riders, through: :ride
   validates :status, inclusion: { in: STATUSES }
 
   before_create :match_request
+  before_create :finalize, if: :can_finalize?
   after_save :notify_riders, if: :status_changed?
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
@@ -22,6 +24,7 @@ class Request < ActiveRecord::Base
 
   delegate :device_token, to: :user
   delegate :device_type, to: :user
+  delegate :finalize, to: :ride
 
   STATUSES.each do |status|
     scope status, -> { where(status: status) }
@@ -35,6 +38,12 @@ class Request < ActiveRecord::Base
 
   DESIGNATIONS.each do |designation|
     scope designation.pluralize, -> { where(designation: designation) }
+  end
+
+  STATUSES.each do |status|
+    define_method "#{status}?" do
+      return self.status.to_s == status
+    end
   end
 
   def match_request
@@ -77,6 +86,14 @@ class Request < ActiveRecord::Base
         rider.notify(other: self.ride.as_json(requests: [self]) )
       end
     end
+  end
+
+  def full_house?
+    self.riders.count == Ride::CAPACITY
+  end
+
+  def can_finalize?
+    full_house? && !self.ride.finalized?
   end
 
   def requested_at
