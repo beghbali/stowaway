@@ -84,7 +84,7 @@ class Request < ActiveRecord::Base
     if options[:format] == :notification
       super(only: [:public_id, :status, :designation], methods: :requested_at).merge(user_public_id: self.user.public_id, uid: self.user.uid)
     else
-      super(except: [:id, :user_id])
+      super(except: [:id, :user_id, :ride_id]).merge(created_at: created_at.to_i, updated_at: updated_at.to_i)
     end
   end
 end

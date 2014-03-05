@@ -83,6 +83,7 @@ describe Stowaway::Rides do
       end
 
       it 'should create a ride' do
+        debugger;2
         expect(Ride.count).to eq(1)
         expect(ride.requests.count).to eq(existing_requests.count + 1)
         expect(request.ride).to be

@@ -78,7 +78,7 @@ module Stowaway
             error!('User not found', 404) if user.nil?
             user.requests.outstanding.destroy_all
             request = user.requests.create!(request_params[:request])
-            request.ride.try(:reload)
+            request.ride.try(:reload) || request
           end
 
           desc "cancel a request"
