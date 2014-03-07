@@ -16,7 +16,7 @@ class Request < ActiveRecord::Base
   validates :status, inclusion: { in: STATUSES }
 
   before_create :match_request
-  before_create :finalize, if: :can_finalize?
+  after_create :finalize, if: :can_finalize?
   after_save :notify_riders, if: :status_changed?
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
@@ -75,7 +75,6 @@ class Request < ActiveRecord::Base
 
   def add_to(ride)
     self.status = 'matched'
-    self.designation = :stowaway if ride.has_captain?
     self.ride = ride
     save unless new_record?
   end
@@ -83,7 +82,7 @@ class Request < ActiveRecord::Base
   def notify_riders
     unless self.ride.nil?
       self.ride.reload.riders.each do |rider|
-        rider.notify(other: self.ride.as_json(requests: [self]) )
+        rider.notify(other: self.ride.as_json(format: :notification, requests: [self]) )
       end
     end
   end
@@ -104,7 +103,8 @@ class Request < ActiveRecord::Base
     if options[:format] == :notification
       super(only: [:public_id, :status, :designation], methods: :requested_at).merge(user_public_id: self.user.public_id, uid: self.user.uid)
     else
-      super(except: [:id, :user_id, :ride_id]).merge(created_at: created_at.to_i, updated_at: updated_at.to_i)
+      super(except: [:id, :user_id, :ride_id], methods: :requested_at).
+        merge(created_at: created_at.to_i, updated_at: updated_at.to_i, user_public_id: self.user.public_id, uid: self.user.uid)
     end
   end
 end

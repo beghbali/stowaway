@@ -5,7 +5,7 @@ class Ride < ActiveRecord::Base
   has_public_id
   CAPACITY = 4
 
-  has_many :requests
+  has_many :requests, autosave: true
   has_many :riders, through: :requests, source: :user
   has_many :stowaways, -> { stowaways }, class_name: 'Request'
   has_one :captain, -> { captains }, class_name: 'Request'
@@ -18,7 +18,12 @@ class Ride < ActiveRecord::Base
 
   def as_json(options = {})
     reqs = options[:requests] || self.requests
-    super(only: [:location_channel, :public_id]).merge(requests: reqs.map{|req| req.as_json(format: :notification) })
+
+    if options[:format] == :notification
+      super(only: [:location_channel, :public_id]).merge(requests: reqs.map{|req| req.as_json(format: :notification) })
+    else
+      super(except: [:created_at, :updated_at]).merge(requests: reqs.map{|req| req.as_json })
+    end
   end
 
   def generate_location_channel
@@ -27,13 +32,15 @@ class Ride < ActiveRecord::Base
 
   def finalize
     captain = determine_captain
-
-    self.requests.each do |request|
+    captain.update(designation: :captain, status: 'fulfilled')
+    (self.requests - [captain]).each do |request|
       request.status = 'fulfilled'
-      request.designation = (request == captain) ? :captain : :stowaway
+      request.designation = :stowaway
       request.save
     end
-    debugger;2
+    self.suggested_dropoff_address, self.suggested_dropoff_lat, self.suggested_dropoff_lng = determine_suggested_dropoff_location
+    self.suggested_pickup_address, self.suggested_pickup_lat, self.suggested_pickup_lng = determine_suggested_pickup_location
+    save
   end
 
   def determine_captain
@@ -42,7 +49,16 @@ class Ride < ActiveRecord::Base
     end.sort {|a,b| a[1] <=> b[1] }.first[0]
   end
 
+  def determine_suggested_dropoff_location
+    lat_lng = Geocoder::Calculations.geographic_center(self.requests.pluck(:dropoff_lat, :dropoff_lng))
+    ["suggested dropoff location"] + lat_lng
+  end
+
+  def determine_suggested_pickup_location
+    [self.captain.pickup_address, self.captain.pickup_lat, self.captain.pickup_lng]
+  end
+
   def finalized?
-    !self.requests.where(status: 'outstanding').exists?
+    !self.requests.matched.any?
   end
 end

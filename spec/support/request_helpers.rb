@@ -9,6 +9,7 @@ module Requests
     def mock_external_requests
       mock_stowaway_email_creation
       mock_gcm_push_notifications
+      mock_push_notifications
     end
 
     def mock_stowaway_email_creation
@@ -29,6 +30,14 @@ module Requests
                with(body: /.+/,
                     headers: {'Authorization' => 'key=123abc456def', 'Content-Type' => 'application/json'}).
                to_return(status: 200, body: "", headers: {})
+    end
+
+    def mock_push_notifications
+      mock_apns
+    end
+
+    def mock_apns
+      allow(APNS).to receive(:send_notification).and_return(true)
     end
   end
 end

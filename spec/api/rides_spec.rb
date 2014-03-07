@@ -2,7 +2,11 @@ require 'spec_helper'
 include Requests::Mocks
 
 describe Stowaway::Rides do
-  before { mock_external_requests }
+  before do
+    Object.send(:remove_const, :APNS)
+    APNS = double()
+    mock_external_requests
+  end
 
   shared_examples_for 'admin endpoints' do
     let(:prefix) { "/api/#{version}/rides/admin" }
@@ -36,11 +40,7 @@ describe Stowaway::Rides do
       it 'creates a valid request' do
         expect(Request.count).to eq(1)
         request_data.each do |k,v|
-          if request.send(k).is_a?(BigDecimal)
-            expect(request.send(k)).to be_within(0.00001).of(v.to_f)
-          else
-            expect(request.send(k)).to eq(v)
-          end
+          expect_values_to_match(request.send(k), v)
         end
         expect(request.status).to eq('outstanding')
       end
@@ -56,7 +56,7 @@ describe Stowaway::Rides do
 
     describe "POST /api/<version>/users/<userid>/rides" do
       before do
-        expect(APNS).to receive(:send_notification).exactly(3).times
+        expect(APNS).to receive(:send_notification).exactly(notification_count).times
         post prefix, request: request_data.except(:id).merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
       end
 
@@ -92,6 +92,60 @@ describe Stowaway::Rides do
         expect(ride.location_channel).to be
       end
 
+      context 'when ride is finalized' do
+
+        before do
+          expect(APNS).to receive(:send_notification).exactly(ride.requests.count ** 2).times
+          ride.requests.each do |request|
+            put "#{prefix}/#{request.public_id}/finalize"
+          end
+          ride.reload
+        end
+
+        it 'designates a captain' do
+          expect(ride.captain).not_to be_nil
+          expect(ride.requests.captains.count).to eq(1)
+        end
+
+        it 'marks requests and fulfilled' do
+          expect(ride.requests.pluck(:status).uniq).to eq(["fulfilled"])
+        end
+
+        it 'designates everyone else as stowaway' do
+          expect(ride.stowaways.count).to eq(ride.requests.count - 1)
+        end
+
+        it 'should include suggested drop off location' do
+          expect(json[:suggested_dropoff_address]).not_to be_nil
+          expect(json[:suggested_dropoff_lat]).not_to be_nil
+          expect(json[:suggested_dropoff_lng]).not_to be_nil
+        end
+
+        it 'should include suggested pickup location' do
+          expect(json[:suggested_pickup_address]).not_to be_nil
+          expect(json[:suggested_pickup_lat]).not_to be_nil
+          expect(json[:suggested_pickup_lng]).not_to be_nil
+        end
+
+        it 'should set the suggested pickup location to the location of the captain' do
+          expect(json[:suggested_pickup_address]).to eq(ride.captain.pickup_address)
+          expect_values_to_match(json[:suggested_pickup_lat], ride.captain.pickup_lat)
+          expect_values_to_match(json[:suggested_pickup_lng], ride.captain.pickup_lng)
+        end
+
+        it 'should return the correct ride info on GET request' do
+          get "/api/#{version}/users/#{user.public_id}/rides/#{ride.public_id}"
+          expect(json[:requests].map{|r| r[:status]}.uniq).to eq(['fulfilled'])
+          expect(json[:requests].select{|r| r[:designation] == 'stowaway'}.count).to eq(ride.requests.count - 1)
+          expect(json[:requests].select{|r| r[:designation] == 'captain'}.count).to eq(1)
+          expect_values_to_match(json[:suggested_pickup_lat], ride.captain.pickup_lat)
+          expect_values_to_match(json[:suggested_pickup_lng], ride.captain.pickup_lng)
+          expect(json[:suggested_dropoff_address]).not_to be_nil
+          expect(json[:suggested_dropoff_lat]).not_to be_nil
+          expect(json[:suggested_dropoff_lng]).not_to be_nil
+        end
+      end
+
     end
   end
 
@@ -110,11 +164,12 @@ describe Stowaway::Rides do
       let(:existing_requests) { [ existing_request ] }
 
       before do
-        allow(APNS).to receive(:send_notification).and_return(true)
         existing_requests
       end
 
-      it_behaves_like 'matching outstanding requests with similar routes'
+      it_behaves_like 'matching outstanding requests with similar routes' do
+        let(:notification_count) { 3 }
+      end
 
       context 'with a third rider joining existing ride' do
         let(:existing_requests) do
@@ -127,8 +182,18 @@ describe Stowaway::Rides do
 
         let(:existing_request) { existing_requests.first }
 
-        it_behaves_like 'matching outstanding requests with similar routes'
+        it_behaves_like 'matching outstanding requests with similar routes' do
+          let(:notification_count) { 3 }
+        end
       end
+    end
+  end
+
+  def expect_values_to_match(a, b)
+    if a.is_a?(BigDecimal) || b.is_a?(BigDecimal)
+      expect(a.to_f).to be_within(0.00001).of(b.to_f)
+    else
+      expect(a).to eq(b)
     end
   end
 end
