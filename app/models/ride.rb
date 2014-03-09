@@ -20,9 +20,9 @@ class Ride < ActiveRecord::Base
     reqs = options[:requests] || self.requests
 
     if options[:format] == :notification
-      super(only: [:location_channel, :public_id]).merge(requests: reqs.map{|req| req.as_json(format: :notification) })
+      super(only: [:public_id])
     else
-      super(except: [:created_at, :updated_at]).merge(requests: reqs.map{|req| req.as_json })
+      super(except: [:created_at, :updated_at, :id]).merge(requests: reqs.map{|req| req.as_json })
     end
   end
 

@@ -51,101 +51,101 @@ describe Stowaway::Rides do
     end
   end
 
-  shared_examples_for 'matching outstanding requests with similar routes' do
-    let(:prefix) { "/api/#{version}/users/#{user.public_id}/requests" }
+  shared_examples_for 'a finalized ride' do
 
-    describe "POST /api/<version>/users/<userid>/rides" do
+    it 'designates a captain' do
+      expect(ride.captain).not_to be_nil
+      expect(ride.requests.captains.count).to eq(1)
+    end
+
+    it 'marks requests and fulfilled' do
+      expect(ride.requests.pluck(:status).uniq).to eq(["fulfilled"])
+    end
+
+    it 'designates everyone else as stowaway' do
+      expect(ride.stowaways.count).to eq(ride.requests.count - 1)
+    end
+
+    context 'when getting the ride info' do
       before do
-        expect(APNS).to receive(:send_notification).exactly(notification_count).times
-        post prefix, request: request_data.except(:id).merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
+        get "/api/#{version}/users/#{user.public_id}/rides/#{ride.public_id}"
       end
 
-      subject(:request) { Request.last }
-      subject(:ride) { Ride.last }
+      it 'should include suggested drop off location' do
+        expect(json[:suggested_dropoff_address]).not_to be_nil
+        expect(json[:suggested_dropoff_lat]).not_to be_nil
+        expect(json[:suggested_dropoff_lng]).not_to be_nil
+      end
 
-      it 'responds successfully' do
-        expect(response.status.to_i).to eq(201)
+      it 'should include suggested pickup location' do
+        expect(json[:suggested_pickup_address]).not_to be_nil
+        expect(json[:suggested_pickup_lat]).not_to be_nil
+        expect(json[:suggested_pickup_lng]).not_to be_nil
+      end
+
+      it 'should set the suggested pickup location to the location of the captain' do
+        expect(json[:suggested_pickup_address]).to eq(ride.captain.pickup_address)
+        expect_values_to_match(json[:suggested_pickup_lat], ride.captain.pickup_lat)
+        expect_values_to_match(json[:suggested_pickup_lng], ride.captain.pickup_lng)
+      end
+
+      it 'should show fulfilled for all requests' do
+        expect(json[:requests].map{|r| r[:status]}.uniq).to eq(['fulfilled'])
+      end
+
+      it 'should have designated the captain and stowaways correctly' do
+        expect(json[:requests].select{|r| r[:designation] == 'stowaway'}.count).to eq(ride.requests.count - 1)
+        expect(json[:requests].select{|r| r[:designation] == 'captain'}.count).to eq(1)
+      end
+    end
+
+  end
+
+  shared_examples_for 'matching outstanding requests with similar routes' do
+    let(:prefix) { "/api/#{version}/users/#{user.public_id}/requests" }
+    let(:expected_status) { "matched" }
+
+    before do
+      expect(APNS).to receive(:send_notification).exactly(notification_count).times
+      post prefix, request: request_data.except(:id).merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
+    end
+
+    subject(:request) { Request.last }
+    subject(:ride) { Ride.last }
+
+    it 'responds successfully' do
+      expect(response.status.to_i).to eq(201)
+    end
+
+    it 'creates a valid request' do
+      expect(Request.count).to eq(existing_requests.count + 1)
+      expect(Request.pluck(:status).uniq.count).to eq(1)
+      expect(Request.pluck(:status).uniq.first).to eq(expected_status)
+    end
+
+    it 'should create a ride' do
+      expect(Ride.count).to eq(1)
+      expect(ride.requests.count).to eq(existing_requests.count + 1)
+      expect(request.ride).to be
+    end
+
+    context 'when getting the ride info' do
+      before do
+        get "/api/#{version}/users/#{user.public_id}/rides/#{ride.public_id}"
       end
 
       it 'responds with a valid ride' do
         expect(json[:location_channel]).to be
         expect(json[:requests].count).to eq(existing_requests.count + 1)
-        expect(json[:requests].map{|r| r[:status]}.uniq).to eq(["matched"])
+        expect(json[:requests].map{|r| r[:status]}.uniq).to eq([expected_status])
         json[:requests].each do |req|
           expect(req[:uid]).to be
         end
       end
 
-      it 'creates a valid request' do
-        expect(Request.count).to eq(existing_requests.count + 1)
-        expect(Request.pluck(:status).uniq.count).to eq(1)
-        expect(Request.pluck(:status).uniq.first).to eq('matched')
-      end
-
-      it 'should create a ride' do
-        expect(Ride.count).to eq(1)
-        expect(ride.requests.count).to eq(existing_requests.count + 1)
-        expect(request.ride).to be
-      end
-
       it 'should generate a location channel for the ride' do
         expect(ride.location_channel).to be
       end
-
-      context 'when ride is finalized' do
-
-        before do
-          expect(APNS).to receive(:send_notification).exactly(ride.requests.count ** 2).times
-          ride.requests.each do |request|
-            put "#{prefix}/#{request.public_id}/finalize"
-          end
-          ride.reload
-        end
-
-        it 'designates a captain' do
-          expect(ride.captain).not_to be_nil
-          expect(ride.requests.captains.count).to eq(1)
-        end
-
-        it 'marks requests and fulfilled' do
-          expect(ride.requests.pluck(:status).uniq).to eq(["fulfilled"])
-        end
-
-        it 'designates everyone else as stowaway' do
-          expect(ride.stowaways.count).to eq(ride.requests.count - 1)
-        end
-
-        it 'should include suggested drop off location' do
-          expect(json[:suggested_dropoff_address]).not_to be_nil
-          expect(json[:suggested_dropoff_lat]).not_to be_nil
-          expect(json[:suggested_dropoff_lng]).not_to be_nil
-        end
-
-        it 'should include suggested pickup location' do
-          expect(json[:suggested_pickup_address]).not_to be_nil
-          expect(json[:suggested_pickup_lat]).not_to be_nil
-          expect(json[:suggested_pickup_lng]).not_to be_nil
-        end
-
-        it 'should set the suggested pickup location to the location of the captain' do
-          expect(json[:suggested_pickup_address]).to eq(ride.captain.pickup_address)
-          expect_values_to_match(json[:suggested_pickup_lat], ride.captain.pickup_lat)
-          expect_values_to_match(json[:suggested_pickup_lng], ride.captain.pickup_lng)
-        end
-
-        it 'should return the correct ride info on GET request' do
-          get "/api/#{version}/users/#{user.public_id}/rides/#{ride.public_id}"
-          expect(json[:requests].map{|r| r[:status]}.uniq).to eq(['fulfilled'])
-          expect(json[:requests].select{|r| r[:designation] == 'stowaway'}.count).to eq(ride.requests.count - 1)
-          expect(json[:requests].select{|r| r[:designation] == 'captain'}.count).to eq(1)
-          expect_values_to_match(json[:suggested_pickup_lat], ride.captain.pickup_lat)
-          expect_values_to_match(json[:suggested_pickup_lng], ride.captain.pickup_lng)
-          expect(json[:suggested_dropoff_address]).not_to be_nil
-          expect(json[:suggested_dropoff_lat]).not_to be_nil
-          expect(json[:suggested_dropoff_lng]).not_to be_nil
-        end
-      end
-
     end
   end
 
@@ -184,6 +184,35 @@ describe Stowaway::Rides do
 
         it_behaves_like 'matching outstanding requests with similar routes' do
           let(:notification_count) { 3 }
+
+          context 'when each rider sends a finalize message' do
+            before do
+              expect(APNS).to receive(:send_notification).exactly(ride.requests.count ** 2).times
+              ride.requests.each do |request|
+                put  "/api/#{version}/users/#{user.public_id}/rides/#{ride.public_id}/finalize"
+              end
+              ride.reload
+            end
+
+            it_behaves_like 'a finalized ride'
+          end
+        end
+
+        context 'with a fourth rider joining existing ride' do
+          let(:existing_requests) do
+            list = []
+            3.times do
+              list << FactoryGirl.create(:request, user: FactoryGirl.create(:user))
+            end
+            list
+          end
+
+          it_behaves_like 'matching outstanding requests with similar routes' do
+            let(:notification_count) { 20 } #4 for matches. 16 for finalize
+            let(:expected_status) { 'fulfilled' }
+
+            it_behaves_like 'a finalized ride'
+          end
         end
       end
     end

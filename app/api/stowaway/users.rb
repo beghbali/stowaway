@@ -78,19 +78,7 @@ module Stowaway
             error!('User not found', 404) if user.nil?
             user.requests.outstanding.destroy_all
             request = user.requests.create!(request_params[:request])
-            request.ride.try(:reload) || Ride.new.as_json(requests: [request])
-          end
-
-          desc "finalize a request"
-          params do
-            requires :id, type: Integer, desc: "request public id"
-          end
-
-          put ':id/finalize' do
-            request = Request.find_by_public_id(params[:id])
-            error!('Request not found', 404) if request.nil?
-            request.finalize unless request.ride.try(:finalized?)
-            request.ride.try(:reload) || Ride.new.as_json(requests: [request])
+            request
           end
 
           desc "cancel a request"
@@ -113,8 +101,20 @@ module Stowaway
 
           get ':id' do
             ride = Ride.find_by_public_id(params[:id])
-            error!('Request not found', 404) if ride.nil?
+            error!('Ride not found', 404) if ride.nil?
             ride
+          end
+
+          desc "finalize a ride"
+          params do
+            requires :id, type: Integer, desc: "ride public id"
+          end
+
+          put ':id/finalize' do
+            ride = Ride.find_by_public_id(params[:id])
+            error!('Ride not found', 404) if ride.nil?
+            ride.finalize unless ride.finalized?
+            ride.reload
           end
         end
       end

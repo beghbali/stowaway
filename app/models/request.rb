@@ -82,7 +82,7 @@ class Request < ActiveRecord::Base
   def notify_riders
     unless self.ride.nil?
       self.ride.reload.riders.each do |rider|
-        rider.notify(other: self.ride.as_json(format: :notification, requests: [self]) )
+        rider.notify(other: self.ride.as_json(format: :notification, requests: [self]) ) unless rider.cannot_be_notified?
       end
     end
   end

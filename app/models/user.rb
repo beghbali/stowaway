@@ -58,4 +58,8 @@ class User < ActiveRecord::Base
     fetch_ride_receipts
     #reconcile stowaway receipts
   end
+
+  def cannot_be_notified?
+    self.device_token.blank? || self.device_type.blank?
+  end
 end
