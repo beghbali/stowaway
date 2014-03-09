@@ -104,7 +104,7 @@ class Request < ActiveRecord::Base
       super(only: [:public_id, :status, :designation], methods: :requested_at).merge(user_public_id: self.user.public_id, uid: self.user.uid)
     else
       super(except: [:id, :user_id, :ride_id], methods: :requested_at).
-        merge(created_at: created_at.to_i, updated_at: updated_at.to_i, user_public_id: self.user.public_id, uid: self.user.uid)
+        merge(created_at: created_at.to_i, updated_at: updated_at.to_i, user_public_id: self.user.public_id, uid: self.user.uid, ride_public_id: self.ride.try(:public_id))
     end
   end
 end

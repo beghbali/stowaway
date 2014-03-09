@@ -129,6 +129,10 @@ describe Stowaway::Rides do
       expect(request.ride).to be
     end
 
+    it 'response includes the ride public id' do
+      expect(json[:ride_public_id]).to eq(request.ride.public_id)
+    end
+
     context 'when getting the ride info' do
       before do
         get "/api/#{version}/users/#{user.public_id}/rides/#{ride.public_id}"
@@ -145,6 +149,10 @@ describe Stowaway::Rides do
 
       it 'should generate a location channel for the ride' do
         expect(ride.location_channel).to be
+      end
+
+      it 'should have the status' do
+        expect(json[:status]).to eq(ride.requests.pluck(:status).uniq.first)
       end
     end
   end
