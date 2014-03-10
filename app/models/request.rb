@@ -18,6 +18,7 @@ class Request < ActiveRecord::Base
   before_create :match_request
   after_create :finalize, if: :can_finalize?
   after_save :notify_riders, if: :status_changed?
+  after_destroy :cancel_ride, if: :captain?
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
   geocoded_by :dropoff_address, latitude: :dropoff_lat, longitude: :dropoff_lng
@@ -25,10 +26,6 @@ class Request < ActiveRecord::Base
   delegate :device_token, to: :user
   delegate :device_type, to: :user
   delegate :finalize, to: :ride
-
-  STATUSES.each do |status|
-    scope status, -> { where(status: status) }
-  end
 
   scope :same_route, ->(as) {
       near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: :pickup_lat, longitude: :pickup_lng).
@@ -38,11 +35,17 @@ class Request < ActiveRecord::Base
 
   DESIGNATIONS.each do |designation|
     scope designation.pluralize, -> { where(designation: designation) }
+
+    define_method "#{designation}?" do
+      self.designation.to_s == designation
+    end
   end
 
   STATUSES.each do |status|
+    scope status, -> { where(status: status) }
+
     define_method "#{status}?" do
-      return self.status.to_s == status
+      self.status.to_s == status
     end
   end
 
@@ -82,7 +85,7 @@ class Request < ActiveRecord::Base
   def notify_riders
     unless self.ride.nil?
       self.ride.reload.riders.each do |rider|
-        rider.notify(other: self.ride.as_json(format: :notification, requests: [self]) ) unless rider.cannot_be_notified?
+        rider.notify(other: self.ride.as_json(format: :notification) ) unless rider.cannot_be_notified?
       end
     end
   end
@@ -97,6 +100,10 @@ class Request < ActiveRecord::Base
 
   def requested_at
     self.created_at.to_i
+  end
+
+  def cancel_ride
+    self.ride.destroy
   end
 
   def as_json(options = {})

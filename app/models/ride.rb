@@ -2,6 +2,8 @@ class Ride < ActiveRecord::Base
   include Notify::Notifier
   include PublicId
 
+  acts_as_paranoid
+
   has_public_id
   CAPACITY = 4
 
@@ -11,6 +13,7 @@ class Ride < ActiveRecord::Base
   has_one :captain, -> { captains }, class_name: 'Request'
 
   before_create :generate_location_channel
+  before_destroy :notify_riders
 
   def has_captain?
     !self.captain.nil?
@@ -64,5 +67,11 @@ class Ride < ActiveRecord::Base
 
   def finalized?
     !self.requests.matched.any?
+  end
+
+  def notify_riders
+    self.riders.each do |rider|
+      rider.notify(other: self.ride.as_json(format: :notification)) unless rider.cannot_be_notified?
+    end
   end
 end
