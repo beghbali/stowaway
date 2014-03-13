@@ -46,6 +46,8 @@ Stowaway::Application.routes.draw do
   #     resources :products
   #   end
 
+  get 'pusher/auth' => 'pusher#auth'
+
   mount API => '/'
   mount ResqueWeb::Engine => "/admin/jobs"
 end
