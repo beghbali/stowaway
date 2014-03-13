@@ -11,7 +11,6 @@ class User < ActiveRecord::Base
   DEVICE_TYPES = %w(ios android)
 
   has_many :requests
-
   validates :uid, uniqueness: true
   validates :provider, inclusion: { in: AUTHENTICATION_PROVIDERS }
   validates :email_provider, inclusion: { in: SUPPORTED_EMAIL_PROVIDERS }, allow_blank: true
@@ -61,5 +60,13 @@ class User < ActiveRecord::Base
 
   def cannot_be_notified?
     self.device_token.blank? || self.device_type.blank?
+  end
+
+  def ride
+    self.requests.outstanding.last.ride
+  end
+
+  def request_for(ride)
+    self.requests.joins(:rides).where(rides: {id: ride.id}).last
   end
 end

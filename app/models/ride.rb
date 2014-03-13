@@ -6,6 +6,7 @@ class Ride < ActiveRecord::Base
 
   has_public_id
   CAPACITY = 4
+  CHECKIN_PROXIMITY = 0.025
 
   has_many :requests, autosave: true
   has_many :riders, through: :requests, source: :user
@@ -71,7 +72,15 @@ class Ride < ActiveRecord::Base
 
   def notify_riders
     self.riders.each do |rider|
-      rider.notify(other: self.ride.as_json(format: :notification)) unless rider.cannot_be_notified?
+      rider.notify(other: self.as_json(format: :notification)) unless rider.cannot_be_notified?
     end
   end
+
+  def checkin(rider)
+    request = rider.request_for(self)
+    raise ArgumentError.new("user is not part of this ride") if request.nil?
+
+    request.update(status: 'checkedin') if request.distance_to(self.captain) <= CHECKIN_PROXIMITY
+  end
+
 end

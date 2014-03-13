@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140310075036) do
+ActiveRecord::Schema.define(version: 20140311085256) do
 
   create_table "receipts", force: true do |t|
     t.string   "generated_by"
@@ -53,6 +53,8 @@ ActiveRecord::Schema.define(version: 20140310075036) do
     t.string   "designation"
     t.integer  "public_id"
     t.datetime "deleted_at"
+    t.decimal  "last_lat",        precision: 16, scale: 12
+    t.decimal  "last_lng",        precision: 16, scale: 12
   end
 
   add_index "requests", ["deleted_at"], name: "index_requests_on_deleted_at", using: :btree

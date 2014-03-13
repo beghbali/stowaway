@@ -116,6 +116,21 @@ module Stowaway
             ride.finalize unless ride.finalized?
             ride.reload
           end
+
+          desc "checkin a user into the ride"
+          params do
+            requires :id, type: Integer, desc: "ride public id"
+            requires :user_id, type: Integer, desc: "user public id"
+          end
+
+          put ':id/checkin' do
+            ride = Ride.find_by_public_id(params[:id])
+            error!('Ride not found', 404) if ride.nil?
+            user = User.find_by_public_id(params[:user_id])
+            error!('User not found', 404) if user.nil?
+            ride.checkin(user) unless user.checked_into?(ride)
+            ride.reload
+          end
         end
       end
     end

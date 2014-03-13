@@ -5,7 +5,7 @@ class Request < ActiveRecord::Base
 
   acts_as_paranoid
 
-  STATUSES = %w(outstanding matched fulfilled cancelled timedout)
+  STATUSES = %w(outstanding matched fulfilled cancelled checkedin)
   PICKUP_RADIUS = 0.3
   DROPOFF_RADIUS = 0.5
   DESIGNATIONS =  %w(stowaway captain)
@@ -18,6 +18,7 @@ class Request < ActiveRecord::Base
   before_create :match_request
   after_create :finalize, if: :can_finalize?
   after_save :notify_riders, if: :status_changed?
+  before_destroy :cancel
   after_destroy :cancel_ride, if: :captain?
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
@@ -104,6 +105,11 @@ class Request < ActiveRecord::Base
 
   def cancel_ride
     self.ride.destroy
+  end
+
+  def cancel
+    self.update(status: 'cancelled')
+    cancel_ride unless self.ride.nil? || self.ride.requests.where.not(status: 'cancelled').any?
   end
 
   def as_json(options = {})
