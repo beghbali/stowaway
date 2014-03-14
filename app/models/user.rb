@@ -26,7 +26,7 @@ class User < ActiveRecord::Base
   end
 
   def generate_stowaway_email_address(postfix='')
-    proposed_email = "#{[first_name, last_name, "pirate", postfix].join.downcase}@getstowaway.com"
+    proposed_email = "#{[first_name, last_name, postfix].join.downcase}@getstowaway.com"
 
     if User.exists?(stowaway_email: proposed_email)
       proposed_email = generate_stowaway_email_address(rand(1..99).to_s)

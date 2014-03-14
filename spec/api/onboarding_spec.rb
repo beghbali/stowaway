@@ -93,7 +93,6 @@ describe 'onboarding' do
               expect(json[:stowaway_email]).to include(existing_user.stowaway_email)
               expect(existing_user.stowaway_email).to include(existing_user.first_name.downcase)
               expect(existing_user.stowaway_email).to include(existing_user.last_name.downcase)
-              expect(existing_user.stowaway_email).to include('pirate')
               expect(existing_user.stowaway_email).to include('@getstowaway.com')
               expect(existing_user.stowaway_email_password).not_to be_nil
             end
