@@ -198,7 +198,8 @@ describe Stowaway::Rides do
     end
 
     it 'should mark all requests as cancelled' do
-      requests.each do |request|
+      #find the now-deleted requests
+      Request.unscoped.where(id: ride.requests.map(&:id)).each do |request|
         expect(request.status).to eq('cancelled')
       end
     end

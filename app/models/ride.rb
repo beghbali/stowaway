@@ -14,7 +14,8 @@ class Ride < ActiveRecord::Base
   has_one :captain, -> { captains }, class_name: 'Request'
 
   before_create :generate_location_channel
-  before_destroy :notify_riders
+  before_destroy -> { notify_riders('ride_cancelled') }
+  before_destroy :destroy_requests
 
   def has_captain?
     !self.captain.nil?
@@ -24,9 +25,9 @@ class Ride < ActiveRecord::Base
     reqs = options[:requests] || self.requests
 
     if options[:format] == :notification
-      super(only: [:public_id])
+      super(only: [:public_id]).merge(status: options[:status] || self.status)
     else
-      super(except: [:created_at, :updated_at, :id], methods: :status).merge(requests: reqs.map{|req| req.as_json })
+      super(except: [:created_at, :updated_at, :id]).merge(status: options[:status] || self.status, requests: reqs.map{|req| req.as_json })
     end
   end
 
@@ -49,6 +50,7 @@ class Ride < ActiveRecord::Base
     self.suggested_dropoff_address, self.suggested_dropoff_lat, self.suggested_dropoff_lng = determine_suggested_dropoff_location
     self.suggested_pickup_address, self.suggested_pickup_lat, self.suggested_pickup_lng = determine_suggested_pickup_location
     save
+    notify_riders('fulfilled')
   end
 
   def determine_captain
@@ -70,10 +72,15 @@ class Ride < ActiveRecord::Base
     !self.requests.matched.any?
   end
 
-  def notify_riders
+  def notify_riders(status, request=nil)
     self.riders.each do |rider|
-      rider.notify(other: self.as_json(format: :notification)) unless rider.cannot_be_notified?
+      alert, sound = notification_options(rider, status, request)
+      rider.notify(alert: alert, badge: 1, sound: sound, other: self.as_json(format: :notification, status: status))
     end
+  end
+
+  def destroy_requests
+    self.requests.map(&:destroy)
   end
 
   def checkin(rider)
@@ -83,4 +90,23 @@ class Ride < ActiveRecord::Base
     request.update(status: 'checkedin') if request.distance_to(self.captain) <= CHECKIN_PROXIMITY
   end
 
+  protected
+  def notification_options(rider, status, request)
+    alert = sound = nil
+    case status
+    when 'ride_cancelled'
+      who_canceled = self.captain.present? ? 'cancelled_by_captain' : 'cancelled'
+      alert = I18n.t("notifications.ride.#{who_canceled}.alert", name: self.captain && ride.captain.user.first_name)
+      sound = I18n.t("notifications.ride.#{who_canceled}.sound")
+    when 'fulfilled'
+      request = rider.request_for(self)
+      alert = I18n.t("notifications.request.fulfilled.#{request.designation}.alert", pickup_address: self.suggested_pickup_address)
+      sound = I18n.t("notifications.request.fulfilled.#{request.designation}.sound")
+    else
+      alert = I18n.t("notifications.request.#{status}.alert", name: request.user.first_name)
+      sound = I18n.t("notifications.request.#{status}.sound")
+    end
+
+    [alert, sound]
+  end
 end

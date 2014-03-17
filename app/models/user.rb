@@ -58,15 +58,11 @@ class User < ActiveRecord::Base
     #reconcile stowaway receipts
   end
 
-  def cannot_be_notified?
-    self.device_token.blank? || self.device_type.blank?
-  end
-
   def ride
     self.requests.outstanding.last.ride
   end
 
   def request_for(ride)
-    self.requests.joins(:rides).where(rides: {id: ride.id}).last
+    self.requests.joins(:ride).where(rides: {id: ride.id}).last
   end
 end

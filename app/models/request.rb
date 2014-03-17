@@ -5,7 +5,7 @@ class Request < ActiveRecord::Base
 
   acts_as_paranoid
 
-  STATUSES = %w(outstanding matched fulfilled cancelled checkedin)
+  STATUSES = %w(outstanding matched fulfilled cancelled checkedin missed)
   PICKUP_RADIUS = 0.3
   DROPOFF_RADIUS = 0.5
   DESIGNATIONS =  %w(stowaway captain)
@@ -17,9 +17,8 @@ class Request < ActiveRecord::Base
 
   before_create :match_request
   after_create :finalize, if: :can_finalize?
-  after_save :notify_riders, if: :status_changed?
   before_destroy :cancel
-  after_destroy :cancel_ride, if: :captain?
+  after_destroy :cancel_ride, if: -> { self.ride && !self.ride.marked_for_destruction? && (self.captain? || self.ride.requests.count <= 2) }
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
   geocoded_by :dropoff_address, latitude: :dropoff_lat, longitude: :dropoff_lng
@@ -27,6 +26,7 @@ class Request < ActiveRecord::Base
   delegate :device_token, to: :user
   delegate :device_type, to: :user
   delegate :finalize, to: :ride
+  delegate :notify_riders, to: :ride
 
   scope :same_route, ->(as) {
       near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: :pickup_lat, longitude: :pickup_lng).
@@ -51,7 +51,8 @@ class Request < ActiveRecord::Base
   end
 
   def match_request
-    match_with_outstanding_requests || match_with_existing_rides
+    ride = match_with_outstanding_requests || match_with_existing_rides
+    notify_riders('matched', self) unless ride.nil?
   end
 
   def match_with_outstanding_requests
@@ -83,14 +84,6 @@ class Request < ActiveRecord::Base
     save unless new_record?
   end
 
-  def notify_riders
-    unless self.ride.nil?
-      self.ride.reload.riders.each do |rider|
-        rider.notify(other: self.ride.as_json(format: :notification) ) unless rider.cannot_be_notified?
-      end
-    end
-  end
-
   def full_house?
     self.riders.count == Ride::CAPACITY
   end
@@ -108,8 +101,8 @@ class Request < ActiveRecord::Base
   end
 
   def cancel
-    self.update(status: 'cancelled')
-    cancel_ride unless self.ride.nil? || self.ride.requests.where.not(status: 'cancelled').any?
+    self.update!(status: 'cancelled')
+    notify_riders('cancelled', self) unless self.ride.nil? || self.ride.marked_for_destruction?
   end
 
   def as_json(options = {})

@@ -20,4 +20,32 @@
 # available at http://guides.rubyonrails.org/i18n.html.
 
 en:
-  hello: "Hello world"
+  notifications:
+    request:
+      matched:
+        alert: "%{name} has joined the ride"
+        sound: 'default'
+      cancelled:
+        alert: "%{name} dropped out of the ride"
+        sound: 'default'
+      fulfilled:
+        stowaway:
+          alert: "Start walking to %{pickup_address}, your ride will arrive in approximately 5 minutes"
+          sound: 'default'
+        captain:
+          alert: "Order the UberX now. Your crew will meet you at %{pickup_address} shortly"
+          sound: 'default'
+      checkedin:
+        alert: "Bon Voyage!"
+        sound: 'default'
+      missed:
+        alert: "Looks like you missed the ride"
+        sound: 'default'
+    ride:
+      cancelled:
+        alert: "Your ride mates had to cancel the ride"
+        sound: 'default'
+      cancelled_by_captain:
+        alert: "Captain %{name} had to cancel the ride"
+        sound: 'default'
+

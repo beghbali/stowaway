@@ -9,9 +9,12 @@ module Notify
   module Notifiable
     class MisconfiguredDeviceError < ArgumentError; end
 
+    def cannot_be_notified?
+      self.device_token.blank? || self.device_type.blank?
+    end
+
     def notify(options = {})
-      raise MisconfiguredDeviceError.new("no device token specified") if self.device_token.blank?
-      raise MisconfiguredDeviceError.new("no device type specified") if self.device_type.blank?
+      return if cannot_be_notified?
 
       if device_type.to_sym == :ios
         APNS.send_notification(self.device_token, options)
