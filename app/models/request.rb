@@ -15,10 +15,11 @@ class Request < ActiveRecord::Base
   has_many :riders, through: :ride
   validates :status, inclusion: { in: STATUSES }
 
-  before_create :match_request
+  before_save :record_vicinity, if: -> { self.last_lat_changed? || last_lng_changed? }
+  after_create :match_request
   after_create :finalize, if: :can_finalize?
   before_destroy :cancel
-  after_destroy :cancel_ride, if: -> { self.ride && !self.ride.marked_for_destruction? && (self.captain? || self.ride.requests.count <= 2) }
+  before_destroy :cancel_ride, if: -> { self.ride && !self.ride.marked_for_destruction? && (self.captain? || self.ride.requests.count <= 2) }
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
   geocoded_by :dropoff_address, latitude: :dropoff_lat, longitude: :dropoff_lng
@@ -26,7 +27,9 @@ class Request < ActiveRecord::Base
   delegate :device_token, to: :user
   delegate :device_type, to: :user
   delegate :finalize, to: :ride
-  delegate :notify_riders, to: :ride
+
+  scope :checkinable, -> { where('vicinity_count >= ?', Ride::MIN_CAPTAIN_VICINITY_COUNT) }
+  scope :uncheckinable, -> { where('vicinity_count < ?', Ride::MIN_CAPTAIN_VICINITY_COUNT) }
 
   scope :same_route, ->(as) {
       near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: :pickup_lat, longitude: :pickup_lng).
@@ -50,9 +53,17 @@ class Request < ActiveRecord::Base
     end
   end
 
+  def other_requests
+    self.ride.requests - [self]
+  end
+
   def match_request
-    ride = match_with_outstanding_requests || match_with_existing_rides
-    notify_riders('matched', self) unless ride.nil?
+    match_with_outstanding_requests || match_with_existing_rides
+
+    unless self.ride.nil?
+      notify_other_riders
+      notify_rider_about(other_requests)
+    end
   end
 
   def match_with_outstanding_requests
@@ -60,7 +71,7 @@ class Request < ActiveRecord::Base
 
     if matches.any?
       self.create_ride
-      (matches + [self]).map{ |rider| rider.add_to(self.ride) }
+      (matches + [self]).map{ |request| request.add_to(self.ride) }
     end
     ride
   end
@@ -81,7 +92,7 @@ class Request < ActiveRecord::Base
   def add_to(ride)
     self.status = 'matched'
     self.ride = ride
-    save unless new_record?
+    save
   end
 
   def full_house?
@@ -101,8 +112,51 @@ class Request < ActiveRecord::Base
   end
 
   def cancel
-    self.update!(status: 'cancelled')
-    notify_riders('cancelled', self) unless self.ride.nil? || self.ride.marked_for_destruction?
+    self.update(status: 'cancelled')
+    notify_other_riders unless self.ride.nil? || self.ride.marked_for_destruction?
+  end
+
+  def record_vicinity
+    self.vicinity_count += 1 if self.distance_to(self.ride.captain) <= Ride::CHECKIN_PROXIMITY
+    try_checkin
+  end
+
+  def try_checkin
+    if self.vicinity_count >= Ride::MAX_CAPTAIN_VICINITY_COUNT
+      self.ride.close
+    elsif self.vicinity_count >= Ride::MIN_CAPTAIN_VICINITY_COUNT
+      if self.ride.requests.uncheckinable.any?
+        self.checkin
+      else
+        self.ride.close
+      end
+    end
+  end
+
+  def checkin
+    self.update(status: 'checkedin')
+    notify_all_riders
+  end
+
+  def missed
+    self.update(status: 'missed')
+    notify_all_riders
+  end
+
+  alias_method :rider, :user
+
+  def notify_other_riders
+    notify(other_requests)
+  end
+
+  def notify_all_riders
+    notify(self.ride.requests)
+  end
+
+  def notify_rider_about(others)
+    others.each do |request|
+      request.notify([self])
+    end
   end
 
   def as_json(options = {})
@@ -112,5 +166,26 @@ class Request < ActiveRecord::Base
       super(except: [:id, :user_id, :ride_id], methods: :requested_at).
         merge(created_at: created_at.to_i, updated_at: updated_at.to_i, user_public_id: self.user.public_id, uid: self.user.uid, ride_public_id: self.ride.try(:public_id))
     end
+  end
+
+  def notify(audience)
+    audience.each do |request|
+      alert, sound = notification_options
+      request.rider.notify(alert: alert, badge: 1, sound: sound, other: self.ride.as_json(format: :notification, status: self.status))
+    end
+  end
+
+  protected
+
+  def notification_options
+    if self.status == 'fulfilled'
+      alert = I18n.t("notifications.request.fulfilled.#{designation}.alert", pickup_address: self.ride.reload.suggested_pickup_address)
+      sound = I18n.t("notifications.request.fulfilled.#{designation}.sound")
+    else
+      alert = I18n.t("notifications.request.#{status}.alert", name: self.rider.first_name)
+      sound = I18n.t("notifications.request.#{status}.sound")
+    end
+
+    [alert, sound]
   end
 end

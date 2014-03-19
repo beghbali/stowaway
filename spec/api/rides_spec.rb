@@ -136,17 +136,18 @@ describe Stowaway::Rides do
 
     context 'cancelling the request' do
       include_context 'cancelling a request'
-      let(:cancellation_count) { existing_requests.count + 1 }
+      let(:cancellation_count) { existing_requests.count }
 
       it_behaves_like 'a cancelled request'
     end
 
     context 'cancellations' do
-      let(:cancellation_count) { existing_requests.count + 1 }
 
       include_context 'finalized ride'
 
       context 'all cancelling the ride' do
+        let(:cancellation_count) { (2..existing_requests.count).reduce(:+) + existing_requests.count + 1 }
+
         include_context 'all cancelling a ride' do
           let(:requests) { ride.requests }
         end
@@ -157,6 +158,8 @@ describe Stowaway::Rides do
       end
 
       context 'captain cancelling the ride' do
+        let(:cancellation_count) { existing_requests.count * 2 + 1 }
+
         include_context 'captain cancelling a ride' do
           let(:requests) { ride.requests }
         end
@@ -238,6 +241,8 @@ describe Stowaway::Rides do
   end
 
   shared_context 'finalized ride' do
+    let(:notification_count) { ((2..existing_requests.count).reduce(:+) || 0) * 2 + existing_requests.count }
+
     before do
       ride.finalize
     end
@@ -249,35 +254,27 @@ describe Stowaway::Rides do
 
     let(:user) { FactoryGirl.create :user }
     let(:request_data) { FactoryGirl.attributes_for :request }
+    let(:notification_count) { ((2..existing_requests.count).reduce(:+) || 0) * 2 }
 
     it_behaves_like 'admin endpoints'
     it_behaves_like 'accepting a ride request'
 
     context 'with another rider with similar route' do
-      let(:existing_request) { FactoryGirl.create :request, user: FactoryGirl.create(:user) }
+      let(:existing_request) { FactoryGirl.create :request }
       let(:existing_requests) { [ existing_request ] }
 
       before do
         existing_requests
       end
 
-      it_behaves_like 'matching outstanding requests with similar routes' do
-        let(:notification_count) { 3 }
-      end
+      it_behaves_like 'matching outstanding requests with similar routes'
 
       context 'with a third rider joining existing ride' do
-        let(:existing_requests) do
-          list = []
-          2.times do
-            list << FactoryGirl.create(:request, user: FactoryGirl.create(:user))
-          end
-          list
-        end
+        let(:existing_requests) { FactoryGirl.create_list(:request, 2) }
 
         let(:existing_request) { existing_requests.first }
 
         it_behaves_like 'matching outstanding requests with similar routes' do
-          let(:notification_count) { 3 }
 
           context 'when each rider sends a finalize message' do
             before do
@@ -293,16 +290,9 @@ describe Stowaway::Rides do
         end
 
         context 'with a fourth rider joining existing ride' do
-          let(:existing_requests) do
-            list = []
-            3.times do
-              list << FactoryGirl.create(:request, user: FactoryGirl.create(:user))
-            end
-            list
-          end
+          let(:existing_requests) { FactoryGirl.create_list(:request, 3) }
 
           it_behaves_like 'matching outstanding requests with similar routes' do
-            let(:notification_count) { 20 } #4 for matches. 16 for finalize
             let(:expected_status) { 'fulfilled' }
 
             it_behaves_like 'a finalized ride'

@@ -7,6 +7,8 @@ class Ride < ActiveRecord::Base
   has_public_id
   CAPACITY = 4
   CHECKIN_PROXIMITY = 0.025
+  MIN_CAPTAIN_VICINITY_COUNT = 2
+  MAX_CAPTAIN_VICINITY_COUNT = 10
 
   has_many :requests, autosave: true
   has_many :riders, through: :requests, source: :user
@@ -15,7 +17,7 @@ class Ride < ActiveRecord::Base
 
   before_create :generate_location_channel
   before_destroy -> { notify_riders('ride_cancelled') }
-  before_destroy :destroy_requests
+  after_destroy :destroy_requests
 
   def has_captain?
     !self.captain.nil?
@@ -35,6 +37,10 @@ class Ride < ActiveRecord::Base
     self.requests.first.status
   end
 
+  def location_channel_name
+    "presence-#{location_channel}"
+  end
+
   def generate_location_channel
     self.location_channel = "#{SecureRandom.hex(10)}"
   end
@@ -50,7 +56,8 @@ class Ride < ActiveRecord::Base
     self.suggested_dropoff_address, self.suggested_dropoff_lat, self.suggested_dropoff_lng = determine_suggested_dropoff_location
     self.suggested_pickup_address, self.suggested_pickup_lat, self.suggested_pickup_lng = determine_suggested_pickup_location
     save
-    notify_riders('fulfilled')
+    self.requests.map{|request| request.notify_rider_about([request])}
+    Resque.enqueue(CheckinRidersJob, self.id)
   end
 
   def determine_captain
@@ -72,9 +79,9 @@ class Ride < ActiveRecord::Base
     !self.requests.matched.any?
   end
 
-  def notify_riders(status, request=nil)
+  def notify_riders(status)
     self.riders.each do |rider|
-      alert, sound = notification_options(rider, status, request)
+      alert, sound = notification_options(status)
       rider.notify(alert: alert, badge: 1, sound: sound, other: self.as_json(format: :notification, status: status))
     end
   end
@@ -83,28 +90,28 @@ class Ride < ActiveRecord::Base
     self.requests.map(&:destroy)
   end
 
-  def checkin(rider)
-    request = rider.request_for(self)
-    raise ArgumentError.new("user is not part of this ride") if request.nil?
+  def close
+    self.requests.checkinable.each do |request|
+      request.checkin
+    end
 
-    request.update(status: 'checkedin') if request.distance_to(self.captain) <= CHECKIN_PROXIMITY
+    self.requests.uncheckinable.each do |request|
+      request.missed
+    end
+  end
+
+  def closed?
+    self.requests.where('status NOT IN (?)', %w(missed checkedin)).any?
   end
 
   protected
-  def notification_options(rider, status, request)
+  def notification_options(status)
     alert = sound = nil
-    case status
-    when 'ride_cancelled'
+
+    if status == 'ride_cancelled'
       who_canceled = self.captain.present? ? 'cancelled_by_captain' : 'cancelled'
-      alert = I18n.t("notifications.ride.#{who_canceled}.alert", name: self.captain && ride.captain.user.first_name)
+      alert = I18n.t("notifications.ride.#{who_canceled}.alert", name: self.captain && self.captain.user.first_name)
       sound = I18n.t("notifications.ride.#{who_canceled}.sound")
-    when 'fulfilled'
-      request = rider.request_for(self)
-      alert = I18n.t("notifications.request.fulfilled.#{request.designation}.alert", pickup_address: self.suggested_pickup_address)
-      sound = I18n.t("notifications.request.fulfilled.#{request.designation}.sound")
-    else
-      alert = I18n.t("notifications.request.#{status}.alert", name: request.user.first_name)
-      sound = I18n.t("notifications.request.#{status}.sound")
     end
 
     [alert, sound]

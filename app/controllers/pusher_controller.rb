@@ -4,9 +4,10 @@ class PusherController < ApplicationController
   def auth
     if current_user
       response = Pusher[params[:channel_name]].authenticate(params[:socket_id], {
-        :user_id => current_user.id, # => required
+        :user_id => current_user.public_id, # => required
         :user_info => { # => optional - for example
           :uid => current_user.uid,
+          :request_public_id => current_user.requests.last
         }
       })
       render :json => response
@@ -16,6 +17,6 @@ class PusherController < ApplicationController
   end
 
   def current_user
-    params[:user_id] && User.find_by_public_id(params[:user_id])
+    params[:user_id] && (params[:user_id] == ENV['PUSHER_SERVER_USER_ID'] || User.find_by_public_id(params[:user_id]))
   end
 end
