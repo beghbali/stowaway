@@ -16,7 +16,7 @@ class Request < ActiveRecord::Base
   validates :status, inclusion: { in: STATUSES }
 
   before_save :record_vicinity, if: -> { self.last_lat_changed? || last_lng_changed? }
-  after_create :match_request
+  after_create :match_request, unless: :dont_match
   after_create :finalize, if: :can_finalize?
   before_destroy :cancel
   before_destroy :cancel_ride, if: -> { self.ride && !self.ride.marked_for_destruction? && (self.captain? || self.ride.requests.count <= 2) }
@@ -30,6 +30,7 @@ class Request < ActiveRecord::Base
 
   scope :checkinable, -> { where('vicinity_count >= ?', Ride::MIN_CAPTAIN_VICINITY_COUNT) }
   scope :uncheckinable, -> { where('vicinity_count < ?', Ride::MIN_CAPTAIN_VICINITY_COUNT) }
+  scope :active, -> { where(status: %w(outstanding matched fulfilled))}
 
   scope :same_route, ->(as) {
       near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: :pickup_lat, longitude: :pickup_lng).
@@ -52,6 +53,8 @@ class Request < ActiveRecord::Base
       self.status.to_s == status
     end
   end
+
+  attr_accessor :dont_match
 
   def other_requests
     self.ride.requests - [self]

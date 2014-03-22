@@ -5,7 +5,7 @@ namespace :seed do
     Dir.glob("./spec/factories/*.rb").each {|f| require(f) }
 
     5.times do
-      FactoryGirl.create(:request, pickup_lat: slat, pickup_lng: slng, dropoff_lat: dlat, dropoff_lng: dlng, user: FactoryGirl.create(:user, device_token: nil, device_type: nil))
+      FactoryGirl.create(:request, pickup_lat: slat, pickup_lng: slng, dropoff_lat: dlat, dropoff_lng: dlng, dont_match: true, user: FactoryGirl.create(:user, device_token: nil, device_type: nil))
     end
   end
 
