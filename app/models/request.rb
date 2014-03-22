@@ -65,7 +65,6 @@ class Request < ActiveRecord::Base
 
     unless self.ride.nil?
       notify_other_riders
-      notify_rider_about(other_requests)
     end
   end
 
