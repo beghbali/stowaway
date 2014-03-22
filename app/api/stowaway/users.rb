@@ -76,7 +76,7 @@ module Stowaway
           post do
             user = User.find_by_public_id(params[:user_id])
             error!('User not found', 404) if user.nil?
-            user.requests.active.destroy_all
+            user.requests.active.map(&:deactivate)
             request = user.requests.create!(request_params[:request])
             request
           end
