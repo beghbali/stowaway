@@ -82,7 +82,7 @@ class Ride < ActiveRecord::Base
   def notify_riders(status)
     self.riders.each do |rider|
       alert, sound = notification_options(status)
-      rider.notify(alert: alert, badge: 1, sound: sound, other: self.as_json(format: :notification, status: status))
+      rider.notify(alert: alert, sound: sound, other: self.as_json(format: :notification, status: status))
     end
   end
 
