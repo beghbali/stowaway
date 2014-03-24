@@ -146,7 +146,7 @@ describe Stowaway::Rides do
       include_context 'finalized ride'
 
       context 'all cancelling the ride' do
-        let(:cancellation_count) { (2..existing_requests.count).reduce(:+) + existing_requests.count + 1 }
+        let(:cancellation_count) { existing_requests.count }
 
         include_context 'all cancelling a ride' do
           let(:requests) { ride.requests }
@@ -158,7 +158,7 @@ describe Stowaway::Rides do
       end
 
       context 'captain cancelling the ride' do
-        let(:cancellation_count) { existing_requests.count * 2 + 1 }
+        let(:cancellation_count) { existing_requests.count }
 
         include_context 'captain cancelling a ride' do
           let(:requests) { ride.requests }
@@ -241,7 +241,7 @@ describe Stowaway::Rides do
   end
 
   shared_context 'finalized ride' do
-    let(:notification_count) { ((2..existing_requests.count).reduce(:+) || 0) * 2 + existing_requests.count }
+    let(:notification_count) { 0 }
 
     before do
       ride.finalize
@@ -254,7 +254,7 @@ describe Stowaway::Rides do
 
     let(:user) { FactoryGirl.create :user }
     let(:request_data) { FactoryGirl.attributes_for :request }
-    let(:notification_count) { ((2..existing_requests.count).reduce(:+) || 0) * 2 }
+    let(:notification_count) { existing_requests.count }
 
     it_behaves_like 'admin endpoints'
     it_behaves_like 'accepting a ride request'
@@ -278,7 +278,7 @@ describe Stowaway::Rides do
 
           context 'when each rider sends a finalize message' do
             before do
-              expect(APNS).to receive(:send_notification).exactly(ride.requests.count ** 2).times
+              expect(APNS).to receive(:send_notification).exactly(ride.requests.count).times
               ride.requests.each do |request|
                 put  "/api/#{version}/users/#{user.public_id}/rides/#{ride.public_id}/finalize"
               end

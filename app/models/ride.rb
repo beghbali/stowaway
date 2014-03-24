@@ -56,7 +56,6 @@ class Ride < ActiveRecord::Base
     self.suggested_dropoff_address, self.suggested_dropoff_lat, self.suggested_dropoff_lng = determine_suggested_dropoff_location
     self.suggested_pickup_address, self.suggested_pickup_lat, self.suggested_pickup_lng = determine_suggested_pickup_location
     save
-    self.requests.map{|request| request.notify_rider_about([request])}
     Resque.enqueue(CheckinRidersJob, self.id)
   end
 

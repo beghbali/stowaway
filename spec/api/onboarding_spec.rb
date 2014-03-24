@@ -110,6 +110,7 @@ describe 'onboarding' do
 
       before do
         put "/api/#{version}/users/#{user.public_id}", data.to_json, headers
+        user.reload
       end
 
       it 'should update the user' do

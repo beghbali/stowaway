@@ -19,7 +19,7 @@ class Request < ActiveRecord::Base
   after_create :match_request, unless: :dont_match
   after_create :finalize, if: :can_finalize?
   before_destroy :cancel
-  before_destroy :cancel_ride, if: -> { self.ride && !self.ride.marked_for_destruction? && (self.captain? || self.ride.requests.count <= 2) }
+  after_destroy :cancel_ride, if: -> { self.ride && !self.ride.marked_for_destruction? && (self.captain? || self.ride.requests.count <= 2) }
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
   geocoded_by :dropoff_address, latitude: :dropoff_lat, longitude: :dropoff_lng
@@ -178,7 +178,7 @@ class Request < ActiveRecord::Base
   def notify(audience)
     audience.each do |request|
       alert, sound = notification_options
-      request.rider.notify(alert: alert, badge: 1, sound: sound, other: self.ride.as_json(format: :notification, status: self.status))
+      request.rider.notify(alert: alert, sound: sound, other: self.ride.as_json(format: :notification, status: self.status))
     end
   end
 
