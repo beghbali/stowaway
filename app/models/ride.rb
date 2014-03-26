@@ -17,7 +17,7 @@ class Ride < ActiveRecord::Base
 
   before_create :generate_location_channel
   before_destroy -> { notify_riders('ride_cancelled') }
-  after_destroy :destroy_requests
+  after_destroy :reset_requests
 
   def has_captain?
     !self.captain.nil?
@@ -85,8 +85,8 @@ class Ride < ActiveRecord::Base
     end
   end
 
-  def destroy_requests
-    self.requests.map(&:destroy)
+  def reset_requests
+    self.requests.map(&:outstanding!)
   end
 
   def close

@@ -19,7 +19,7 @@ class Request < ActiveRecord::Base
   after_create :match_request, unless: :dont_match
   after_create :finalize, if: :can_finalize?
   before_destroy :cancel
-  after_destroy :cancel_ride, if: -> { self.ride && !self.ride.marked_for_destruction? && (self.captain? || self.ride.requests.count <= 2) }
+  after_destroy :cancel_ride, if: -> { self.ride && !self.ride.marked_for_destruction? && (self.captain? || self.ride.requests.count == 1) }
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
   geocoded_by :dropoff_address, latitude: :dropoff_lat, longitude: :dropoff_lng
@@ -48,6 +48,10 @@ class Request < ActiveRecord::Base
 
   STATUSES.each do |status|
     scope status, -> { where(status: status) }
+
+    define_method "#{status}!" do
+      self.update(status: status)
+    end
 
     define_method "#{status}?" do
       self.status.to_s == status
@@ -114,7 +118,7 @@ class Request < ActiveRecord::Base
   end
 
   def cancel
-    self.update(status: 'cancelled')
+    self.cancelled!
     notify_other_riders unless self.ride.nil? || self.ride.marked_for_destruction?
   end
 
@@ -136,12 +140,12 @@ class Request < ActiveRecord::Base
   end
 
   def checkin
-    self.update(status: 'checkedin')
+    self.checkedin!
     notify_all_riders
   end
 
   def missed
-    self.update(status: 'missed')
+    self.missed!
     notify_all_riders
     self.deactivate
   end

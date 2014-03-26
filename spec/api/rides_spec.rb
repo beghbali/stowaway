@@ -200,10 +200,9 @@ describe Stowaway::Rides do
       expect(Ride.unscoped.where(id: ride.id).count).to be(1)
     end
 
-    it 'should mark all requests as cancelled' do
-      #find the now-deleted requests
+    it 'should reset requests back to outstanding' do
       Request.unscoped.where(id: ride.requests.map(&:id)).each do |request|
-        expect(request.status).to eq('cancelled')
+        expect(request.status).to eq('outstanding')
       end
     end
   end
