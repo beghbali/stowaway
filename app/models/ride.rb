@@ -38,7 +38,7 @@ class Ride < ActiveRecord::Base
   end
 
   def location_channel_name
-    "presence-#{location_channel}"
+    "private-#{location_channel}"
   end
 
   def generate_location_channel
