@@ -10,7 +10,7 @@ class Ride < ActiveRecord::Base
   MIN_CAPTAIN_VICINITY_COUNT = 2
   MAX_CAPTAIN_VICINITY_COUNT = 10
 
-  has_many :requests, autosave: true
+  has_many :requests, -> { available }, autosave: true
   has_many :riders, through: :requests, source: :user
   has_many :stowaways, -> { stowaways }, class_name: 'Request'
   has_one :captain, -> { captains }, class_name: 'Request'
@@ -81,12 +81,14 @@ class Ride < ActiveRecord::Base
   def notify_riders(status)
     self.riders.each do |rider|
       alert, sound = notification_options(status)
-      rider.notify(alert: alert, sound: sound, other: self.as_json(format: :notification, status: status))
+      data = self.as_json(format: :notification, status: status)
+      data.merge!('public_id' => nil) if status == 'ride_cancelled'
+      rider.notify(alert: alert, sound: sound, other: data)
     end
   end
 
   def reset_requests
-    self.requests.map(&:outstanding!)
+    self.requests.available.map(&:outstanding!)
   end
 
   def close

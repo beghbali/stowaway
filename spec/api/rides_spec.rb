@@ -105,9 +105,10 @@ describe Stowaway::Rides do
     let(:prefix) { "/api/#{version}/users/#{user.public_id}/requests" }
     let(:expected_status) { "matched" }
     let(:cancellation_count) { 0 }
+    let(:rematch_count) { 0 }
 
     before do
-      expect(APNS).to receive(:send_notification).exactly(notification_count + cancellation_count).times
+      expect(APNS).to receive(:send_notification).exactly(notification_count + cancellation_count + rematch_count).times
       post prefix, request: request_data.except(:id).merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
     end
 
@@ -136,19 +137,22 @@ describe Stowaway::Rides do
 
     context 'cancelling the request' do
       include_context 'cancelling a request'
-      let(:cancellation_count) { existing_requests.count }
+      let(:notification_count) { 0 }
+      let(:cancellation_count) { (existing_requests.count == 1) ? 2 : existing_requests.count }
+      let(:rematch_count) { existing_requests.count }
 
       it_behaves_like 'a cancelled request'
     end
 
     context 'cancellations' do
+      let(:rematch_count) { existing_requests.count }
 
       include_context 'finalized ride'
 
-      context 'all cancelling the ride' do
-        let(:cancellation_count) { existing_requests.count }
+      context 'everyone besides captain cancelling the ride' do
+        let(:cancellation_count) { (1..existing_requests.count).reduce(:+) + 1 }
 
-        include_context 'all cancelling a ride' do
+        include_context 'everyone besides captain cancelling a ride' do
           let(:requests) { ride.requests }
         end
 
@@ -158,7 +162,7 @@ describe Stowaway::Rides do
       end
 
       context 'captain cancelling the ride' do
-        let(:cancellation_count) { existing_requests.count }
+        let(:cancellation_count) { existing_requests.count * 2 }
 
         include_context 'captain cancelling a ride' do
           let(:requests) { ride.requests }
@@ -200,15 +204,19 @@ describe Stowaway::Rides do
       expect(Ride.unscoped.where(id: ride.id).count).to be(1)
     end
 
-    it 'should reset requests back to outstanding' do
-      Request.unscoped.where(id: ride.requests.map(&:id)).each do |request|
-        expect(request.status).to eq('outstanding')
+    it 'should reset other requests back to outstanding' do
+      existing_requests.each do |request|
+        expect(['matched', 'outstanding']).to include(request.status)
       end
+    end
+
+    it 'cancels the request' do
+      expect( Request.deleted.where(ride_id: ride.id).first.status).to eq('cancelled')
     end
   end
 
   shared_examples_for 'a cancelled request' do
-    let(:duplicate_request) { FactoryGirl.create :request, request.attributes.except('id', 'public_id')}
+    let(:duplicate_request) { FactoryGirl.build :request, request.attributes.except('id', 'public_id')}
 
     it 'should mark the request as cancelled' do
       expect(request.reload.status).to eq('cancelled')
@@ -225,9 +233,9 @@ describe Stowaway::Rides do
     end
   end
 
-  shared_context 'all cancelling a ride' do
+  shared_context 'everyone besides captain cancelling a ride' do
     before do
-      requests.each do |request|
+      requests.stowaways.each do |request|
         delete "/api/#{version}/users/#{request.user.public_id}/requests/#{request.public_id}"
       end
     end
@@ -277,7 +285,7 @@ describe Stowaway::Rides do
 
           context 'when each rider sends a finalize message' do
             before do
-              expect(APNS).to receive(:send_notification).exactly(ride.requests.count).times
+              expect(APNS).to receive(:send_notification).exactly(0).times
               ride.requests.each do |request|
                 put  "/api/#{version}/users/#{user.public_id}/rides/#{ride.public_id}/finalize"
               end
