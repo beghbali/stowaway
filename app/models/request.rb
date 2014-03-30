@@ -19,7 +19,7 @@ class Request < ActiveRecord::Base
   after_create :match_request, unless: :dont_match
   after_create :finalize, if: :can_finalize?
   before_destroy :cancel
-  after_destroy :cancel_ride, if: -> { self.ride && (self.captain? || self.ride.requests.count == 1) }
+  after_destroy :cancel_ride, if: :should_cancel_ride?
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
   geocoded_by :dropoff_address, latitude: :dropoff_lat, longitude: :dropoff_lng
@@ -120,7 +120,7 @@ class Request < ActiveRecord::Base
 
   def cancel
     self.cancelled!
-    notify_other_riders unless self.ride.nil?
+    notify_other_riders unless self.ride.nil? || should_cancel_ride?
   end
 
   def record_vicinity
@@ -188,6 +188,10 @@ class Request < ActiveRecord::Base
   end
 
   protected
+
+  def should_cancel_ride?
+    self.ride && (self.captain? || (self.ride.requests - [self]).count <= 1)
+  end
 
   def notification_options
     if self.status == 'fulfilled'

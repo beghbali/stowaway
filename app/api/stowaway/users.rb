@@ -128,7 +128,7 @@ module Stowaway
             error!('Ride not found', 404) if ride.nil?
             user = User.find_by_public_id(params[:user_id])
             error!('User not found', 404) if user.nil?
-            ride.checkin(user) unless user.checked_into?(ride)
+            ride.start_checkin(user) if user.captain_of?(ride)
             ride.reload
           end
         end

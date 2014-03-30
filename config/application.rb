@@ -22,5 +22,6 @@ module Stowaway
 
     config.paths.add "app/api", glob: "**/*.rb"
     config.autoload_paths += %W(#{config.root}/lib #{config.root}/app/api/*)
+    I18n.config.enforce_available_locales = true
   end
 end

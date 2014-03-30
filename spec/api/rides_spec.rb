@@ -138,7 +138,7 @@ describe Stowaway::Rides do
     context 'cancelling the request' do
       include_context 'cancelling a request'
       let(:notification_count) { 0 }
-      let(:cancellation_count) { (existing_requests.count == 1) ? 2 : existing_requests.count }
+      let(:cancellation_count) { existing_requests.count }
       let(:rematch_count) { existing_requests.count }
 
       it_behaves_like 'a cancelled request'
@@ -150,7 +150,7 @@ describe Stowaway::Rides do
       include_context 'finalized ride'
 
       context 'everyone besides captain cancelling the ride' do
-        let(:cancellation_count) { (1..existing_requests.count).reduce(:+) + 1 }
+        let(:cancellation_count) { (1..existing_requests.count).reduce(:+) }
 
         include_context 'everyone besides captain cancelling a ride' do
           let(:requests) { ride.requests }
@@ -162,7 +162,7 @@ describe Stowaway::Rides do
       end
 
       context 'captain cancelling the ride' do
-        let(:cancellation_count) { existing_requests.count * 2 }
+        let(:cancellation_count) { existing_requests.count }
 
         include_context 'captain cancelling a ride' do
           let(:requests) { ride.requests }
@@ -275,6 +275,21 @@ describe Stowaway::Rides do
       end
 
       it_behaves_like 'matching outstanding requests with similar routes'
+
+      context 'cancelling one of the requests' do
+        let(:request) { FactoryGirl.create :request }
+        let(:ride) { request.ride }
+        before do
+          ride
+        end
+
+        include_context 'cancelling a request' do
+          prepend_before do
+            expect(APNS).to receive(:send_notification).exactly(2).times
+          end
+        end
+        it_behaves_like 'a cancelled ride'
+      end
 
       context 'with a third rider joining existing ride' do
         let(:existing_requests) { FactoryGirl.create_list(:request, 2) }

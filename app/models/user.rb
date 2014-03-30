@@ -65,4 +65,8 @@ class User < ActiveRecord::Base
   def request_for(ride)
     self.requests.joins(:ride).where(rides: {id: ride.id}).last
   end
+
+  def captain_of?(ride)
+    self.request_for(ride).try(:captain?) || false
+  end
 end
