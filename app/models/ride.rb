@@ -9,6 +9,7 @@ class Ride < ActiveRecord::Base
   CHECKIN_PROXIMITY = 0.025
   MIN_CAPTAIN_VICINITY_COUNT = 2
   MAX_CAPTAIN_VICINITY_COUNT = 10
+  PRESUMED_SPEED 25 #mph
 
   has_many :requests, -> { available }, autosave: true
   has_many :riders, through: :requests, source: :user
@@ -102,10 +103,19 @@ class Ride < ActiveRecord::Base
     self.requests.uncheckinable.each do |request|
       request.missed
     end
+
   end
 
   def closed?
     self.requests.where('status NOT IN (?)', %w(missed checkedin)).any?
+  end
+
+  def anticipated_end
+    captain.checkedin_at + (distance/PRESUMED_SPEED).hours
+  end
+
+  def distance
+    Geocoder::Calculations.distance_between([pickup_lat, pickup_lng], [dropoff_lat, dropoff_lng])
   end
 
   protected

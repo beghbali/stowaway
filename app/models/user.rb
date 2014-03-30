@@ -55,6 +55,11 @@ class User < ActiveRecord::Base
 
   def reconcile_ride_receipts
     fetch_ride_receipts
+    #find receipt by closeness to start and closeness to end and date and closeness to time
+    #get amount and divide by number of checkedin. charge each stowaway include our charge. generate receipt
+    #pay captain by adding credits.
+    #charges should first take credits and charge balance to card
+    #link each request to the reconciled receipt and the generated stowaway receipt.
     #reconcile stowaway receipts
   end
 
