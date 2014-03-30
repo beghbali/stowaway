@@ -15,7 +15,7 @@ module Notify
 
     def notify(options = {})
       return if cannot_be_notified?
-
+      p "NOTIFICATION: #{options} TO: #{self.device_token}"
       if device_type.to_sym == :ios
         APNS.send_notification(self.device_token, options)
       else
