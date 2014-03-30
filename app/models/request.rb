@@ -148,11 +148,11 @@ class Request < ActiveRecord::Base
   def missed
     self.missed!
     notify_all_riders
-    self.deactivate
+    self.deactivate!
   end
 
-  def deactivate
-    self.deleted_at = Time.now
+  def deactivate!
+    self.update(deleted_at: Time.now)
   end
 
   alias_method :rider, :user
