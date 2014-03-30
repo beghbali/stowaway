@@ -9,7 +9,7 @@ class Ride < ActiveRecord::Base
   CHECKIN_PROXIMITY = 0.025
   MIN_CAPTAIN_VICINITY_COUNT = 2
   MAX_CAPTAIN_VICINITY_COUNT = 10
-  PRESUMED_SPEED 25 #mph
+  PRESUMED_SPEED = 25 #mph
 
   has_many :requests, -> { available }, autosave: true
   has_many :riders, through: :requests, source: :user
@@ -111,7 +111,7 @@ class Ride < ActiveRecord::Base
   end
 
   def anticipated_end
-    # captain.checkedin_at + (distance/PRESUMED_SPEED).hours
+    captain.checkedin_at + (distance/PRESUMED_SPEED).hours
   end
 
   def distance
