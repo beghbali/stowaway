@@ -111,7 +111,7 @@ class Ride < ActiveRecord::Base
   end
 
   def anticipated_end
-    captain.checkedin_at + (distance/PRESUMED_SPEED).hours
+    # captain.checkedin_at + (distance/PRESUMED_SPEED).hours
   end
 
   def distance
