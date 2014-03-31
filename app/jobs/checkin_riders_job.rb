@@ -8,10 +8,12 @@ class CheckinRidersJob
     raise "ride not found: #{ride_id}" if ride.nil?
 
     socket = PusherClient::Socket.new(ENV['PUSHER_KEY'], secret: ENV['PUSHER_SECRET'], encrypted: true)
-
+    Rails.logger.debug('got socket')
     socket.subscribe(ride.location_channel_name, ENV['PUSHER_SERVER_USER_ID'])
+    Rails.logger.debug("subscribed to #{ride.location_channel_name} with #{ENV['PUSHER_SERVER_USER_ID']}")
+
     socket[ride.location_channel_name].bind('client-location-update') do |data|
-      puts "DATA:#{data}"
+      Rails.logger.debug "DATA:#{data}"
       request = Request.find_by_public_id(data[:request_public_id])
       request.update_attributes(last_lat: data[:lat], last_lng: data[:lng])
       socket.disconnect if ride.closed?
