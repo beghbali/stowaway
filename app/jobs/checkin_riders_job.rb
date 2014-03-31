@@ -11,6 +11,7 @@ class CheckinRidersJob
 
     socket.subscribe(ride.location_channel_name, ENV['PUSHER_SERVER_USER_ID'])
     socket[ride.location_channel_name].bind('client-location-update') do |data|
+      puts "DATA:#{data}"
       request = Request.find_by_public_id(data[:request_public_id])
       request.update_attributes(last_lat: data[:lat], last_lng: data[:lng])
       socket.disconnect if ride.closed?
