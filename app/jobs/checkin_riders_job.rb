@@ -1,7 +1,7 @@
 require 'pusher-client'
 
 class CheckinRidersJob
-  include Httparty
+  include HTTParty
 
   @queue = :checkin_queue
 
