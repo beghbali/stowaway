@@ -16,9 +16,9 @@ class Request < ActiveRecord::Base
   has_many :riders, through: :ride
   validates :status, inclusion: { in: STATUSES }
 
+  before_save :record_vicinity, if: -> { self.last_lat_changed? || last_lng_changed? }
   after_create :match_request, unless: :dont_match   #TODO: see if this can be done after commit in case the client requests ride for things to be resolved already
   after_create :finalize, if: :can_finalize?
-  after_save :record_vicinity, if: -> { self.last_lat_changed? || last_lng_changed? }
   before_destroy :cancel
   after_destroy :cancel_ride, if: :should_cancel_ride?
 
@@ -52,6 +52,10 @@ class Request < ActiveRecord::Base
 
   STATUSES.each do |status|
     scope status, -> { where(status: status) }
+
+    define_method "#{status}" do
+      self.status = status
+    end
 
     define_method "#{status}!" do
       self.update(status: status)
@@ -135,8 +139,7 @@ class Request < ActiveRecord::Base
   end
 
   def record_vicinity
-    self.increment!(:vicinity_count) if self.proximity_to(self.ride.captain) <= Ride::CHECKIN_PROXIMITY
-    Rails.logger.debug("DISTANCE to captain: #{self.proximity_to(self.ride.captain)}")
+    self.increment(:vicinity_count) if self.proximity_to(self.ride.captain) <= Ride::CHECKIN_PROXIMITY
     try_checkin
   end
 
@@ -152,28 +155,50 @@ class Request < ActiveRecord::Base
     end
   end
 
+  def checkedin
+    self.status = 'checkedin'
+    self.checkedin_at = Time.now
+  end
+
   def checkedin!
-    self.update(status: 'checkedin', checkedin_at: Time.now)
+    checkedin
+    save
   end
 
   def checkin
-    self.checkedin!
+    self.checkedin
     notify_all_riders
     pay
+  end
+
+  def checkin!
+    checkin
+    save
   end
 
   def pay
     Resque.enqueue_at(ride.anticipated_end + 5.minutes, ReconcileReceiptsJob, self.rider.public_id)
   end
 
-  def missed
-    self.missed!
+  def miss
+    self.missed
     notify_all_riders
-    self.deactivate!
+    self.deactivate
+  end
+
+  def miss!
+    miss
+    save
+  end
+
+
+  def deactivate
+    self.deleted_at = Time.now
   end
 
   def deactivate!
-    self.update(deleted_at: Time.now)
+    deactivate
+    save
   end
 
   alias_method :rider, :user

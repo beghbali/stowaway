@@ -102,11 +102,11 @@ class Ride < ActiveRecord::Base
 
   def close
     self.requests.checkinable.each do |request|
-      request.checkin
+      request.checkin!
     end
 
     self.requests.uncheckinable.each do |request|
-      request.missed
+      request.miss!
     end
     stop_checkin
   end
