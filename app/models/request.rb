@@ -16,9 +16,9 @@ class Request < ActiveRecord::Base
   has_many :riders, through: :ride
   validates :status, inclusion: { in: STATUSES }
 
-  before_save :record_vicinity, if: -> { self.last_lat_changed? || last_lng_changed? }
   after_create :match_request, unless: :dont_match   #TODO: see if this can be done after commit in case the client requests ride for things to be resolved already
   after_create :finalize, if: :can_finalize?
+  after_save :record_vicinity, if: -> { self.last_lat_changed? || last_lng_changed? }
   before_destroy :cancel
   after_destroy :cancel_ride, if: :should_cancel_ride?
 
