@@ -136,6 +136,7 @@ class Request < ActiveRecord::Base
 
   def record_vicinity
     self.increment(:vicinity_count) if self.proximity_to(self.ride.captain) <= Ride::CHECKIN_PROXIMITY
+    Rails.logger.debug("DISTANCE to captain: #{self.proximity_to(self.ride.captain)}")
     try_checkin
   end
 
