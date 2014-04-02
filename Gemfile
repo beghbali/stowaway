@@ -42,7 +42,7 @@ gem 'geocoder', git: "git@github.com:beghbali/geocoder.git"
 gem 'paranoia', '~> 2.0'
 gem 'pushmeup'
 gem 'pusher'
-gem 'websocket-native' #native websockets implementation to speed up pusher
+# gem 'websocket-native' #native websockets implementation to speed up pusher
 gem 'pusher-client'
 
 group :doc do
