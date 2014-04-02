@@ -126,8 +126,16 @@ class Request < ActiveRecord::Base
     notify_other_riders unless self.ride.nil? || should_cancel_ride?
   end
 
+  def last_location
+    [last_lat, last_lng]
+  end
+
+  def proximity_to(another_request)
+    Geocoder::Calculations.distance_between(self.last_location, another_request.last_location)
+  end
+
   def record_vicinity
-    self.increment(:vicinity_count) if self.distance_to(self.ride.captain) <= Ride::CHECKIN_PROXIMITY
+    self.increment(:vicinity_count) if self.proximity_to(self.ride.captain) <= Ride::CHECKIN_PROXIMITY
     try_checkin
   end
 
