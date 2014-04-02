@@ -17,7 +17,7 @@ class Ride < ActiveRecord::Base
   has_one :captain, -> { captains }, class_name: 'Request'
 
   before_create :generate_location_channel
-  before_destroy -> { notify_riders('ride_cancelled') }
+  before_destroy -> { stop_checkin && notify_riders('ride_cancelled') }
   after_destroy :reset_requests
 
   def has_captain?
@@ -95,6 +95,10 @@ class Ride < ActiveRecord::Base
     Resque.enqueue(CheckinRidersJob, self.id)
   end
 
+  def stop_checkin
+    Resque::Job.destroy(:checkin_queue, CheckinRidersJob, self.id)
+  end
+
   def close
     self.requests.checkinable.each do |request|
       request.checkin
@@ -103,7 +107,7 @@ class Ride < ActiveRecord::Base
     self.requests.uncheckinable.each do |request|
       request.missed
     end
-
+    stop_checkin
   end
 
   def closed?
