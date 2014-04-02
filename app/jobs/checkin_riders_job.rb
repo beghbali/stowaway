@@ -22,6 +22,7 @@ class CheckinRidersJob
   end
 
   def self.authenticate(socket_id, channel)
-    post "#{ENV[SERVER_ADDRESS]}/pusher/#{ENV['PUSHER_SERVER_USER_ID']}/auth", {channel_name: channel, socket_id: socket_id}
+    Rails.logger.debug "Authenticating"
+    Rails.logger.debug(post "#{ENV[SERVER_ADDRESS]}/pusher/#{ENV['PUSHER_SERVER_USER_ID']}/auth", {channel_name: channel, socket_id: socket_id})
   end
 end
