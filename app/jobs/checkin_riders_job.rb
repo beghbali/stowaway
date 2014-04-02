@@ -16,7 +16,9 @@ class CheckinRidersJob
       Rails.logger.debug "DATA:#{json}"
       data = JSON.parse(json).with_indifferent_access
       request = ::Request.find_by_public_id(data[:request_public_id])
-      request.update_attributes(last_lat: data[:lat], last_lng: data[:lng])
+      Rails.logger.debug "updating lat lng #{data[:lat]}, #{data[:long]}"
+      request.update(last_lat: data[:lat], last_lng: data[:long])
+      Rails.logger.debug "disconnect? #{ride.closed?}"
       socket.disconnect if ride.closed?
     end
     socket.connect
