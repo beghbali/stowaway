@@ -127,7 +127,7 @@ class Request < ActiveRecord::Base
   end
 
   def record_vicinity
-    self.vicinity_count += 1 if self.distance_to(self.ride.captain) <= Ride::CHECKIN_PROXIMITY
+    self.update(vicinity_count: vicinity_count + 1) if self.distance_to(self.ride.captain) <= Ride::CHECKIN_PROXIMITY
     try_checkin
   end
 
