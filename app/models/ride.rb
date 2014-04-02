@@ -96,6 +96,7 @@ class Ride < ActiveRecord::Base
   end
 
   def stop_checkin
+    Rails.logger.debug "Stop checking in: #{self.location_channel_name}, #{self.public_id}"
     Resque::Job.destroy(:checkin_queue, CheckinRidersJob, self.id)
   end
 
@@ -122,12 +123,16 @@ class Ride < ActiveRecord::Base
     Geocoder::Calculations.distance_between([pickup_lat, pickup_lng], [dropoff_lat, dropoff_lng])
   end
 
+  def cancellations
+    requests.only_deleted.order(updated_at: :asc)
+  end
+
   protected
   def notification_options(status)
     alert = sound = nil
 
     if status == 'ride_cancelled'
-      who_canceled = self.captain.present? ? 'cancelled_by_captain' : 'cancelled'
+      who_canceled = self.cancellations.last.try(:captain?) ? 'cancelled_by_captain' : 'cancelled'
       alert = I18n.t("notifications.ride.#{who_canceled}.alert", name: self.captain && self.captain.user.first_name)
       sound = I18n.t("notifications.ride.#{who_canceled}.sound")
     end
