@@ -6,6 +6,7 @@ class Request < ActiveRecord::Base
   acts_as_paranoid
 
   STATUSES = %w(outstanding matched fulfilled cancelled checkedin missed)
+  CLOSED_STATUSES = %w(missed checkedin)
   PICKUP_RADIUS = 0.3
   DROPOFF_RADIUS = 0.5
   DESIGNATIONS =  %w(stowaway captain)
@@ -32,6 +33,8 @@ class Request < ActiveRecord::Base
   scope :uncheckinable, -> { where('vicinity_count < ?', Ride::MIN_CAPTAIN_VICINITY_COUNT) }
   scope :active, -> { where(status: %w(outstanding matched fulfilled))}
   scope :available, -> { where(deleted_at: nil) }
+  scope :unclosed, -> { where('status NOT IN (?)', CLOSED_STATUSES)}
+  scope :closed, -> { where(status: CLOSED_STATUSES)}
 
   scope :same_route, ->(as) {
       near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: :pickup_lat, longitude: :pickup_lng).

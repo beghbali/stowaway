@@ -107,7 +107,7 @@ class Ride < ActiveRecord::Base
   end
 
   def closed?
-    self.requests.where('status NOT IN (?)', %w(missed checkedin)).any?
+    !self.requests.unclosed.any?
   end
 
   def anticipated_end
