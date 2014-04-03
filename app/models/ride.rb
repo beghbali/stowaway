@@ -30,7 +30,7 @@ class Ride < ActiveRecord::Base
     if options[:format] == :notification
       super(only: [:public_id]).merge(status: options[:status] || self.status)
     else
-      super(except: [:created_at, :updated_at, :id]).merge(status: options[:status] || self.status, requests: reqs.map{|req| req.as_json })
+      super(except: [:created_at, :updated_at, :id]).merge(status: options[:status] || self.status, timeout: timeout_notification, requests: reqs.map{|req| req.as_json })
     end
   end
 
@@ -125,6 +125,13 @@ class Ride < ActiveRecord::Base
 
   def cancellations
     requests.only_deleted.order(updated_at: :asc)
+  end
+
+  def timeout_notification
+    {
+      alert: I18n.t('notifications.ride.timeout.alert'),
+      sound: I18n.t('notifications.ride.timeout.sound')
+    }
   end
 
   protected

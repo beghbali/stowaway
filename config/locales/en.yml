@@ -24,24 +24,27 @@ en:
     request:
       matched:
         alert: "%{name} has joined the ride"
-        sound: 'default'
+        sound: 'ridermatch-short'
       cancelled:
         alert: "%{name} dropped out of the ride"
         sound: 'default'
       fulfilled:
         stowaway:
           alert: "Start walking to %{pickup_address}, your ride will arrive in approximately 5 minutes"
-          sound: 'default'
+          sound: 'you-are-stowaway-short'
         captain:
           alert: "Order the UberX now. Your crew will meet you at %{pickup_address} shortly"
-          sound: 'default'
+          sound: 'you-are-captain-short'
       checkedin:
         alert: "Bon Voyage!"
-        sound: 'default'
+        sound: 'rideleaving-success-short'
       missed:
         alert: "Looks like you missed the ride"
-        sound: 'default'
+        sound: 'rideleaving-fail-short'
     ride:
+      timeout:
+        alert: "Your action is required"
+        sound: 'default'
       cancelled:
         alert: "Your ride mates had to cancel the ride"
         sound: 'default'
