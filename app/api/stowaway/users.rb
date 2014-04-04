@@ -91,6 +91,12 @@ module Stowaway
             error!('Request not found', 404) if request.nil?
             request.destroy
           end
+
+          put ':id/checkin' do
+            request = Request.find_by_public_id(params[:id])
+            error!('Request not found', 404) if request.nil?
+            params[:type] == 'checkedin' ? request.checkin! : request.miss!
+          end
         end
 
         resources :rides do
