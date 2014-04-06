@@ -92,10 +92,15 @@ module Stowaway
             request.destroy
           end
 
-          put ':id/checkin' do
+          params do
+            requires :id, type: Integer
+            requires :user_id, type: Integer
+            requires :type, type: String
+          end
+          get ':id/checkin/:type' do
             request = Request.find_by_public_id(params[:id])
             error!('Request not found', 404) if request.nil?
-            params[:type] == 'checkedin' ? request.checkin! : request.miss!
+            params[:type] == 'checkedin' ?  request.checkin! : request.miss!
           end
         end
 
