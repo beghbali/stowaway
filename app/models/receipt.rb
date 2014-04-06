@@ -2,6 +2,10 @@ class Receipt < ActiveRecord::Base
   belongs_to :user
   validate :did_not_generate_same_receipt_before
 
+  RIDESHARES = %w(Uber)
+
+  scope :rideshare, -> { where(generated_by: RIDESHARES)}
+
   def self.build_from_email(email)
     parser = ReceiptParser.parser_for(email)
     raise ReceiptParser::UnknownSenderError.new(mail.from) if parser.nil?

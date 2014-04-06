@@ -13,6 +13,8 @@ class Request < ActiveRecord::Base
 
   belongs_to :user
   belongs_to :ride
+  belongs_to :receipt
+
   has_many :riders, through: :ride
   validates :status, inclusion: { in: STATUSES }
 
@@ -222,7 +224,7 @@ class Request < ActiveRecord::Base
     if options[:format] == :notification
       super(only: [:public_id, :status, :designation], methods: :requested_at).merge(user_public_id: self.user.public_id, uid: self.user.uid)
     else
-      super(except: [:id, :user_id, :ride_id], methods: :requested_at).
+      super(except: [:id, :user_id, :ride_id, :last_lat, :last_lng, :vicinity_count, :receipt_id], methods: :requested_at).
         merge(created_at: created_at.to_i, updated_at: updated_at.to_i, user_public_id: self.user.public_id,
           uid: self.user.uid, ride_public_id: self.ride.try(:public_id), notification: notification)
     end
@@ -253,6 +255,8 @@ class Request < ActiveRecord::Base
     if self.status == 'fulfilled'
       alert = I18n.t("notifications.request.fulfilled.#{designation}.alert", pickup_address: self.ride.reload.suggested_pickup_address)
       sound = I18n.t("notifications.request.fulfilled.#{designation}.sound")
+    elsif self.status == 'outstanding'
+      alert = sound = nil
     else
       alert = I18n.t("notifications.request.#{status}.alert", name: self.rider.first_name)
       sound = I18n.t("notifications.request.#{status}.sound")

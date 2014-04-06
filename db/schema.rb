@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140330221245) do
+ActiveRecord::Schema.define(version: 20140404163342) do
 
   create_table "receipts", force: true do |t|
     t.string   "generated_by"
@@ -57,6 +57,7 @@ ActiveRecord::Schema.define(version: 20140330221245) do
     t.decimal  "last_lng",        precision: 16, scale: 12
     t.integer  "vicinity_count",                            default: 0
     t.datetime "checkedin_at"
+    t.integer  "receipt_id"
   end
 
   add_index "requests", ["deleted_at"], name: "index_requests_on_deleted_at", using: :btree
@@ -75,6 +76,7 @@ ActiveRecord::Schema.define(version: 20140330221245) do
     t.decimal  "suggested_pickup_lat",      precision: 16, scale: 12
     t.decimal  "suggested_pickup_lng",      precision: 16, scale: 12
     t.datetime "deleted_at"
+    t.integer  "receipt_id"
   end
 
   add_index "rides", ["deleted_at"], name: "index_rides_on_deleted_at", using: :btree

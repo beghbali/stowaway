@@ -15,10 +15,13 @@ class Ride < ActiveRecord::Base
   has_many :riders, through: :requests, source: :user
   has_many :stowaways, -> { stowaways }, class_name: 'Request'
   has_one :captain, -> { captains }, class_name: 'Request'
+  belongs_to :receipt
 
   before_create :generate_location_channel
   before_destroy -> { stop_checkin && notify_riders('ride_cancelled') }
   after_destroy :reset_requests
+
+  scope :unreconciled, -> { where(receipt_id: nil) }
 
   def has_captain?
     !self.captain.nil?

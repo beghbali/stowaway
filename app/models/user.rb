@@ -11,6 +11,7 @@ class User < ActiveRecord::Base
   DEVICE_TYPES = %w(ios android)
 
   has_many :requests
+  has_many :rides, through: :requests
   validates :uid, uniqueness: true
   validates :provider, inclusion: { in: AUTHENTICATION_PROVIDERS }
   validates :email_provider, inclusion: { in: SUPPORTED_EMAIL_PROVIDERS }, allow_blank: true
@@ -55,12 +56,7 @@ class User < ActiveRecord::Base
 
   def reconcile_ride_receipts
     fetch_ride_receipts
-    #find receipt by closeness to start and closeness to end and date and closeness to time
-    #get amount and divide by number of checkedin. charge each stowaway include our charge. generate receipt
-    #pay captain by adding credits.
-    #charges should first take credits and charge balance to card
-    #link each request to the reconciled receipt and the generated stowaway receipt.
-    #reconcile stowaway receipts
+    user.rides.unreconciled.map(&:reconcile_receipt)
   end
 
   def ride

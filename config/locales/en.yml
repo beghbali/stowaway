@@ -22,9 +22,12 @@
 en:
   notifications:
     request:
+      outstanding:
+        alert:
+        sound:
       matched:
         alert: "%{name} has joined the ride"
-        sound: 'ridermatch-short'
+        sound: 'ride_matched.wav'
       cancelled:
         alert: "%{name} dropped out of the ride"
         sound: 'default'
@@ -37,18 +40,18 @@ en:
           sound: 'you-are-captain-short'
       checkedin:
         alert: "Bon Voyage!"
-        sound: 'rideleaving-success-short'
+        sound: 'ride_checkedin.wav'
       missed:
         alert: "Looks like you missed the ride"
-        sound: 'rideleaving-fail-short'
+        sound: 'ride_missed.wav'
     ride:
       timeout:
         alert: "Your action is required"
         sound: 'default'
       cancelled:
         alert: "Your ride mates had to cancel the ride"
-        sound: 'default'
+        sound: null
       cancelled_by_captain:
         alert: "Captain %{name} had to cancel the ride"
-        sound: 'default'
+        sound: null
 
