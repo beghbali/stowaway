@@ -1,5 +1,6 @@
 class Ride < ActiveRecord::Base
   include Notify::Notifier
+  include Notify::Utils
   include PublicId
 
   acts_as_paranoid
@@ -135,6 +136,26 @@ class Ride < ActiveRecord::Base
       alert: I18n.t('notifications.ride.timeout.alert'),
       sound: I18n.t('notifications.ride.timeout.sound')
     }
+  end
+
+  def find_receipt
+    Receipt.rideshares.for(self)
+  end
+
+  def reconcile_receipt
+    self.class.transaction do
+      find_receipt
+      #find receipt by closeness to start and closeness to end and date and closeness to time
+      #get amount and divide by number of checkedin. charge each stowaway include our charge. generate receipt
+      #pay captain by adding credits.
+      #charges should first take credits and charge balance to card
+      #link each request to the reconciled receipt and the generated stowaway receipt.
+      #reconcile stowaway receipts
+    end
+  end
+
+  def pickup_location
+    [suggested_pickup_lat, suggested_pickup_lng]
   end
 
   protected

@@ -23,21 +23,21 @@ en:
   notifications:
     request:
       outstanding:
-        alert:
-        sound:
+        alert: ''
+        sound: ''
       matched:
         alert: "%{name} has joined the ride"
         sound: 'ride_matched.wav'
       cancelled:
         alert: "%{name} dropped out of the ride"
-        sound: 'default'
+        sound: ''
       fulfilled:
         stowaway:
           alert: "Start walking to %{pickup_address}, your ride will arrive in approximately 5 minutes"
-          sound: 'you-are-stowaway-short'
+          sound: 'you-are-stowaway.wav'
         captain:
           alert: "Order the UberX now. Your crew will meet you at %{pickup_address} shortly"
-          sound: 'you-are-captain-short'
+          sound: 'you-are-captain.wav'
       checkedin:
         alert: "Bon Voyage!"
         sound: 'ride_checkedin.wav'
@@ -47,11 +47,11 @@ en:
     ride:
       timeout:
         alert: "Your action is required"
-        sound: 'default'
+        sound: 'action_required.wav'
       cancelled:
         alert: "Your ride mates had to cancel the ride"
-        sound: null
+        sound: ''
       cancelled_by_captain:
         alert: "Captain %{name} had to cancel the ride"
-        sound: null
+        sound: ''
 

@@ -1,5 +1,6 @@
 class Request < ActiveRecord::Base
   include PublicId
+  include Notify::Utils
 
   has_public_id
 
@@ -255,13 +256,15 @@ class Request < ActiveRecord::Base
     if self.status == 'fulfilled'
       alert = I18n.t("notifications.request.fulfilled.#{designation}.alert", pickup_address: self.ride.reload.suggested_pickup_address)
       sound = I18n.t("notifications.request.fulfilled.#{designation}.sound")
-    elsif self.status == 'outstanding'
-      alert = sound = nil
     else
       alert = I18n.t("notifications.request.#{status}.alert", name: self.rider.first_name)
       sound = I18n.t("notifications.request.#{status}.sound")
     end
 
+    alert = nillify_blank(alert)
+    sound = nillify_blank(sound)
+
     [alert, sound]
   end
+
 end

@@ -1,4 +1,11 @@
 module Notify
+  module Utils
+    private
+    def nillify_blank(str)
+      str.blank? ? nil : str
+    end
+  end
+
   module Notifier
 
     def notify(targets, options = {})
