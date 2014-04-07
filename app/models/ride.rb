@@ -105,12 +105,17 @@ class Ride < ActiveRecord::Base
   end
 
   def close
+    Rails.logger.debug "checkinable>>#{self.requests.checkinable.pluck(:id)}"
+
     self.requests.checkinable.each do |request|
       request.checkin!
+      Rails.logger.debug "REQ-CHECKEDIN>>#{request}"
     end
+    Rails.logger.debug "checkinable>>#{self.requests.uncheckinable.pluck(:id)}"
 
     self.requests.uncheckinable.each do |request|
       request.miss!
+      Rails.logger.debug "REQ-MISS>>#{request}"
     end
     stop_checkin
   end
