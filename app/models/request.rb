@@ -172,7 +172,7 @@ class Request < ActiveRecord::Base
   def checkin
     self.checkedin
     notify_all_riders
-    pay
+    # pay
   end
 
   def checkin!
