@@ -5,7 +5,8 @@ class Receipt < ActiveRecord::Base
   RIDESHARES = %w(Uber)
 
   scope :rideshare, -> { where(generated_by: RIDESHARES)}
-
+  scope :for, ->(ride) { where(ride_requested_at: (ride.created_at..ride.created_at + 20.minutes)).near(ride.pickup_location)}
+  #ride requested at within 15 minutes + geocoded pickup location/dropoff location within 200 ft of the ride
   def self.build_from_email(email)
     parser = ReceiptParser.parser_for(email)
     raise ReceiptParser::UnknownSenderError.new(mail.from) if parser.nil?
