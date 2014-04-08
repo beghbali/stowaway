@@ -10,6 +10,11 @@ module Requests
       mock_stowaway_email_creation
       mock_gcm_push_notifications
       mock_push_notifications
+      mock_stripe
+    end
+
+    def unmock_external_requests
+      StripeMock.stop
     end
 
     def mock_stowaway_email_creation
@@ -34,6 +39,10 @@ module Requests
 
     def mock_push_notifications
       mock_apns
+    end
+
+    def mock_stripe
+      StripeMock.start
     end
 
     def mock_apns

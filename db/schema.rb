@@ -11,7 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140404163342) do
+ActiveRecord::Schema.define(version: 20140408090948) do
+
+  create_table "payments", force: true do |t|
+    t.decimal  "amount",             precision: 8, scale: 2, default: 0.0
+    t.decimal  "credits_used",       precision: 8, scale: 2, default: 0.0
+    t.decimal  "credit_card_charge", precision: 8, scale: 2, default: 0.0
+    t.decimal  "fee",                precision: 8, scale: 2, default: 0.0
+    t.string   "reference"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "receipts", force: true do |t|
     t.string   "generated_by"
@@ -21,13 +31,13 @@ ActiveRecord::Schema.define(version: 20140404163342) do
     t.string   "pickup_location"
     t.string   "dropoff_location"
     t.string   "payment_card"
-    t.decimal  "total_amount",      precision: 8, scale: 2
-    t.decimal  "base_amount",       precision: 8, scale: 2
-    t.decimal  "distance_amount",   precision: 8, scale: 2
-    t.decimal  "time_amount",       precision: 8, scale: 2
-    t.decimal  "surge_amount",      precision: 8, scale: 2
+    t.decimal  "total_amount",      precision: 8,  scale: 2
+    t.decimal  "base_amount",       precision: 8,  scale: 2
+    t.decimal  "distance_amount",   precision: 8,  scale: 2
+    t.decimal  "time_amount",       precision: 8,  scale: 2
+    t.decimal  "surge_amount",      precision: 8,  scale: 2
     t.float    "surge_multiple"
-    t.decimal  "other_amount",      precision: 8, scale: 2
+    t.decimal  "other_amount",      precision: 8,  scale: 2
     t.string   "other_description"
     t.string   "driver_name"
     t.float    "distance"
@@ -36,6 +46,8 @@ ActiveRecord::Schema.define(version: 20140404163342) do
     t.string   "map_url"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.decimal  "pickup_lat",        precision: 16, scale: 12
+    t.decimal  "pickup_lng",        precision: 16, scale: 12
   end
 
   create_table "requests", force: true do |t|
@@ -106,6 +118,8 @@ ActiveRecord::Schema.define(version: 20140404163342) do
     t.string   "stripe_token"
     t.string   "device_type"
     t.string   "device_token"
+    t.string   "customer_id"
+    t.decimal  "credits",                      precision: 8, scale: 2, default: 0.0
   end
 
 end

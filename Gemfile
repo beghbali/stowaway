@@ -60,6 +60,7 @@ group :test do
   gem 'factory_girl_rails'
   gem 'faker'
   gem 'webmock'
+  gem 'stripe-ruby-mock', '~> 1.10.1.6'
 end
 
 # Use ActiveModel has_secure_password

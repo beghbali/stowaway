@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'stripe_mock'
 include Requests::Mocks
 
 describe Stowaway::Rides do
@@ -7,6 +8,8 @@ describe Stowaway::Rides do
     APNS = double()
     mock_external_requests
   end
+
+  after { unmock_external_requests }
 
   shared_examples_for 'admin endpoints' do
     let(:prefix) { "/api/#{version}/rides/admin" }
