@@ -241,6 +241,12 @@ class Request < ActiveRecord::Base
     }
   end
 
+  def to_s(format=nil)
+    if format.to_sym == :charge
+      self.ride && self.ride.to_s(:charge)
+    end
+  end
+
   protected
 
   def should_cancel_ride?

@@ -11,6 +11,7 @@ class Ride < ActiveRecord::Base
   MIN_CAPTAIN_VICINITY_COUNT = 2
   MAX_CAPTAIN_VICINITY_COUNT = 10
   PRESUMED_SPEED = 25 #mph
+  BASE_FEE = 1.00 #dollars
 
   has_many :requests, -> { available }, autosave: true
   has_many :riders, through: :requests, source: :user
@@ -160,11 +161,18 @@ class Ride < ActiveRecord::Base
         self.receipt = receipt
 
         self.riders.each do |rider|
-          rider.charge(self.cost_of(rider) * 100, ride)
+          request = rider.request_for(self)
+          cost = self.cost_of(rider) + fee
+          charged, credits_used, charge_ref = rider.charge(cost * 100, request)
+          request.create_payment!(amount: cost, credits_used: credits_used, credit_card_charge: charged, fee: fee, reference: charge_ref)
         end
 
       end
     end
+  end
+
+  def fee
+    BASE_FEE
   end
 
   #same cost for everyone
