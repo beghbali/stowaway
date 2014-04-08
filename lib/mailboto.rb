@@ -6,7 +6,7 @@ module Mailboto
     base_uri 'http://getstowaway.com/createInbox.php'
 
     def create(name, existing_email)
-      response = self.class.post("?" + mailboto_params(name, existing_email), options: { headers: { 'ContentType' => 'application/json' } } )
+      response = self.class.post("?" + URI.encode(mailboto_params(name, existing_email)), options: { headers: { 'ContentType' => 'application/json' } } )
       json = JSON.parse(response)
       [json['email'], json['password']]
     end
