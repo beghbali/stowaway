@@ -19,8 +19,8 @@ class User < ActiveRecord::Base
   validates :device_type, inclusion: { in: DEVICE_TYPES }, allow_blank: true
 
   before_create :generate_stowaway_email_address
-  before_save :create_stowaway_email, :if => :can_create_email?
-
+  before_save :create_stowaway_email, if: :can_create_email?
+  before_save :link_payment_card, if: :stripe_token_changed?
 
   def update_facebook_attributes!(fb_attributes)
     self.update_attributes!(fb_attributes)
@@ -54,11 +54,6 @@ class User < ActiveRecord::Base
     end
   end
 
-  def reconcile_ride_receipts
-    fetch_ride_receipts
-    user.rides.unreconciled.map(&:reconcile_receipt)
-  end
-
   def ride
     self.requests.outstanding.last.ride
   end
@@ -69,5 +64,15 @@ class User < ActiveRecord::Base
 
   def captain_of?(ride)
     self.request_for(ride).try(:captain?) || false
+  end
+
+  def link_payment_card
+    return if self.stripe_token.blank?
+
+    customer = Stripe::Customer.create(
+      card: self.stripe_token,
+      description: "#{self.email}"
+    )
+    self.customer_id = customer.id
   end
 end

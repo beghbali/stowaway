@@ -170,18 +170,13 @@ class Request < ActiveRecord::Base
   end
 
   def checkin
-    self.checkedin
+    checkedin
     notify_all_riders
-    # pay
   end
 
   def checkin!
     checkin
     save
-  end
-
-  def pay
-    Resque.enqueue_at(ride.anticipated_end + 5.minutes, ReconcileReceiptsJob, self.rider.public_id)
   end
 
   def miss

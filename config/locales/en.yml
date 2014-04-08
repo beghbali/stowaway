@@ -54,4 +54,8 @@ en:
       cancelled_by_captain:
         alert: "Captain %{name} had to cancel the ride"
         sound: ''
+  models:
+    ride:
+      format:
+        charge: "stowaway ride from %{pickup}"
 

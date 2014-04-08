@@ -105,19 +105,15 @@ class Ride < ActiveRecord::Base
   end
 
   def close
-    Rails.logger.debug "checkinable>>#{self.requests.checkinable.pluck(:id)}"
-
     self.requests.checkinable.each do |request|
       request.checkin!
-      Rails.logger.debug "REQ-CHECKEDIN>>#{request}"
     end
-    Rails.logger.debug "checkinable>>#{self.requests.uncheckinable.pluck(:id)}"
 
     self.requests.uncheckinable.each do |request|
       request.miss!
-      Rails.logger.debug "REQ-MISS>>#{request}"
     end
     stop_checkin
+    collect_payments
   end
 
   def closed?
@@ -143,24 +139,57 @@ class Ride < ActiveRecord::Base
     }
   end
 
+  def collect_payments
+    Resque.enqueue_at(self.anticipated_end + 5.minutes, ReconcileReceiptsJob, self.public_id)
+  end
+
   def find_receipt
     Receipt.rideshares.for(self)
   end
 
+  #find receipt by closeness to start and closeness to end and date and closeness to time
+  #get amount and divide by number of checkedin. charge each stowaway include our charge. generate receipt
+  #pay captain by adding credits.
+  #charges should first take credits and charge balance to card
+  #link each ride to the reconciled receipt and each request to the generated stowaway receipt.
+  #reconcile stowaway receipts
   def reconcile_receipt
     self.class.transaction do
-      find_receipt
-      #find receipt by closeness to start and closeness to end and date and closeness to time
-      #get amount and divide by number of checkedin. charge each stowaway include our charge. generate receipt
-      #pay captain by adding credits.
-      #charges should first take credits and charge balance to card
-      #link each request to the reconciled receipt and the generated stowaway receipt.
-      #reconcile stowaway receipts
+      receipt = find_receipt
+      unless receipt.blank?
+        self.receipt = receipt
+
+        self.riders.each do |rider|
+          rider.charge(self.cost_of(rider) * 100, ride)
+        end
+
+      end
     end
+  end
+
+  #same cost for everyone
+  def cost_of(user)
+    self.riders.exists?(id: user.id) && self.cost/self.riders.count
   end
 
   def pickup_location
     [suggested_pickup_lat, suggested_pickup_lng]
+  end
+
+  def reconciled?
+    !receipt_id.nil?
+  end
+
+  def cost
+    receipt && receipt.total_amount
+  end
+
+  def to_s(format=nil)
+    if format.to_sym == :charge
+      I18n.t('models.ride.format.charge', pickup: self.suggested_pickup_address)
+    else
+      super(format)
+    end
   end
 
   protected
