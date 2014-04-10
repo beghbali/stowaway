@@ -81,6 +81,17 @@ module Stowaway
             request
           end
 
+          desc "get request info"
+          params do
+            requires :id, type: Integer, desc: "request public id"
+          end
+
+          get ':id' do
+            request = Request.find_by_public_id(params[:id])
+            error!('Request not found', 404) if request.nil?
+            request
+          end
+
           desc "cancel a request"
           params do
             requires :id, type: Integer, desc: "request public id"
