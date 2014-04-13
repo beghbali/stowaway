@@ -17,7 +17,8 @@ class ReceiptParser < Mail::Message
   end
 
   def self.parser_for(mail)
-    RECEIPT_SENDERS[mail.from]
+    #substring search
+    RECEIPT_SENDERS[supported_senders.detect{|sender| mail.from.first.include? sender }]
   end
 
   attr_accessor :email, :text

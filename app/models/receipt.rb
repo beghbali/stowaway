@@ -13,7 +13,7 @@ class Receipt < ActiveRecord::Base
   #ride requested at within 15 minutes + geocoded pickup location/dropoff location within 200 ft of the ride
   def self.build_from_email(email)
     parser = ReceiptParser.parser_for(email)
-    raise ReceiptParser::UnknownSenderError.new(mail.from) if parser.nil?
+    raise ReceiptParser::UnknownSenderError.new(email.from) if parser.nil?
 
     parsed_email = parser.new(email).parse
     self.new(parsed_email)

@@ -32,8 +32,8 @@ class Request < ActiveRecord::Base
   delegate :device_type, to: :user
   delegate :finalize, to: :ride
 
-  scope :checkinable, -> { where('vicinity_count >= ?', Ride::MIN_CAPTAIN_VICINITY_COUNT) }
-  scope :uncheckinable, -> { where('vicinity_count < ?', Ride::MIN_CAPTAIN_VICINITY_COUNT) }
+  scope :checkinable, -> { where('vicinity_count >= ?', Ride::MAX_CAPTAIN_VICINITY_COUNT) }
+  scope :uncheckinable, -> { where('vicinity_count < ?', Ride::MAX_CAPTAIN_VICINITY_COUNT) }
   scope :active, -> { where(status: %w(outstanding matched fulfilled))}
   scope :available, -> { where(deleted_at: nil) }
   scope :unclosed, -> { where('status NOT IN (?)', CLOSED_STATUSES)}
@@ -148,14 +148,8 @@ class Request < ActiveRecord::Base
   end
 
   def try_checkin
-    if self.vicinity_count >= Ride::MAX_CAPTAIN_VICINITY_COUNT
+    if self.vicinity_count >= Ride::MAX_CAPTAIN_VICINITY_COUNT && !self.captain?
       self.ride.close
-    elsif self.vicinity_count >= Ride::MIN_CAPTAIN_VICINITY_COUNT
-      if self.ride.requests.uncheckinable.any?
-        self.checkin
-      else
-        self.ride.close
-      end
     end
   end
 

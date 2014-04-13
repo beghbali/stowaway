@@ -50,7 +50,6 @@ class User < ActiveRecord::Base
 
   def fetch_ride_receipts
     unprocessed_emails.each do |email|
-      debugger;1
       Resque.enqueue(ParseEmailJob, self.public_id, { email: email.encoded })
     end
   end
@@ -109,7 +108,6 @@ class User < ActiveRecord::Base
   def refresh_token!
     response = HTTParty.post(token_request_url, refresh_token_request)
 
-    debugger;2
     if response.code == 200
       self.auth_token = response.parsed_response['access_token']
       self.auth_token_expires_at = DateTime.now + response.parsed_response['expires_in'].seconds

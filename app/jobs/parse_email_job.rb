@@ -7,7 +7,6 @@ class ParseEmailJob
     email = Mail::Message.new message['email']
 
     Receipt.transaction do
-      debugger;2
       receipt = Receipt.build_from_email(email)
       receipt.user_id = user.id
       receipt.save!
