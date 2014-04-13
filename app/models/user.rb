@@ -26,8 +26,8 @@ class User < ActiveRecord::Base
     self.update_attributes!(fb_attributes)
   end
 
-  def generate_stowaway_email_address(postfix='')
-    proposed_email = "#{[first_name, last_name, postfix].join('.').downcase}@getstowaway.com"
+  def generate_stowaway_email_address(postfix=nil)
+    proposed_email = "#{[first_name, last_name, postfix].compact.join('.').downcase}@getstowaway.com"
 
     if User.exists?(stowaway_email: proposed_email)
       proposed_email = generate_stowaway_email_address(rand(1..99).to_s)
