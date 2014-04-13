@@ -195,7 +195,7 @@ class Ride < ActiveRecord::Base
 
   def generate_stowaway_receipts
     self.riders.each do |rider|
-
+    end
   end
 
   def to_s(format=nil)
