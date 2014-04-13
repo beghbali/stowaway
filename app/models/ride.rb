@@ -7,7 +7,7 @@ class Ride < ActiveRecord::Base
 
   has_public_id
   CAPACITY = 4
-  CHECKIN_PROXIMITY = 0.025
+  CHECKIN_PROXIMITY = 0.005
   MIN_CAPTAIN_VICINITY_COUNT = 2
   MAX_CAPTAIN_VICINITY_COUNT = 10
   PRESUMED_SPEED = 25 #mph
@@ -22,6 +22,7 @@ class Ride < ActiveRecord::Base
   before_create :generate_location_channel
   before_destroy -> { stop_checkin && notify_riders('ride_cancelled') }
   after_destroy :reset_requests
+  after_save :generate_stowaway_receipts, if: :receipt_id_changed?
 
   scope :unreconciled, -> { where(receipt_id: nil) }
 
@@ -166,7 +167,7 @@ class Ride < ActiveRecord::Base
           charged, credits_used, charge_ref = rider.charge(cost * 100, request)
           request.create_payment!(amount: cost, credits_used: credits_used, credit_card_charge: charged, fee: fee, reference: charge_ref)
         end
-
+        save
       end
     end
   end
@@ -190,6 +191,11 @@ class Ride < ActiveRecord::Base
 
   def cost
     receipt && receipt.total_amount
+  end
+
+  def generate_stowaway_receipts
+    self.riders.each do |rider|
+
   end
 
   def to_s(format=nil)

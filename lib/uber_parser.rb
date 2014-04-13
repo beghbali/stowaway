@@ -5,11 +5,11 @@ class UberParser < ReceiptParser
   class << self
 
     def from
-      %w(supportsf@uber.com)
+      %w(@uber.com)
     end
 
     def subject
-      "Receipt"
+      "Uber"
     end
   end
 

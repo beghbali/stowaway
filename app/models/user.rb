@@ -50,6 +50,7 @@ class User < ActiveRecord::Base
 
   def fetch_ride_receipts
     unprocessed_emails.each do |email|
+      debugger;1
       Resque.enqueue(ParseEmailJob, self.public_id, { email: email.encoded })
     end
   end
@@ -74,5 +75,69 @@ class User < ActiveRecord::Base
       description: "#{self.email}"
     )
     self.customer_id = customer.id
+  end
+
+  def auth_token
+    self.send("#{self.email_provider}_access_token")
+  end
+
+  def auth_token=(value)
+    self.send("#{self.email_provider}_access_token=", value)
+  end
+
+  def refresh_token
+    self.send("#{self.email_provider}_refresh_token")
+  end
+
+  def refresh_token=(value)
+    self.send("#{self.email_provider}_refresh_token=", value)
+  end
+
+  def auth_token_expires_at
+    self.send("#{self.email_provider}_access_token_expires_at")
+  end
+
+  def auth_token_expires_at=(value)
+    self.send("#{self.email_provider}_access_token_expires_at=", value)
+  end
+
+  def reset_access_token!
+    self.auth_token = nil
+    save
+  end
+
+  def refresh_token!
+    response = HTTParty.post(token_request_url, refresh_token_request)
+
+    debugger;2
+    if response.code == 200
+      self.auth_token = response.parsed_response['access_token']
+      self.auth_token_expires_at = DateTime.now + response.parsed_response['expires_in'].seconds
+      save
+    else
+      false
+    end
+  end
+
+  def refresh_token_request
+    {
+      body: {
+        client_id:     ENV['GMAIL_CLIENT_ID'],
+        client_secret: ENV['GMAIL_CLIENT_SECRET'],
+        refresh_token: refresh_token,
+        grant_type:    'refresh_token'
+      },
+      headers: {
+        'Content-Type' => 'application/x-www-form-urlencoded'
+      }
+    }
+  end
+
+  def token_request_url
+    self.send("#{self.email_provider}_token_request_url")
+  end
+
+  def gmail_token_request_url
+    'https://accounts.google.com/o/oauth2/token'
   end
 end

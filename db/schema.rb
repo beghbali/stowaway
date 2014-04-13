@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140408090948) do
+ActiveRecord::Schema.define(version: 20140409163315) do
 
   create_table "payments", force: true do |t|
     t.decimal  "amount",             precision: 8, scale: 2, default: 0.0
@@ -119,7 +119,8 @@ ActiveRecord::Schema.define(version: 20140408090948) do
     t.string   "device_type"
     t.string   "device_token"
     t.string   "customer_id"
-    t.decimal  "credits",                      precision: 8, scale: 2, default: 0.0
+    t.decimal  "credits",                       precision: 8, scale: 2, default: 0.0
+    t.string   "gmail_access_token_expires_at"
   end
 
 end

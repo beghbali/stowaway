@@ -1,7 +1,7 @@
 module Emails
 
   def email_service
-    @email_service ||= "Emails::#{self.email_provider.camelize}Service".constantize.new(self.email, self.send("#{self.email_provider}_access_token"))
+    @email_service ||= "Emails::#{self.email_provider.camelize}Service".constantize.new(self)
   end
 
   def unprocessed_emails(options={})
@@ -13,16 +13,27 @@ module Emails
   end
 
   class IMAPService
-    attr_accessor :imap
+    attr_accessor :imap, :account
 
     def imap_server
       raise "not implemented"
     end
 
-    def initialize(email, auth_token)
+    def initialize(account)
       self.imap = Net::IMAP.new(imap_server, 993, usessl = true, certs = nil, verify = false)
-      self.imap.authenticate('XOAUTH2', email, auth_token)
+      debugger;2
+      self.imap.authenticate('XOAUTH2', account.email, account.auth_token)
+      debugger;2
+
       self.imap.select('INBOX')
+    rescue Net::IMAP::NoResponseError => e
+      debugger;2
+      if e.message.include? "Invalid credentials"
+        account.reset_access_token!
+        account.refresh_token!
+        raise "unable to refresh auth token" if account.auth_token.nil?
+        retry
+      end
     end
 
     def messages(options={})
