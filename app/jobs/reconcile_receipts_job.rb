@@ -6,8 +6,11 @@ class ReconcileReceiptsJob
     raise "ride not found: #{ride_public_id}" if ride.nil?
 
     Ride.transaction do
-      ride.reconcile_receipt
-      Resque.enqueue_in(5.minutes, ReconcileReceiptsJob, ride.public_id) unless ride.reconciled? && Time.now < (ride.created_at + 1.hour)
+      unless ride.reconciled?
+        ride.reconcile_receipt
+        verify_in = Time.now < (ride.created_at + 1.hour) ? 5.minutes : 3.hours
+        Resque.enqueue_in(5.minutes, ReconcileReceiptsJob, ride.public_id) unless Time.now > (ride.created_at + 28.hours)
+      end
     end
   end
 end
