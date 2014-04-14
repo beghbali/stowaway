@@ -5,7 +5,7 @@ class UberParser < ReceiptParser
   class << self
 
     def from
-      '@uber.com'
+      'receipts.san.francisco@uber.com@uber.com'
     end
 
     def subject

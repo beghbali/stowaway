@@ -163,7 +163,8 @@ class Ride < ActiveRecord::Base
 
         self.riders.each do |rider|
           request = rider.request_for(self)
-          cost = self.cost_of(rider) + fee
+          charges = self.cost_of(rider) + fee
+          cost = request.coupon.present? ? request.coupon.apply(charges) : charges
           charged, credits_used, charge_ref = rider.charge(cost * 100, request)
           request.create_payment!(amount: cost, credits_used: credits_used, credit_card_charge: charged, fee: fee, reference: charge_ref)
         end

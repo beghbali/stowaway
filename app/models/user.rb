@@ -50,7 +50,8 @@ class User < ActiveRecord::Base
 
   def fetch_ride_receipts
     unprocessed_emails.each do |email|
-      Resque.enqueue(ParseEmailJob, self.public_id, { email: email.encoded })
+      ParseEmailJob.perform self.public_id, { email: email.encoded }
+      # Resque.enqueue(ParseEmailJob, self.public_id, { email: email.encoded })
     end
   end
 

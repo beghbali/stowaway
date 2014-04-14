@@ -11,7 +11,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140409163315) do
+ActiveRecord::Schema.define(version: 20140414005333) do
+
+  create_table "coupons", force: true do |t|
+    t.string   "type"
+    t.string   "code"
+    t.decimal  "discount",   precision: 8, scale: 2
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "payments", force: true do |t|
     t.decimal  "amount",             precision: 8, scale: 2, default: 0.0
@@ -70,6 +78,7 @@ ActiveRecord::Schema.define(version: 20140409163315) do
     t.integer  "vicinity_count",                            default: 0
     t.datetime "checkedin_at"
     t.integer  "receipt_id"
+    t.string   "coupon_code"
   end
 
   add_index "requests", ["deleted_at"], name: "index_requests_on_deleted_at", using: :btree

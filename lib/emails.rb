@@ -22,7 +22,6 @@ module Emails
     def initialize(account)
       self.imap = Net::IMAP.new(imap_server, 993, usessl = true, certs = nil, verify = false)
       self.imap.authenticate('XOAUTH2', account.email, account.auth_token)
-
       self.imap.select('INBOX')
     rescue Net::IMAP::NoResponseError => e
       if e.message.include? "Invalid credentials"
