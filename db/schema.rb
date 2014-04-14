@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140414005333) do
+ActiveRecord::Schema.define(version: 20140414060016) do
 
   create_table "coupons", force: true do |t|
     t.string   "type"
@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(version: 20140414005333) do
     t.decimal  "discount",   precision: 8, scale: 2
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.datetime "expires_at"
   end
 
   create_table "payments", force: true do |t|
@@ -130,6 +131,7 @@ ActiveRecord::Schema.define(version: 20140414005333) do
     t.string   "customer_id"
     t.decimal  "credits",                       precision: 8, scale: 2, default: 0.0
     t.string   "gmail_access_token_expires_at"
+    t.string   "coupon_code"
   end
 
 end

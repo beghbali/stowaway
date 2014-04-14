@@ -12,6 +12,8 @@ class User < ActiveRecord::Base
 
   has_many :requests
   has_many :rides, through: :requests
+  belongs_to :coupon, foreign_key: :coupon_code, primary_key: :code
+
   validates :uid, uniqueness: true
   validates :provider, inclusion: { in: AUTHENTICATION_PROVIDERS }
   validates :email_provider, inclusion: { in: SUPPORTED_EMAIL_PROVIDERS }, allow_blank: true

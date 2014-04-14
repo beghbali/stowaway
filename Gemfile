@@ -62,6 +62,7 @@ group :test do
   gem 'faker'
   gem 'webmock'
   gem 'stripe-ruby-mock', '~> 1.10.1.6'
+  gem 'timecop'
 end
 
 # Use ActiveModel has_secure_password

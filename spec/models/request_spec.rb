@@ -29,14 +29,44 @@ describe Request do
       let(:coupon) { FactoryGirl.create :percent_coupon }
       let(:price) { 10.00 }
 
-      subject(:discounted_price) { request.coupon.apply(price) }
+      subject(:discounted_price) { request.coupon.apply(price).round(2) }
 
       it 'associates the coupon' do
         expect(request.coupon).to eq(coupon)
       end
 
       it 'applies the coupon correctly' do
-        expect(discounted_price).to be_within(0.01).of(price * (1 - coupon.discount))
+        expect(discounted_price).to eq(price * (1 - coupon.discount))
+      end
+
+      context 'with a user who has the coupon' do
+        let(:user) { FactoryGirl.create :user, coupon_code: coupon.code }
+        let(:request) { FactoryGirl.create :request, user: user }
+
+        it 'should associate the coupon with the user' do
+          expect(user.coupon).to eq(coupon)
+        end
+
+        it 'should create new requests with the given coupon' do
+          expect(request.coupon).to eq(user.coupon)
+        end
+
+        it 'should update the coupon with a new one if added to the request' do
+          request.update_attributes(coupon_code: 'LONERIDER')
+          expect(request.coupon.code).to eq('LONERIDER')
+        end
+      end
+
+      context 'with an expired coupon' do
+        before do
+          coupon.expires_at = 2.minutes.from_now
+          coupon.save
+          Timecop.travel(5.minutes.from_now)
+        end
+
+        it 'should not apply the discount' do
+          expect(request.coupon).to be_nil
+        end
       end
     end
   end

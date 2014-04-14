@@ -9,7 +9,7 @@ class Ride < ActiveRecord::Base
   CAPACITY = 4
   CHECKIN_PROXIMITY = 0.005
   MIN_CAPTAIN_VICINITY_COUNT = 2
-  MAX_CAPTAIN_VICINITY_COUNT = 10
+  MAX_CAPTAIN_VICINITY_COUNT = 5
   PRESUMED_SPEED = 25 #mph
   BASE_FEE = 1.00 #dollars
 
@@ -127,7 +127,8 @@ class Ride < ActiveRecord::Base
   end
 
   def distance
-    Geocoder::Calculations.distance_between([pickup_lat, pickup_lng], [dropoff_lat, dropoff_lng])
+    Geocoder::Calculations.distance_between([suggested_pickup_lat, suggested_pickup_lng],
+                                            [suggested_dropoff_lat, suggested_dropoff_lng])
   end
 
   def cancellations

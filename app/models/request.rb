@@ -21,6 +21,7 @@ class Request < ActiveRecord::Base
   validates :status, inclusion: { in: STATUSES }
 
   before_save :record_vicinity, if: -> { self.last_lat_changed? || last_lng_changed? }
+  before_save :apply_user_coupon
   before_save :apply_coupon, if: :coupon_code_changed?
   after_create :match_request, unless: :dont_match   #TODO: see if this can be done after commit in case the client requests ride for things to be resolved already
   after_create :finalize, if: :can_finalize?
@@ -196,6 +197,10 @@ class Request < ActiveRecord::Base
     save
   end
 
+  def apply_user_coupon
+    self.coupon_code = user.coupon.code if self.coupon_code.nil? && user.coupon.present?
+  end
+
   def apply_coupon
     return if coupon_code.nil?
 
@@ -204,10 +209,12 @@ class Request < ActiveRecord::Base
 
   def ride_alone!
     return nil unless self.ride.nil?
-    self.create_ride
-    self.designation = :captain
-    self.checkin!
-    self.ride.close
+    create_ride
+    fulfilled!
+    self.ride.finalize
+    self.vicinity_count = Ride::MAX_CAPTAIN_VICINITY_COUNT
+    checkedin!
+    self.ride.reload.close
   end
 
   alias_method :rider, :user
