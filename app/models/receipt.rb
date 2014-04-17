@@ -1,14 +1,17 @@
 class Receipt < ActiveRecord::Base
   belongs_to :user
+  has_one :payment
   validate :did_not_generate_same_receipt_before
 
   geocoded_by :pickup_location, latitude: :pickup_lat, longitude: :pickup_lng
 
   after_validation :geocode
+  after_create :email_it, if: -> { generated_by == 'Stowaway' }
+
   RIDESHARES = %w(Uber)
   REQUEST_TIME_PROXIMITY = 20.minutes
-  scope :rideshare, -> { where(generated_by: RIDESHARES)}
-  scope :for, ->(ride) { geocoded.where(billed_to: self.captain.email).where(ride_requested_at: (ride.created_at..ride.created_at + REQUEST_TIME_PROXIMITY)).near(ride.pickup_location)}
+  scope :rideshares, -> { where(generated_by: RIDESHARES)}
+  scope :for, ->(ride) { geocoded.where(billed_to: ride.captain.rider.email).where(ride_requested_at: (ride.created_at..ride.created_at + REQUEST_TIME_PROXIMITY)).near(ride.pickup_location)}
 
   #ride requested at within 15 minutes + geocoded pickup location/dropoff location within 200 ft of the ride
   def self.build_from_email(email)
@@ -36,10 +39,14 @@ class Receipt < ActiveRecord::Base
 
   def geocode(tries=1)
     begin
-      super
+      super()
     rescue Geocoder::OverQueryLimitError
       sleep tries*tries
       geocode(tries+1) unless tries > 3
     end
+  end
+
+  def email_it
+    ReceiptMailer.send("#{self.payment.request.designation}_ride_receipt").deliver
   end
 end

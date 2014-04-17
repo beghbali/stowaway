@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140414060016) do
+ActiveRecord::Schema.define(version: 20140417031712) do
 
   create_table "coupons", force: true do |t|
     t.string   "type"
@@ -30,6 +30,8 @@ ActiveRecord::Schema.define(version: 20140414060016) do
     t.string   "reference"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "request_id"
+    t.integer  "receipt_id"
   end
 
   create_table "receipts", force: true do |t|

@@ -15,9 +15,11 @@ class Request < ActiveRecord::Base
   belongs_to :user
   belongs_to :ride
   belongs_to :receipt
+  belongs_to :coupon, foreign_key: :coupon_code, primary_key: :code
 
   has_many :riders, through: :ride
-  belongs_to :coupon, foreign_key: :coupon_code, primary_key: :code
+  has_one :payment
+
   validates :status, inclusion: { in: STATUSES }
 
   before_save :record_vicinity, if: -> { self.last_lat_changed? || last_lng_changed? }

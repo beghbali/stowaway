@@ -2,6 +2,7 @@ class User < ActiveRecord::Base
   include Notify::Notifiable
   include PublicId
   include Emails
+  include Payments
 
   has_public_id
   has_many :receipts
@@ -28,6 +29,10 @@ class User < ActiveRecord::Base
     self.update_attributes!(fb_attributes)
   end
 
+  def full_name
+    "#{first_name} #{last_name}"
+  end
+
   def generate_stowaway_email_address(postfix=nil)
     proposed_email = "#{[first_name, last_name, postfix].compact.join('.').downcase}@getstowaway.com"
 
@@ -52,8 +57,7 @@ class User < ActiveRecord::Base
 
   def fetch_ride_receipts
     unprocessed_emails.each do |email|
-      ParseEmailJob.perform self.public_id, { email: email.encoded }
-      # Resque.enqueue(ParseEmailJob, self.public_id, { email: email.encoded })
+      Resque.enqueue(ParseEmailJob, self.public_id, { email: email.encoded })
     end
   end
 

@@ -5,7 +5,7 @@ class UberParser < ReceiptParser
   class << self
 
     def from
-      'receipts.san.francisco@uber.com@uber.com'
+      '@uber.com'
     end
 
     def subject
@@ -20,7 +20,7 @@ class UberParser < ReceiptParser
   def parse
     {
       generated_by:         name,
-      billed_to:            match('billed to'),
+      billed_to:            to.first,
       ride_requested_at:    match_datetime('request date'),
       pickup_location:      match('pickup location'),
       dropoff_location:     match('dropoff location'),

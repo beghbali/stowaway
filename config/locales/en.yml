@@ -58,4 +58,6 @@ en:
     ride:
       format:
         charge: "stowaway ride from %{pickup}"
+    payment:
+      fee: "Stowaway grouping fee"
 

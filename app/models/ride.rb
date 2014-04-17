@@ -147,7 +147,7 @@ class Ride < ActiveRecord::Base
   end
 
   def find_receipt
-    Receipt.rideshares.for(self)
+    Receipt.rideshares.for(self).first
   end
 
   #find receipt by closeness to start and closeness to end and date and closeness to time
@@ -166,7 +166,8 @@ class Ride < ActiveRecord::Base
           request = rider.request_for(self)
           charges = self.cost_of(rider) + fee
           cost = request.coupon.present? ? request.coupon.apply(charges) : charges
-          charged, credits_used, charge_ref = rider.charge(cost * 100, request)
+          charged, credits_used, charge_ref = rider.charge(cost.round(2), request)
+          debugger;2
           request.create_payment!(amount: cost, credits_used: credits_used, credit_card_charge: charged, fee: fee, reference: charge_ref)
         end
         save

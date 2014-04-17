@@ -52,6 +52,11 @@ class ReceiptParser < Mail::Message
     ((hours || 0) * 3600) + ((mins || 0) * 60) + (secs || 0)
   end
 
+  def match_clock(what)
+    clock = match(what)
+    hours, mins, secs = clock && clock.match(/(\d\d):(\d\d):(\d\d)/) && [$1.try(:to_i), $2.try(:to_i), $3.try(:to_i)]
+  end
+
   def match_speed(what)
     match(what).try(:to_f)
   end
