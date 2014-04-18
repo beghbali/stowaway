@@ -31,7 +31,6 @@ ActiveRecord::Schema.define(version: 20140417031712) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "request_id"
-    t.integer  "receipt_id"
   end
 
   create_table "receipts", force: true do |t|
@@ -59,6 +58,7 @@ ActiveRecord::Schema.define(version: 20140417031712) do
     t.datetime "updated_at"
     t.decimal  "pickup_lat",        precision: 16, scale: 12
     t.decimal  "pickup_lng",        precision: 16, scale: 12
+    t.integer  "payment_id"
   end
 
   create_table "requests", force: true do |t|

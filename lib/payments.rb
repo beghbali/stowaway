@@ -27,5 +27,11 @@ module Payments
     [amount - used_credits, used_credits]
   end
 
+  def credit(amount)
+    ActiveRecord::Base.transaction do
+      self.credits += amount
+      save
+    end
+  end
 end
 

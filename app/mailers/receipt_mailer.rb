@@ -1,10 +1,22 @@
-class ReceiptMailer
+class ReceiptMailer < ActionMailer::Base
 
-  def captain_ride_receipt(captain_id, ride_id)
-    @rider = User.find(captain_id)
-    @ride = Ride.find(ride_id)
+  default from: 'support@getstowaway.com'
+
+  def captain_ride_receipt(receipt_id)
+    @receipt = Receipt.find(receipt_id)
+    mail(to: @receipt.billed_to,
+         subject: I18n.t('mailers.receipt_mailer.captain_ride_receipt.subject',
+          weekday: @receipt.request.ride.created_at.strftime("%A"),
+          timeofday: @receipt.request.ride.created_at.to_datetime.time_of_day,
+          savings: "#{@receipt.savings * 100}%"))
   end
 
-  def stowaway_ride_receipt
+  def stowaway_ride_receipt(receipt_id)
+    @receipt = Receipt.find(receipt_id)
+    mail(to: @receipt.billed_to,
+         subject: I18n.t('mailers.receipt_mailer.stowaway_ride_receipt.subject',
+          weekday: @receipt.request.ride.created_at.strftime("%A"),
+          timeofday: @receipt.request.ride.created_at.to_datetime.time_of_day,
+          savings: "#{@receipt.savings * 100}%"))
   end
 end

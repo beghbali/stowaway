@@ -1,6 +1,7 @@
 class Receipt < ActiveRecord::Base
   belongs_to :user
-  has_one :payment
+  belongs_to :payment
+  has_one :request, through: :payment
   validate :did_not_generate_same_receipt_before
 
   geocoded_by :pickup_location, latitude: :pickup_lat, longitude: :pickup_lng
@@ -47,6 +48,15 @@ class Receipt < ActiveRecord::Base
   end
 
   def email_it
-    ReceiptMailer.send("#{self.payment.request.designation}_ride_receipt").deliver
+    ReceiptMailer.send("#{self.payment.request.designation}_ride_receipt", self.id).deliver
+  end
+
+  def savings
+    cost = self.payment && payment.request.ride.cost
+    cost.nil? ? 0 : (cost - total_amount)/cost
+  end
+
+  def credited_amount
+    request.nil? ? 0.0 : (request.ride.cost - total_amount)
   end
 end

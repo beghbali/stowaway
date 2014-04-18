@@ -60,4 +60,9 @@ en:
         charge: "stowaway ride from %{pickup}"
     payment:
       fee: "Stowaway grouping fee"
-
+  mailers:
+    receipt_mailer:
+      captain_ride_receipt:
+        subject: "Your %{weekday} %{timeofday} ride. You saved %{savings}"
+      stowaway_ride_receipt:
+        subject: "Your %{weekday} %{timeofday} ride. You saved %{savings}"

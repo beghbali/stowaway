@@ -47,19 +47,17 @@
                                     </td>
                                 </tr>
                             </tbody></table>
-                          <table bgcolor="white" border="0" cellpadding="36" cellspacing="0" width="520" style="border:1px solid #e6e6e6;border-bottom:none;border-top:none;background-color:#ffffff" background="white">
+                          <table border="0" bgcolor="white" cellpadding="36" cellspacing="0" width="520" style="border:1px solid #e6e6e6;border-bottom:none;border-top:none;background-color:#ffffff">
                   <tbody><tr>
                     <td>
                       <table border="0" cellpadding="0" cellspacing="0" width="445">
                                     <tbody><tr>
                                         <td align="center" valign="top">
-
                                             <table border="0" cellpadding="0" cellspacing="0" width="445" style="border-bottom:0">
                                                   <tbody><tr>
                                                       <td style="color:#202020;font-family:Helvetica,Arial;font-size:34px;font-weight:bold;line-height:100%;padding:0;text-align:left;vertical-align:middle; width: 227px;">
                                                                   &nbsp;<img alt="Stowaway Ride Receipt" src="https://getstowaway.com/images/stowaway/newsletter/stowaway-200px.png" width="200" height="23"></td>
                                                       <td style="text-align:right;color:#808080;font-size:13px;font-style:italic;font-family:Helvetica,Arial">
-                                                          Captain
                                                           Ride Receipt</td>
                                                       <td style="text-align:right;width:50px">
                                                           &nbsp;<img alt="Stowaway Ride Receipt" src="https://getstowaway.com/images/stowaway/newsletter/wheel.png" width="40" height="42"></td>
@@ -94,10 +92,8 @@
                         <h1 align="center" style="text-align:center;" class="style1">
             Thanks for riding with Stowaway!<br>
             <br>
-            <span class="style2">You saved <%= (@receipt.savings * 100).round %>% on this ride.<br>
-            <br>
-            Your Stowaway account has been <br>
-            credited with <%= number_to_currency(@receipt.credited_amount) %> for future rides. </span></h1>
+            <span class="style2">You saved <%= (@receipt.savings * 100).round %>% on this ride. <br>
+&nbsp;</span></h1>
 
     <p style="color:#8a8b8d;padding:0 12px" align="center">Ride with <%= @receipt.request.ride.riders.map(&:first_name).join(',') %> on <%= l @receipt.request.ride.created_at, format: :long %></p>
     <br>
@@ -122,17 +118,16 @@
     <table cellspacing="0" style="width:100%;border-bottom:1px solid #a4a6ab;color:#717171;padding-bottom:3px">
         <tbody>
                                                 <tr>
-                        <td>Ride <i><%= @receipt.distance.round(2) %> mi:</i></td>
-                        <td style="text-align:right">You Saved <%= (@receipt.savings * 100).round %>%</td>
+                        <td>Ride <%= @receipt.distance.round(2) %> mi:</i></td>
+                        <td style="text-align:right">You saved <%= (@receipt.savings * 100).round %>%</td>
                     </tr>
                                                                                             </tbody>
     </table>
         <table cellspacing="0" style="width:100%;color:#717171;padding-top:3px">
         <tbody>
             <tr>
-                <td><strong style="color:#7a7a7a">Total credited to your
-        account:</strong></td>
-                <td style="text-align:right"><strong style="color:#7a7a7a"></strong><span style="color:#7a7a7a"><%= number_to_currency(@receipt.credited_amount) %> </td>
+                <td><strong style="color:#7a7a7a">Total charged:</strong></td>
+                <td style="text-align:right"><strong style="color:#7a7a7a"></strong><span style="color:#7a7a7a"><%= number_to_currency(@receipt.total_amount) %></td>
             </tr>
                         </span>
                         <tr>
@@ -158,10 +153,11 @@
 <table border="0" cellpadding="0" cellspacing="0" width="445" height="0" style="border-bottom:1px solid #e6e6e6;margin-bottom:20px">
     <tbody><tr>
         <td class="style4">
-             <br>
-      <a href="https://www.facebook.com/dialog/feed?picture=https://getstowaway.com/images/fb_icon.png&amp;%20%20%20%20%20%20%20%20%20%20%20%20app_id=614476495254253&amp;%20%20%20%20%20%20%20%20%20%20%20%20link=https://getstowaway.com&amp;description=I%20just%20saved%20big%20on%20my%20last%20private%20taxi%20ride%20by%20using%20Stowaway!%20%20You%20can%20too:%20https://getstowaway.com&amp;%20%20%20%20%20%20%20%20%20%20%20%20redirect_uri=http://www.facebook.com&amp;">
+            <br>
+
+          <a href="https://www.facebook.com/dialog/feed?picture=https://getstowaway.com/images/fb_icon.png&amp;%20%20%20%20%20%20%20%20%20%20%20%20app_id=614476495254253&amp;%20%20%20%20%20%20%20%20%20%20%20%20link=https://getstowaway.com/?r=8Jgi34sm&amp;description=Shiver%20me%20timbers!%20I%20just%20joined%20Stowaway%20and%20got%20two%20free%20rides%20around%20the%20city.%20%20You%20can%20too:%20https://getstowaway.com&amp;%20%20%20%20%20%20%20%20%20%20%20%20redirect_uri=http://www.facebook.com&amp;">
           <img alt="Facebook Share" src="https://getstowaway.com/images/stowaway/newsletter/fb-share.png" width="126" height="36" class="style5"></a>
-      <a href="http://twitter.com/share?text=I%20just%20saved%20big%20on%20my%20last%20private%20taxi%20ride%20by%20using%20Stowaway!%20%20You%20can%20too:%20&amp;url=https://getstowaway.com">
+      <a href="http://twitter.com/share?text=Shiver%20me%20timbers!%20I%20just%20joined%20Stowaway%20and%20got%20two%20free%20rides%20around%20the%20city.%20You%20can%20too:%20&amp;url=https://getstowaway.com">
       <img alt="Twitter Share" src="https://getstowaway.com/images/stowaway/newsletter/tw-share.png" width="126" height="36" class="style5"></a>
       <a href="mailto:?subject=I%20became%20a%20Stowaway%20and%20got%20two%20free%20rides%20in%20SF&amp;body=Shiver%20me%20timbers!%20I%20just%20joined%20Stowaway%20and%20got%20two%20free%20rides%20around%20the%20city.%20%20You%20can%20too:https://getstowaway.com">
       <img alt="Email Share" src="https://getstowaway.com/images/stowaway/newsletter/em-share.png" width="126" height="36" class="style5"></a><br>
