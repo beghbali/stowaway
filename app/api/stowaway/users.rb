@@ -16,7 +16,7 @@ module Stowaway
         end
 
         def permitted_request_params
-          [ :pickup_address, :dropoff_address, :pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng ]
+          [ :pickup_address, :dropoff_address, :pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng, :coupon_code ]
         end
 
         def new_user_params
@@ -112,6 +112,16 @@ module Stowaway
             request = Request.find_by_public_id(params[:id])
             error!('Request not found', 404) if request.nil?
             params[:type] == 'checkedin' ?  request.checkin! : request.miss!
+          end
+
+          params do
+            requires :id, type: Integer
+            requires :user_id, type: Integer
+          end
+          put ':id' do
+            request = Request.find_by_public_id(params[:id])
+            request.update(request_params) unless request.nil?
+            request
           end
         end
 
