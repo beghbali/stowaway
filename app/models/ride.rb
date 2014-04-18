@@ -53,16 +53,18 @@ class Ride < ActiveRecord::Base
   end
 
   def finalize
-    captain = determine_captain
-    captain.update(designation: :captain, status: 'fulfilled')
-    (self.requests - [captain]).each do |request|
-      request.status = 'fulfilled'
-      request.designation = :stowaway
-      request.save
+    self.class.transaction do
+      captain = determine_captain
+      captain.update(designation: :captain, status: 'fulfilled')
+      (self.requests - [captain]).each do |request|
+        request.status = 'fulfilled'
+        request.designation = :stowaway
+        request.save
+      end
+      self.suggested_dropoff_address, self.suggested_dropoff_lat, self.suggested_dropoff_lng = determine_suggested_dropoff_location
+      self.suggested_pickup_address, self.suggested_pickup_lat, self.suggested_pickup_lng = determine_suggested_pickup_location
+      save
     end
-    self.suggested_dropoff_address, self.suggested_dropoff_lat, self.suggested_dropoff_lng = determine_suggested_dropoff_location
-    self.suggested_pickup_address, self.suggested_pickup_lat, self.suggested_pickup_lng = determine_suggested_pickup_location
-    save
   end
 
   def determine_captain
