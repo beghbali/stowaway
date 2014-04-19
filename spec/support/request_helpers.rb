@@ -1,3 +1,5 @@
+require 'stripe_mock'
+
 module Requests
   module JsonHelpers
     def json
