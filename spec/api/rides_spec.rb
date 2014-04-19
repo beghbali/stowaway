@@ -230,6 +230,36 @@ describe Stowaway::Rides do
     end
   end
 
+  shared_examples_for 'a lone rider' do
+    let(:prefix) { "/api/#{version}/users/#{user.public_id}/requests" }
+    let(:data) { { coupon_code: 'LONERIDER' } }
+
+    describe "PUT /api/<version>/users/<userid>/requests/<requestid>" do
+      before do
+        post prefix, request: request_data
+        put "#{prefix}/#{request.public_id}", data
+        request.reload
+      end
+
+      subject(:request) { Request.last}
+      subject(:ride) { request.ride }
+
+      it 'responds successfully' do
+        expect(response.status.to_i).to eq(200)
+      end
+
+      it 'creates a valid request' do
+        expect(Request.count).to eq(1)
+        expect(request.status).to eq('checkedin')
+      end
+
+      it 'should create a ride' do
+        expect(ride).to be_present
+      end
+
+    end
+  end
+
   shared_context 'cancelling a request' do
     before do
       delete "/api/#{version}/users/#{request.user.public_id}/requests/#{request.public_id}"
@@ -268,6 +298,7 @@ describe Stowaway::Rides do
 
     it_behaves_like 'admin endpoints'
     it_behaves_like 'accepting a ride request'
+    it_behaves_like 'a lone rider'
 
     context 'with another rider with similar route' do
       let(:existing_request) { FactoryGirl.create :request }

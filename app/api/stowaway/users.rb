@@ -27,9 +27,14 @@ module Stowaway
           ActionController::Parameters.new(params.except(:route_info)).permit(permitted_user_params)
         end
 
-        def request_params
+        def new_request_params
           ActionController::Parameters.new(params.except(:route_info)).permit(request: permitted_request_params)
         end
+
+        def request_params
+          ActionController::Parameters.new(params.except(:route_info)).permit(permitted_request_params)
+        end
+
       end
 
       desc "create a new user"
@@ -77,7 +82,7 @@ module Stowaway
             user = User.find_by_public_id(params[:user_id])
             error!('User not found', 404) if user.nil?
             user.requests.active.map(&:deactivate!)
-            request = user.requests.create!(request_params[:request])
+            request = user.requests.create!(new_request_params[:request])
             request
           end
 
@@ -117,6 +122,7 @@ module Stowaway
           params do
             requires :id, type: Integer
             requires :user_id, type: Integer
+            optional :coupon_code, type: String
           end
           put ':id' do
             request = Request.find_by_public_id(params[:id])
