@@ -19,16 +19,30 @@ module Emails
       raise "not implemented"
     end
 
+    def auth_type
+      'XOAUTH2'
+    end
+
+    def oauth?
+      %w(XOAUTH2).include?(auth_type)
+    end
+
+    def auth_credentials
+      [:email, :auth_token]
+    end
+
     def initialize(account)
       self.imap = Net::IMAP.new(imap_server, 993, usessl = true, certs = nil, verify = false)
-      self.imap.authenticate('XOAUTH2', account.email, account.auth_token)
+      self.imap.authenticate(auth_type, *auth_credentials.map{|cred| account.send(cred)})
       self.imap.select('INBOX')
     rescue Net::IMAP::NoResponseError => e
-      if e.message.include? "Invalid credentials"
+      if oauth? && e.message.include?("Invalid credentials")
         account.reset_access_token!
         account.refresh_token!
         raise "unable to refresh auth token" if account.auth_token.nil?
         retry
+      else
+        raise "could not login to IMAP server"
       end
     end
 
@@ -55,6 +69,21 @@ module Emails
   end
 
   class YahooService < IMAPService
+
+    def imap_server
+      'imap.mail.yahoo.com'
+    end
+  end
+
+  class StowawayService < IMAPService
+
+    def auth_type
+      'LOGIN'
+    end
+
+    def auth_credentials
+      [:email, :stowaway_email_password]
+    end
 
     def imap_server
       'imap.mail.yahoo.com'

@@ -2,7 +2,10 @@
 class API < Grape::API
   prefix 'api'
   format :json
-  use ApiLogger
+
+  before do
+    Rails.logger.info "REQUEST: #{params.to_hash.except("route_info")}"
+  end
 
   mount Stowaway::Rides
   mount Stowaway::Users
