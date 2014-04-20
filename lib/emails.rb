@@ -42,7 +42,7 @@ module Emails
         raise "unable to refresh auth token" if account.auth_token.nil?
         retry
       else
-        raise "could not login to IMAP server"
+        raise "could not login to IMAP server: #{e.message}"
       end
     end
 
@@ -75,18 +75,19 @@ module Emails
     end
   end
 
-  class StowawayService < IMAPService
+  #stowaway
+  class OtherService < IMAPService
 
     def auth_type
       'LOGIN'
     end
 
     def auth_credentials
-      [:email, :stowaway_email_password]
+      [:stowaway_email, :stowaway_email_password]
     end
 
     def imap_server
-      'imap.mail.yahoo.com'
+      'mail.getstowaway.com'
     end
   end
 end
