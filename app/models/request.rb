@@ -159,7 +159,7 @@ class Request < ActiveRecord::Base
       self.decrement(:vicinity_count)
     end
 
-    Rails.logger.debug("PROXIMITY: #{self.proximity_to(self.ride.captain)}, #{self.ride.captain.last_location}")
+    Rails.logger.debug("PROXIMITY: #{self.proximity_to(self.ride.captain)}, #{self.ride.captain.last_location}, vicinity: #{self.vicinity_count}")
     try_checkin
     self.ride.close unless self.ride.requests.unclosed.any?
   end
