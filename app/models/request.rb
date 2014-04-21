@@ -146,15 +146,29 @@ class Request < ActiveRecord::Base
     Geocoder::Calculations.distance_between(self.last_location, another_request.last_location)
   end
 
+  def getting_farther_from(another_request)
+    current_distance = Geocoder::Calculations.distance_between(self.last_location, another_request.last_location)
+    previous_distance = Geocoder::Calculations.distance_between([last_lat_was, last_lng_was], another_request.last_location)
+    current_distance > previous_distance
+  end
+
   def record_vicinity
-    self.increment(:vicinity_count) if self.proximity_to(self.ride.captain) <= Ride::CHECKIN_PROXIMITY
+    if self.proximity_to(self.ride.captain) <= Ride::CHECKIN_PROXIMITY
+      self.increment(:vicinity_count)
+    elsif getting_farther_from(self.ride.captain)
+      self.decrement(:vicinity_count)
+    end
+
     Rails.logger.debug("PROXIMITY: #{self.proximity_to(self.ride.captain)}, #{self.ride.captain.last_location}")
     try_checkin
+    self.ride.close unless self.ride.requests.unclosed.any?
   end
 
   def try_checkin
-    if self.vicinity_count >= Ride::MAX_CAPTAIN_VICINITY_COUNT && !self.captain?
-      self.ride.close
+    if self.vicinity_count >= Ride::MAX_CAPTAIN_VICINITY_COUNT
+      checkin
+    elsif self.vicinity_count <= Ride::MIN_CAPTAIN_VICINITY_COUNT
+      miss
     end
   end
 

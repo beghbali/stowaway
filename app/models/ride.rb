@@ -8,7 +8,7 @@ class Ride < ActiveRecord::Base
   has_public_id
   CAPACITY = 4
   CHECKIN_PROXIMITY = 0.007
-  MIN_CAPTAIN_VICINITY_COUNT = 2
+  MIN_CAPTAIN_VICINITY_COUNT = -5
   MAX_CAPTAIN_VICINITY_COUNT = 5
   PRESUMED_SPEED = 25 #mph
   BASE_FEE = 1.00 #dollars
@@ -109,13 +109,6 @@ class Ride < ActiveRecord::Base
   end
 
   def close
-    self.requests.checkinable.each do |request|
-      request.checkin!
-    end
-
-    self.requests.uncheckinable.each do |request|
-      request.miss!
-    end
     stop_checkin
     collect_payments
   end
