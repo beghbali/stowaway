@@ -17,7 +17,7 @@ class CheckinRidersJob
       data = JSON.parse(json).with_indifferent_access
       request = ::Request.find_by_public_id(data[:request_public_id])
       Rails.logger.info "[AUTOCHECKIN] updating lat lng #{data[:lat]}, #{data[:long]}"
-      request.update(last_lat: data[:lat], last_lng: data[:long])
+      request.update(last_lat: data[:lat], last_lng: data[:long]) unless request.checkedin? || request.missed?
       Rails.logger.info "[AUTOCHECKIN] disconnect? #{ride.closed?}"
       socket.disconnect if ride.closed?
     end
