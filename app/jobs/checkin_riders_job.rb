@@ -11,14 +11,14 @@ class CheckinRidersJob
 
     socket = PusherClient::Socket.new(ENV['PUSHER_KEY'], secret: ENV['PUSHER_SECRET'], encrypted: true)
     socket.subscribe(ride.location_channel_name, ENV['PUSHER_SERVER_USER_ID'])
-
+    Rails.logger.info "[AUTOCHECKIN] subscribed to #{ride.location_channel_name}"
     socket[ride.location_channel_name].bind('client-location-update') do |json|
-      Rails.logger.debug "DATA:#{json}"
+      Rails.logger.info "[AUTOCHECKIN] data:#{json}"
       data = JSON.parse(json).with_indifferent_access
       request = ::Request.find_by_public_id(data[:request_public_id])
-      Rails.logger.debug "updating lat lng #{data[:lat]}, #{data[:long]}"
+      Rails.logger.info "[AUTOCHECKIN] updating lat lng #{data[:lat]}, #{data[:long]}"
       request.update(last_lat: data[:lat], last_lng: data[:long])
-      Rails.logger.debug "disconnect? #{ride.closed?}"
+      Rails.logger.info "[AUTOCHECKIN] disconnect? #{ride.closed?}"
       socket.disconnect if ride.closed?
     end
     socket.connect
