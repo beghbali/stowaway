@@ -209,7 +209,7 @@ class Ride < ActiveRecord::Base
     alert = sound = nil
 
     if status == 'ride_cancelled'
-      who_canceled = self.cancellations.last.try(:captain?) ? 'cancelled_by_captain' : 'cancelled'
+      who_canceled = self.captain.cancelled? ? 'cancelled_by_captain' : 'cancelled'
       alert = I18n.t("notifications.ride.#{who_canceled}.alert", name: self.captain && self.captain.user.first_name)
       sound = I18n.t("notifications.ride.#{who_canceled}.sound")
     end
