@@ -10,7 +10,7 @@ class API < Grape::API
   mount Stowaway::Rides
   mount Stowaway::Users
 
-  resource :admin
+  resource :admin do
     http_basic do |email, password|
       email == ENV['BASIC_AUTH_USERNAME'] && password == ENV['BASIC_AUTH_PASSWORD']
     end
