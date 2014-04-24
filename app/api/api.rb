@@ -10,9 +10,15 @@ class API < Grape::API
   mount Stowaway::Rides
   mount Stowaway::Users
 
-  get 'c5f443772075576dbdc7' do
-    last_commit = `git log --pretty=oneline | head -1 | awk '{print $1}'`
-    {commit: last_commit.strip}
+  resource :admin
+    http_basic do |email, password|
+      email == ENV['BASIC_AUTH_USERNAME'] && password == ENV['BASIC_AUTH_PASSWORD']
+    end
+
+    get 'c5f443772075576dbdc7' do
+      last_commit = `git log --pretty=oneline | head -1 | awk '{print $1}'`
+      {commit: last_commit.strip}
+    end
   end
 end
 
