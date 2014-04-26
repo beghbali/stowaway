@@ -14,7 +14,7 @@ class CheckinRidersJob
 
     Resque.enqueue_at((ENV['AUTOCHECKIN_WINDOW'] || 120).seconds.from_now, CloseRideJob, ride.id)
 
-    Rails.logger.info "[AUTOCHECKIN] subscribed to #{ride.location_channel_name}: auto-closes at #{end_autocheckin_at}"
+    Rails.logger.info "[AUTOCHECKIN] subscribed to #{ride.location_channel_name}"
     socket[ride.location_channel_name].bind('client-location-update') do |json|
       Rails.logger.info "[AUTOCHECKIN] data:#{json}"
       data = JSON.parse(json).with_indifferent_access
