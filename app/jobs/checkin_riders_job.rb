@@ -3,7 +3,7 @@ require 'pusher-client'
 class CheckinRidersJob
   include HTTParty
 
-  @queue = :checkin_queue
+  @queue = :autocheckin
 
   def self.perform(ride_id)
     ride = Ride.find(ride_id)
@@ -11,7 +11,9 @@ class CheckinRidersJob
 
     socket = PusherClient::Socket.new(ENV['PUSHER_KEY'], secret: ENV['PUSHER_SECRET'], encrypted: true)
     socket.subscribe(ride.location_channel_name, ENV['PUSHER_SERVER_USER_ID'])
-    end_autocheckin_at = 2.minutes.from_now
+
+    Resque.enqueue_at((ENV['AUTOCHECKIN_WINDOW'] || 120).seconds.from_now, CloseRideJob, ride.id)
+
     Rails.logger.info "[AUTOCHECKIN] subscribed to #{ride.location_channel_name}: auto-closes at #{end_autocheckin_at}"
     socket[ride.location_channel_name].bind('client-location-update') do |json|
       Rails.logger.info "[AUTOCHECKIN] data:#{json}"
@@ -20,7 +22,6 @@ class CheckinRidersJob
       Rails.logger.info "[AUTOCHECKIN] updating lat lng #{data[:lat]}, #{data[:long]}"
       request.update(last_lat: data[:lat], last_lng: data[:long]) unless request.checkedin? || request.missed?
       Rails.logger.info "[AUTOCHECKIN] disconnect? #{ride.closed?}"
-      ride.close if Time.now >= end_autocheckin_at
       socket.disconnect if ride.closed?
     end
     socket.connect

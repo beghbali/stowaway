@@ -1,5 +1,5 @@
 class ParseEmailJob
-  @queue = :parse_emails_queue
+  @queue = :email_parser
 
   def self.perform(user_public_id, message)
     user = User.find_by_public_id(user_public_id)
