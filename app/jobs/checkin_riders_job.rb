@@ -12,7 +12,7 @@ class CheckinRidersJob
     socket = PusherClient::Socket.new(ENV['PUSHER_KEY'], secret: ENV['PUSHER_SECRET'], encrypted: true)
     socket.subscribe(ride.location_channel_name, ENV['PUSHER_SERVER_USER_ID'])
 
-    Resque.enqueue_at((ENV['AUTOCHECKIN_WINDOW'] || 120).seconds.from_now, CloseRideJob, ride.id)
+    Resque.enqueue_at((ENV['AUTOCHECKIN_WINDOW'].to_i || 120).seconds.from_now, CloseRideJob, ride.id)
 
     Rails.logger.info "[AUTOCHECKIN] subscribed to #{ride.location_channel_name}"
     socket[ride.location_channel_name].bind('client-location-update') do |json|
