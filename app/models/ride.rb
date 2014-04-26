@@ -105,7 +105,7 @@ class Ride < ActiveRecord::Base
 
   def stop_checkin
     Rails.logger.debug "Stop checking in: #{self.location_channel_name}, #{self.public_id}"
-    Resque::Job.destroy(:checkin_queue, CheckinRidersJob, self.id)
+    Resque::Job.destroy(:autocheckin, CheckinRidersJob, self.id)
   end
 
   def close
