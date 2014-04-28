@@ -27,6 +27,7 @@ class Request < ActiveRecord::Base
   before_save :apply_user_coupon
   before_save :apply_coupon, if: :coupon_code_changed?
   after_create :match_request, unless: :dont_match   #TODO: see if this can be done after commit in case the client requests ride for things to be resolved already
+  after_create :update_ride, if: :ride
   after_create :finalize, if: :can_finalize?
   before_destroy :cancel
   after_destroy :cancel_ride, if: :should_cancel_ride?
@@ -221,6 +222,10 @@ class Request < ActiveRecord::Base
     save
   end
 
+  def update_ride
+    self.ride.request_added(self)
+  end
+
   def apply_user_coupon
     self.coupon_code = user.coupon.code if self.coupon_code.nil? && user.coupon.present?
   end
@@ -233,7 +238,8 @@ class Request < ActiveRecord::Base
 
   def ride_alone!
     return nil unless self.ride.nil?
-    create_ride
+    add_to(create_ride)
+    update_ride
     fulfilled!
     self.ride.finalize
     self.vicinity_count = Ride::MAX_CAPTAIN_VICINITY_COUNT

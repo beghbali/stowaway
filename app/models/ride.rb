@@ -13,7 +13,7 @@ class Ride < ActiveRecord::Base
   PRESUMED_SPEED = 25 #mph
   BASE_FEE = 1.00 #dollars
 
-  has_many :requests, -> { available }, autosave: true
+  has_many :requests, -> { available }, autosave: true, after_add: :request_added
   has_many :riders, through: :requests, source: :user
   has_many :stowaways, -> { stowaways }, class_name: 'Request'
   has_one :captain, -> { captains }, class_name: 'Request'
@@ -56,15 +56,30 @@ class Ride < ActiveRecord::Base
     self.class.transaction do
       captain = determine_captain
       captain.update(designation: :captain, status: 'fulfilled')
-      (self.requests - [captain]).each do |request|
-        request.status = 'fulfilled'
-        request.designation = :stowaway
-        request.save
-      end
-      self.suggested_dropoff_address, self.suggested_dropoff_lat, self.suggested_dropoff_lng = determine_suggested_dropoff_location
-      self.suggested_pickup_address, self.suggested_pickup_lat, self.suggested_pickup_lng = determine_suggested_pickup_location
-      save
+      (self.requests - [captain]).map { |request| request.update(status: 'fulfilled', designation: :stowaway) }
+      set_pickup_to_captains
+      update_ride_time!
     end
+  end
+
+  def request_added(request)
+    update_ride_route!
+  end
+
+  def update_ride_route!
+    self.suggested_dropoff_address, self.suggested_dropoff_lat, self.suggested_dropoff_lng = determine_suggested_dropoff_location
+    self.suggested_pickup_address, self.suggested_pickup_lat, self.suggested_pickup_lng = determine_suggested_pickup_location
+    save
+  end
+
+  def update_ride_time!
+    request_times = requests.order(requested_for: :desc).pluck(:requested_for)
+    self.suggested_pickup_time = request_times[request_times.count/2]
+    save
+  end
+
+  def set_pickup_to_captains
+    self.suggested_pickup_address, self.suggested_pickup_lat, self.suggested_pickup_lng = captain.try(:pickup_address), captain.try(:pickup_lat), captain.try(:pickup_lng)
   end
 
   def determine_captain
@@ -79,7 +94,8 @@ class Ride < ActiveRecord::Base
   end
 
   def determine_suggested_pickup_location
-    [self.captain.pickup_address, self.captain.pickup_lat, self.captain.pickup_lng]
+    lat_lng = Geocoder::Calculations.geographic_center(self.requests.pluck(:pickup_lat, :pickup_lng))
+    ["suggested pickup location"] + lat_lng
   end
 
   def finalized?
