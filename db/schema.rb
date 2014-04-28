@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140417031712) do
+ActiveRecord::Schema.define(version: 20140428035840) do
 
   create_table "coupons", force: true do |t|
     t.string   "type"
@@ -82,6 +82,8 @@ ActiveRecord::Schema.define(version: 20140417031712) do
     t.datetime "checkedin_at"
     t.integer  "receipt_id"
     t.string   "coupon_code"
+    t.datetime "requested_for"
+    t.integer  "duration"
   end
 
   add_index "requests", ["deleted_at"], name: "index_requests_on_deleted_at", using: :btree
@@ -101,6 +103,7 @@ ActiveRecord::Schema.define(version: 20140417031712) do
     t.decimal  "suggested_pickup_lng",      precision: 16, scale: 12
     t.datetime "deleted_at"
     t.integer  "receipt_id"
+    t.datetime "suggested_pickup_time"
   end
 
   add_index "rides", ["deleted_at"], name: "index_rides_on_deleted_at", using: :btree

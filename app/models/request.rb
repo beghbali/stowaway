@@ -22,6 +22,7 @@ class Request < ActiveRecord::Base
 
   validates :status, inclusion: { in: STATUSES }
 
+  before_validation :set_request_time
   before_save :record_vicinity, if: -> { self.last_lat_changed? || last_lng_changed? }
   before_save :apply_user_coupon
   before_save :apply_coupon, if: :coupon_code_changed?
@@ -44,11 +45,18 @@ class Request < ActiveRecord::Base
   scope :unclosed, -> { where('status NOT IN (?)', CLOSED_STATUSES)}
   scope :closed, -> { where(status: CLOSED_STATUSES)}
 
+  scope :same_route_unscheduled, -> (as) {
+    near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: :pickup_lat, longitude: :pickup_lng).
+    near([as.dropoff_lat, as.dropoff_lng], PICKUP_RADIUS, latitude: :dropoff_lat, longitude: :dropoff_lng).
+    where.not(:id => as.id)
+  }
+  scope :same_route_scheduled, ->(as) {
+    same_route_unscheduled(as).where(requested_for: (as.requested_for - as.duration)..(as.requested_for + as.duration))
+  }
+
   scope :same_route, ->(as) {
-      near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: :pickup_lat, longitude: :pickup_lng).
-      near([as.dropoff_lat, as.dropoff_lng], PICKUP_RADIUS, latitude: :dropoff_lat, longitude: :dropoff_lng).
-      where.not(:id => as.id)
-    }
+    as.requested_for > Time.now ? same_route_scheduled(as) : same_route_unscheduled(as)
+  }
 
   DESIGNATIONS.each do |designation|
     scope designation.pluralize, -> { where(designation: designation) }
@@ -277,6 +285,13 @@ class Request < ActiveRecord::Base
   def to_s(format=nil)
     if format.to_sym == :charge
       self.ride && self.ride.to_s(:charge)
+    end
+  end
+
+  def set_request_time
+    if self.requested_for.nil?
+      self.requested_for = Time.now
+      self.duration = nil
     end
   end
 

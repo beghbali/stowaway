@@ -288,20 +288,10 @@ describe Stowaway::Rides do
     end
   end
 
-  context 'v1' do
-    let(:version) { 'v1' }
-    version = 'v1'
 
-    let(:user) { FactoryGirl.create :user }
-    let(:request_data) { FactoryGirl.attributes_for :request }
-    let(:notification_count) { existing_requests.count }
-
-    it_behaves_like 'admin endpoints'
-    it_behaves_like 'accepting a ride request'
-    it_behaves_like 'a lone rider'
-
+  shared_examples_for 'a group ride experience' do
     context 'with another rider with similar route' do
-      let(:existing_request) { FactoryGirl.create :request }
+      let(:existing_request) { FactoryGirl.create :request, *request_traits }
       let(:existing_requests) { [ existing_request ] }
 
       before do
@@ -311,7 +301,7 @@ describe Stowaway::Rides do
       it_behaves_like 'matching outstanding requests with similar routes'
 
       context 'cancelling one of the requests' do
-        let(:request) { FactoryGirl.create :request }
+        let(:request) { FactoryGirl.create :request, *request_traits }
         let(:ride) { request.ride }
         before do
           ride
@@ -326,7 +316,7 @@ describe Stowaway::Rides do
       end
 
       context 'with a third rider joining existing ride' do
-        let(:existing_requests) { FactoryGirl.create_list(:request, 2) }
+        let(:existing_requests) { FactoryGirl.create_list(:request, 2, *request_traits) }
 
         let(:existing_request) { existing_requests.first }
 
@@ -346,7 +336,7 @@ describe Stowaway::Rides do
         end
 
         context 'with a fourth rider joining existing ride' do
-          let(:existing_requests) { FactoryGirl.create_list(:request, 3) }
+          let(:existing_requests) { FactoryGirl.create_list(:request, 3, *request_traits) }
 
           it_behaves_like 'matching outstanding requests with similar routes' do
             let(:expected_status) { 'fulfilled' }
@@ -355,6 +345,27 @@ describe Stowaway::Rides do
           end
         end
       end
+    end
+  end
+
+  context 'v1' do
+    let(:version) { 'v1' }
+    version = 'v1'
+
+    let(:user) { FactoryGirl.create :user }
+    let(:request_traits) { nil }
+    let(:request_data) { FactoryGirl.attributes_for :request, *request_traits }
+    let(:notification_count) { existing_requests.count }
+
+    it_behaves_like 'admin endpoints'
+    it_behaves_like 'accepting a ride request'
+    it_behaves_like 'a lone rider'
+    it_behaves_like 'a group ride experience'
+
+    context 'with scheduled requests' do
+      let(:request_traits) { [:scheduled] }
+
+      it_behaves_like 'a group ride experience'
     end
   end
 
