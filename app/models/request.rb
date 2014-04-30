@@ -45,6 +45,7 @@ class Request < ActiveRecord::Base
   scope :available, -> { where(deleted_at: nil) }
   scope :unclosed, -> { where('status NOT IN (?)', CLOSED_STATUSES)}
   scope :closed, -> { where(status: CLOSED_STATUSES)}
+  scope :scheduled, -> { where.not(scheduled_for: nil) }
 
   scope :same_route_unscheduled, -> (as) {
     near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: :pickup_lat, longitude: :pickup_lng).

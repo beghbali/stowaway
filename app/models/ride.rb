@@ -12,6 +12,8 @@ class Ride < ActiveRecord::Base
   MAX_CAPTAIN_VICINITY_COUNT = 5
   PRESUMED_SPEED = 25 #mph
   BASE_FEE = 1.00 #dollars
+  CAPTAIN_NOTIFICATION_TIME = 5.minutes #how long before the ride to remind them (if scheduled)
+  STOWAWAY_NOTIFICATION_TIME = 10.minutes
 
   has_many :requests, -> { available }, autosave: true, after_add: :request_added
   has_many :riders, through: :requests, source: :user
@@ -22,6 +24,8 @@ class Ride < ActiveRecord::Base
   before_create :generate_location_channel
   before_destroy -> { stop_checkin && notify_riders('ride_cancelled') }
   after_destroy :reset_requests
+  after_destroy :delete_reminders
+  after_create :schedule_finalization
   after_save :generate_stowaway_receipts, if: :receipt_id_changed?
 
   scope :unreconciled, -> { where(receipt_id: nil) }
@@ -58,12 +62,12 @@ class Ride < ActiveRecord::Base
       captain.update(designation: :captain, status: 'fulfilled')
       (self.requests - [captain]).map { |request| request.update(status: 'fulfilled', designation: :stowaway) }
       set_pickup_to_captains
-      update_ride_time!
     end
   end
 
   def request_added(request)
     update_ride_route!
+    update_ride_time!
   end
 
   def update_ride_route!
@@ -72,10 +76,13 @@ class Ride < ActiveRecord::Base
     save
   end
 
-  def update_ride_time!
+  def determine_suggested_pickup_time
     request_times = requests.order(requested_for: :desc).pluck(:requested_for)
-    self.suggested_pickup_time = request_times[request_times.count/2]
-    save
+    request_times[request_times.count/2]
+  end
+
+  def update_ride_time!
+    update(suggested_pickup_time: determine_suggested_pickup_time)
   end
 
   def set_pickup_to_captains
@@ -218,6 +225,21 @@ class Ride < ActiveRecord::Base
     else
       super(format)
     end
+  end
+
+  def schedule_finalization
+    duration = requests.where.not(duration: nil).first.try(:duration)
+    Resque.enqueue_at(self.suggested_pickup_time - duration, FinalizeRideJob, self.id) unless duration.nil?
+  end
+
+  def notify_riders_to_initiate_the_ride
+    requests.scheduled.each do |sched_req|
+      Resque.enqueue_at(self.suggested_pickup_time - send("#{sched_req.designation.upcase}_NOTIFICATION_TIME", DelayedNotificationJob, sched_req.id)
+    end
+  end
+
+  def delete_reminders
+    Resque::Job.destroy('finalize', FinalizeRideJob, self.public_id)
   end
 
   protected
