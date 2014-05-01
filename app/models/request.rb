@@ -6,7 +6,7 @@ class Request < ActiveRecord::Base
 
   acts_as_paranoid
 
-  STATUSES = %w(outstanding matched fulfilled cancelled checkedin missed)
+  STATUSES = %w(outstanding matched fulfilled initiated cancelled checkedin missed)
   CLOSED_STATUSES = %w(missed checkedin)
   PICKUP_RADIUS = 0.3
   DROPOFF_RADIUS = 0.5
@@ -41,7 +41,7 @@ class Request < ActiveRecord::Base
 
   scope :checkinable, -> { where('vicinity_count >= ?', Ride::MAX_CAPTAIN_VICINITY_COUNT) }
   scope :uncheckinable, -> { where('vicinity_count < ?', Ride::MAX_CAPTAIN_VICINITY_COUNT) }
-  scope :active, -> { where(status: %w(outstanding matched fulfilled))}
+  scope :active, -> { where(status: %w(outstanding matched fulfilled initiated))}
   scope :available, -> { where(deleted_at: nil) }
   scope :unclosed, -> { where('status NOT IN (?)', CLOSED_STATUSES)}
   scope :closed, -> { where(status: CLOSED_STATUSES)}
@@ -76,7 +76,8 @@ class Request < ActiveRecord::Base
     end
 
     define_method "#{status}!" do
-      self.update(status: status)
+      status()
+      save
     end
 
     define_method "#{status}?" do
@@ -180,6 +181,16 @@ class Request < ActiveRecord::Base
     elsif self.vicinity_count <= Ride::MIN_CAPTAIN_VICINITY_COUNT
       miss
     end
+  end
+
+  def fulfilled
+    self.status = 'fulfilled'
+    notify_rider_about(self) if scheduled?
+  end
+
+  def initiated
+    self.status = 'initiated'
+    notify_rider_about(self) if scheduled?
   end
 
   def checkedin
@@ -302,6 +313,10 @@ class Request < ActiveRecord::Base
     end
   end
 
+  def scheduled?
+    scheduled_for.present?
+  end
+
   protected
 
   def should_cancel_ride?
@@ -309,9 +324,9 @@ class Request < ActiveRecord::Base
   end
 
   def notification_options
-    if self.status == 'fulfilled'
-      alert = I18n.t("notifications.request.fulfilled.#{designation}.alert", pickup_address: self.ride.reload.suggested_pickup_address)
-      sound = I18n.t("notifications.request.fulfilled.#{designation}.sound")
+    if self.status == 'fulfilled' || self.status == 'initiated'
+      alert = I18n.t("notifications.request.#{status}.#{designation}.alert", pickup_address: self.ride.reload.suggested_pickup_address)
+      sound = I18n.t("notifications.request.#{status}.#{designation}.sound")
     else
       alert = I18n.t("notifications.request.#{status}.alert", name: self.rider.first_name)
       sound = I18n.t("notifications.request.#{status}.sound")
