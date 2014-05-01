@@ -62,6 +62,7 @@ class Ride < ActiveRecord::Base
       captain.update(designation: :captain, status: 'fulfilled')
       (self.requests - [captain]).map { |request| request.update(status: 'fulfilled', designation: :stowaway) }
       set_pickup_to_captains
+      save
       initiate
     end
   end
@@ -235,14 +236,14 @@ class Ride < ActiveRecord::Base
 
   def initiate
     requests.each do |request|
-      request.scheduled? ? Resque.enqueue_at(self.suggested_pickup_time - send("#{request.designation.upcase}_NOTIFICATION_TIME", InitiateRideJob, request.id) : request.initiate!
+      request.scheduled? ? Resque.enqueue_at(self.suggested_pickup_time - self.class.const_get("#{request.designation.upcase}_NOTIFICATION_TIME"), InitiateRequestJob, request.id) : request.initiate!
     end
   end
 
   def delete_reminders
     Resque::Job.destroy('finalize', FinalizeRideJob, self.id)
     requests.with_deleted.each do |request|
-      Resque::Job.destroy('initiate', InitiateRideJob, request.id)
+      Resque::Job.destroy('initiate', InitiateRequestJob, request.id)
     end
   end
 

@@ -33,6 +33,13 @@ en:
         sound: ''
       fulfilled:
         stowaway:
+          alert: "You are designated as a stowaway, Your ride will pick you up at %{pickup_address} in %{minutes} minutes"
+          sound: 'you-are-stowaway.wav'
+        captain:
+          alert: "You are designated as the captain, You'll need to order an UberX in %{minutes} minutes. your crew will meet you at your location"
+          sound: 'you-are-captain.wav'
+      initiated:
+        stowaway:
           alert: "Start walking to %{pickup_address}, your ride will arrive in approximately 5 minutes"
           sound: 'you-are-stowaway.wav'
         captain:

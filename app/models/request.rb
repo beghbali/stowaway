@@ -45,7 +45,7 @@ class Request < ActiveRecord::Base
   scope :available, -> { where(deleted_at: nil) }
   scope :unclosed, -> { where('status NOT IN (?)', CLOSED_STATUSES)}
   scope :closed, -> { where(status: CLOSED_STATUSES)}
-  scope :scheduled, -> { where.not(scheduled_for: nil) }
+  scope :scheduled, -> { where.not(requested_for: nil) }
 
   scope :same_route_unscheduled, -> (as) {
     near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: :pickup_lat, longitude: :pickup_lng).
@@ -76,7 +76,7 @@ class Request < ActiveRecord::Base
     end
 
     define_method "#{status}!" do
-      status()
+      send(status)
       save
     end
 
@@ -185,12 +185,12 @@ class Request < ActiveRecord::Base
 
   def fulfilled
     self.status = 'fulfilled'
-    notify_rider_about(self) if scheduled?
+    notify_rider_about([self]) if scheduled?
   end
 
   def initiated
     self.status = 'initiated'
-    notify_rider_about(self) if scheduled?
+    notify_rider_about([self]) if scheduled?
   end
 
   def checkedin
@@ -314,7 +314,7 @@ class Request < ActiveRecord::Base
   end
 
   def scheduled?
-    scheduled_for.present?
+    requested_for.present?
   end
 
   protected
@@ -325,7 +325,8 @@ class Request < ActiveRecord::Base
 
   def notification_options
     if self.status == 'fulfilled' || self.status == 'initiated'
-      alert = I18n.t("notifications.request.#{status}.#{designation}.alert", pickup_address: self.ride.reload.suggested_pickup_address)
+      alert = I18n.t("notifications.request.#{status}.#{designation}.alert",
+        pickup_address: self.ride.reload.suggested_pickup_address, minutes: self.duration)
       sound = I18n.t("notifications.request.#{status}.#{designation}.sound")
     else
       alert = I18n.t("notifications.request.#{status}.alert", name: self.rider.first_name)
