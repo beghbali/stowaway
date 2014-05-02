@@ -29,6 +29,7 @@ class Request < ActiveRecord::Base
   after_create :match_request, unless: :dont_match   #TODO: see if this can be done after commit in case the client requests ride for things to be resolved already
   after_create :update_ride, if: :ride
   after_create :finalize, if: :can_finalize?
+  after_create :notify_neighbors, if: -> { outstanding? && scheduled? }
   before_destroy :cancel
   after_destroy :cancel_ride, if: :should_cancel_ride?
 
@@ -301,7 +302,7 @@ class Request < ActiveRecord::Base
   end
 
   def to_s(format=nil)
-    if format.to_sym == :charge
+    if format.try(:to_sym) == :charge
       self.ride && self.ride.to_s(:charge)
     end
   end
@@ -315,6 +316,9 @@ class Request < ActiveRecord::Base
 
   def scheduled?
     requested_for.present?
+  end
+
+  def notify_neighbors
   end
 
   protected

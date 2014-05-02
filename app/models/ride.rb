@@ -222,10 +222,8 @@ class Ride < ActiveRecord::Base
   end
 
   def to_s(format=nil)
-    if format.to_sym == :charge
+    if format.try(:to_sym) == :charge
       I18n.t('models.ride.format.charge', pickup: self.suggested_pickup_address)
-    else
-      super(format)
     end
   end
 
