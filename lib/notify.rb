@@ -28,6 +28,8 @@ module Notify
       else
         # GCM.send_notification(self.device_token, options[:other])
       end
+    rescue Exception => e
+      Rails.logger.error("NOTIFICATION: FAILED #{e.message}")
     end
   end
 end

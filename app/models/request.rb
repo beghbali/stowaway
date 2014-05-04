@@ -58,7 +58,7 @@ class Request < ActiveRecord::Base
   }
 
   scope :same_route, ->(as) {
-    as.requested_for > Time.now ? same_route_scheduled(as) : same_route_unscheduled(as)
+    as.requested_for.present? && as.requested_for > Time.now ? same_route_scheduled(as) : same_route_unscheduled(as)
   }
 
   DESIGNATIONS.each do |designation|
