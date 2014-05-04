@@ -76,6 +76,8 @@ module Stowaway
               requires :pickup_lng, type: Float, desc: "geocoded longitude of the desired pickup location"
               requires :dropoff_lat, type: Float, desc: "geocoded latitude of the desired dropoff location"
               requires :dropoff_lng, type: Float, desc: "geocoded longitude of the desired dropoff location"
+              optional :requested_for, type: DateTime, desc: "desired pickup time"
+              optional :duration, type: Integer, desc: "how long to wait for"
             end
           end
           post do
