@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140501102037) do
+ActiveRecord::Schema.define(version: 20140504173156) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string   "namespace"
@@ -53,6 +53,15 @@ ActiveRecord::Schema.define(version: 20140501102037) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.datetime "expires_at"
+  end
+
+  create_table "locales", force: true do |t|
+    t.string   "name"
+    t.decimal  "lat",        precision: 16, scale: 12
+    t.decimal  "lng",        precision: 16, scale: 12
+    t.integer  "accuracy"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "payments", force: true do |t|
@@ -140,6 +149,18 @@ ActiveRecord::Schema.define(version: 20140501102037) do
   end
 
   add_index "rides", ["deleted_at"], name: "index_rides_on_deleted_at", using: :btree
+
+  create_table "routes", force: true do |t|
+    t.integer  "user_id"
+    t.integer  "start_locale_id"
+    t.integer  "end_locale_id"
+    t.integer  "accuracy"
+    t.integer  "count",            default: 0
+    t.string   "added_by"
+    t.datetime "last_notified_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "users", force: true do |t|
     t.string   "first_name"

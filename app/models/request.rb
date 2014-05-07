@@ -319,7 +319,7 @@ class Request < ActiveRecord::Base
   end
 
   def notify_neighbors
-    Resqueue.enqueue(NotifyNeighborsJob, self.id)
+    Resque.enqueue(NotifyNeighborsJob, self.id)
   end
 
   def pickup_location
