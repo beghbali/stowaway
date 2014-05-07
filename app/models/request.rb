@@ -127,7 +127,7 @@ class Request < ActiveRecord::Base
   def add_to(ride)
     self.status = 'matched'
     self.ride = ride
-    save
+    save unless new_record?
   end
 
   def full_house?
