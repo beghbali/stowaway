@@ -16,7 +16,7 @@ module Stowaway
         end
 
         def permitted_request_params
-          [ :pickup_address, :dropoff_address, :pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng, :coupon_code, :requested_for, :duration ]
+          [ :pickup_address, :dropoff_address, :pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng, :coupon_code, :requested_for, :duration, :device_type, :device_token ]
         end
 
         def new_user_params
