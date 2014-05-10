@@ -40,7 +40,11 @@ class Ride < ActiveRecord::Base
     if options[:format] == :notification
       super(only: [:public_id]).merge(status: options[:status] || self.status)
     else
-      super(except: [:created_at, :updated_at, :id]).merge(status: options[:status] || self.status, timeout: timeout_notification, requests: reqs.map{|req| req.as_json })
+      super(except: [:created_at, :updated_at, :id]).merge(
+        suggested_pickup_time: suggested_pickup_time.try(:to_time).try(:to_i),
+        status: options[:status] || self.status,
+        timeout: timeout_notification,
+        requests: reqs.map{|req| req.as_json })
     end
   end
 

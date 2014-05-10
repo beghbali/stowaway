@@ -1,5 +1,23 @@
 module Notify
   module Utils
+    def notification(options = {})
+      alert, sound = notification_options(options)
+      {
+        alert: alert,
+        sound: sound
+      }
+    end
+
+    def notification_options(options = {})
+      alert = sound = nil
+      yield(options) if block_given?
+
+      alert = nillify_blank(alert)
+      sound = nillify_blank(sound)
+
+      [alert, sound]
+    end
+
     private
     def nillify_blank(str)
       str.blank? ? nil : str

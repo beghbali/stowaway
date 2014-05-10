@@ -127,7 +127,7 @@ class Request < ActiveRecord::Base
   def add_to(ride)
     self.status = 'matched'
     self.ride = ride
-    save unless new_record?
+    save
   end
 
   def full_house?
@@ -293,14 +293,6 @@ class Request < ActiveRecord::Base
     end
   end
 
-  def notification
-    alert, sound = notification_options
-    {
-      alert: alert,
-      sound: sound
-    }
-  end
-
   def to_s(format=nil)
     if format.try(:to_sym) == :charge
       self.ride && self.ride.to_s(:charge)
@@ -340,20 +332,17 @@ class Request < ActiveRecord::Base
     self.ride && (self.captain? || (self.ride.requests - [self]).count <= 1)
   end
 
-  def notification_options
-    if self.status == 'fulfilled' || self.status == 'initiated'
-      alert = I18n.t("notifications.request.#{status}.#{designation}.alert",
-        pickup_address: self.ride.reload.suggested_pickup_address, minutes: self.duration)
-      sound = I18n.t("notifications.request.#{status}.#{designation}.sound")
-    else
-      alert = I18n.t("notifications.request.#{status}.alert", name: self.rider.first_name)
-      sound = I18n.t("notifications.request.#{status}.sound")
+  def notification_options(options = {})
+    super do
+      if self.status == 'fulfilled' || self.status == 'initiated'
+        alert = I18n.t("notifications.request.#{status}.#{designation}.alert",
+          pickup_address: self.ride.reload.suggested_pickup_address, minutes: self.duration)
+        sound = I18n.t("notifications.request.#{status}.#{designation}.sound")
+      else
+        alert = I18n.t("notifications.request.#{status}.alert", name: self.rider.first_name)
+        sound = I18n.t("notifications.request.#{status}.sound")
+      end
     end
-
-    alert = nillify_blank(alert)
-    sound = nillify_blank(sound)
-
-    [alert, sound]
   end
 
 end

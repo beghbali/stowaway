@@ -13,6 +13,7 @@ class User < ActiveRecord::Base
 
   has_many :requests
   has_many :rides, through: :requests
+  has_many :routes
   belongs_to :coupon, foreign_key: :coupon_code, primary_key: :code
 
   validates :uid, uniqueness: true
@@ -24,6 +25,7 @@ class User < ActiveRecord::Base
   before_create :generate_stowaway_email_address
   before_save :create_stowaway_email, if: :can_create_email?
   before_save :link_payment_card, if: :stripe_token_changed?
+  after_create :retreive_preferences
 
   def update_facebook_attributes!(fb_attributes)
     self.update_attributes!(fb_attributes)
@@ -144,5 +146,17 @@ class User < ActiveRecord::Base
 
   def gmail_token_request_url
     'https://accounts.google.com/o/oauth2/token'
+  end
+
+  def retreive_preferences
+    preferences = Mailboto::SignupPreference.new(self)
+    add_route(preferences.home, preferences.work)
+    credit(preferences.credit.to_i)
+  end
+
+  def add_route(from, to)
+    start_locale = Locale.find_by_name(from)
+    end_locale = Locale.find_by_name(to)
+    self.routes.create(start_locale: start_locale, end_locale: end_locale, accuracy: 5, added_by: 'user')
   end
 end
