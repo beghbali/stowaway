@@ -10,6 +10,7 @@ module Requests
   module Mocks
     def mock_external_requests
       mock_stowaway_email_creation
+      mock_user_preferences
       mock_gcm_push_notifications
       mock_push_notifications
       mock_stripe
@@ -20,7 +21,7 @@ module Requests
     end
 
     def mock_stowaway_email_creation
-      stub_request(:post, "http://getstowaway.com/createInbox.php").with(query: hash_including({ nonce: '821222a91eb75f136ea40899'} )).
+      stub_request(:post, "https://getstowaway.com/createInbox.php").with(query: hash_including({ nonce: '821222a91eb75f136ea40899'} )).
          to_return(status: 200, body: ->(request) { mock_create_stowaway_email(request).to_json })
     end
 
@@ -29,6 +30,19 @@ module Requests
       {
         email:"#{username}@getstowaway.com",
         password: SecureRandom.base64(8)
+      }
+    end
+
+    def mock_user_preferences
+      stub_request(:get, "https://getstowaway.com/getter.php").with(query: hash_including({ nonce: '821222Aq3erdfgnqQFEJD1223'} )).
+         to_return(status: 200, body: ->(request) { mock_user_preference_data.to_json })
+    end
+
+    def mock_user_preference_data
+      {
+        home: Locale.all.sample.name,
+        work: Locale.all.sample.name,
+        credit: [0, 1, 5, 10, 20].sample
       }
     end
 
