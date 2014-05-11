@@ -288,6 +288,28 @@ describe Stowaway::Rides do
     end
   end
 
+  shared_examples_for 'notifying neighbors about route' do
+    context 'with neighbors with similar route' do
+      #pending
+      it 'should notify neighbors' do
+        expect(APNS).to receive(:send_notification).exactly(neighbors.count).times
+      end
+
+      context 'with another request on the same route' do
+        #pending
+        it 'should not notify neighbors' do
+          expect(APNS).not_to receive(:send_notification)
+        end
+      end
+    end
+
+    context 'with neighbors who do not have same destination' do
+      #pending
+      it 'should not send any notifications' do
+        expect(APNS).not_to receive(:send_notification)
+      end
+    end
+  end
 
   shared_examples_for 'a group ride experience' do
     context 'with another rider with similar route' do
@@ -298,6 +320,7 @@ describe Stowaway::Rides do
         existing_requests
       end
 
+      it_behaves_like 'notifying neighbors about route'
       it_behaves_like 'matching outstanding requests with similar routes'
 
       context 'cancelling one of the requests' do

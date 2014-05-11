@@ -19,6 +19,7 @@ class Request < ActiveRecord::Base
 
   has_many :riders, through: :ride
   has_one :payment
+  has_many :routes
 
   validates :status, inclusion: { in: STATUSES }
 
@@ -288,17 +289,8 @@ class Request < ActiveRecord::Base
 
   def notify(audience)
     audience.each do |request|
-      alert, sound = notification_options
-      request.rider.notify(alert: alert, sound: sound, other: self.ride.as_json(format: :notification, status: self.status))
+      request.rider.notify(notification.merge(other: self.ride.as_json(format: :notification, status: self.status)))
     end
-  end
-
-  def notification
-    alert, sound = notification_options
-    {
-      alert: alert,
-      sound: sound
-    }
   end
 
   def to_s(format=nil)
@@ -319,6 +311,19 @@ class Request < ActiveRecord::Base
   end
 
   def notify_neighbors
+    Resque.enqueue(NotifyNeighborsJob, self.id)
+  end
+
+  def pickup_location
+    [self.pickup_lat, self.pickup_lng]
+  end
+
+  def dropoff_location
+    [self.dropoff_lat, self.dropoff_lng]
+  end
+
+  def to_route
+    Route.new(:start => Locale.by_location(pickup_location).first, :end => Locale.by_location(dropoff_location).first, :added_by => 'request')
   end
 
   protected
@@ -327,20 +332,17 @@ class Request < ActiveRecord::Base
     self.ride && (self.captain? || (self.ride.requests - [self]).count <= 1)
   end
 
-  def notification_options
-    if self.status == 'fulfilled' || self.status == 'initiated'
-      alert = I18n.t("notifications.request.#{status}.#{designation}.alert",
-        pickup_address: self.ride.reload.suggested_pickup_address, minutes: self.duration)
-      sound = I18n.t("notifications.request.#{status}.#{designation}.sound")
-    else
-      alert = I18n.t("notifications.request.#{status}.alert", name: self.rider.first_name)
-      sound = I18n.t("notifications.request.#{status}.sound")
+  def notification_options(options = {})
+    super do
+      if self.status == 'fulfilled' || self.status == 'initiated'
+        alert = I18n.t("notifications.request.#{status}.#{designation}.alert",
+          pickup_address: self.ride.reload.suggested_pickup_address, minutes: self.duration)
+        sound = I18n.t("notifications.request.#{status}.#{designation}.sound")
+      else
+        alert = I18n.t("notifications.request.#{status}.alert", name: self.rider.first_name)
+        sound = I18n.t("notifications.request.#{status}.sound")
+      end
     end
-
-    alert = nillify_blank(alert)
-    sound = nillify_blank(sound)
-
-    [alert, sound]
   end
 
 end
