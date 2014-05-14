@@ -109,9 +109,10 @@ describe Stowaway::Rides do
     let(:expected_status) { "matched" }
     let(:cancellation_count) { 0 }
     let(:rematch_count) { 0 }
+    let(:request_count) { 1 }
 
     before do
-      expect(APNS).to receive(:send_notification).exactly(notification_count + cancellation_count + rematch_count).times
+      expect(APNS).to receive(:send_notification).exactly(notification_count*request_count + cancellation_count + rematch_count).times
       post prefix, request: request_data.except(:id).merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
     end
 
@@ -145,6 +146,29 @@ describe Stowaway::Rides do
       let(:rematch_count) { existing_requests.count }
 
       it_behaves_like 'a cancelled request'
+    end
+
+    context 'requesting again' do
+      let(:request_count) { 2 }
+
+      subject(:new_request) do
+        post prefix, request: request_data.except(:id).merge(existing_request.slice(:pickup_lat, :pickup_lng, :dropoff_lat, :dropoff_lng))
+        Request.last
+      end
+
+      subject(:user_routes) { new_request.rider.reload.routes }
+
+      it 'replaces existing request' do
+        expect { new_request }.not_to change { Request.count }
+      end
+
+      it 'does not find multiple requests for the user' do
+        expect(new_request.rider.requests.count).to eq(1)
+      end
+
+      it 'updates the existing route' do
+        expect(user_routes.last.count).to eq(2)
+      end
     end
 
     context 'cancellations' do
@@ -291,6 +315,7 @@ describe Stowaway::Rides do
   shared_examples_for 'notifying neighbors about route' do
     context 'with neighbors with similar route' do
       #pending
+      let(:neighbors) { 1 }
       it 'should notify neighbors' do
         expect(APNS).to receive(:send_notification).exactly(neighbors.count).times
       end

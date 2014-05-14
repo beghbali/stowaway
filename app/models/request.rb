@@ -19,7 +19,6 @@ class Request < ActiveRecord::Base
 
   has_many :riders, through: :ride
   has_one :payment
-  has_many :routes
 
   validates :status, inclusion: { in: STATUSES }
 
@@ -30,6 +29,7 @@ class Request < ActiveRecord::Base
   after_create :match_request, unless: :dont_match   #TODO: see if this can be done after commit in case the client requests ride for things to be resolved already
   after_create :update_ride, if: :ride
   after_create :finalize, if: :can_finalize?
+  after_create :update_routes
   after_create :notify_neighbors, if: -> { outstanding? && scheduled? }
   before_destroy :cancel
   after_destroy :cancel_ride, if: :should_cancel_ride?
@@ -323,7 +323,23 @@ class Request < ActiveRecord::Base
   end
 
   def to_route
-    Route.new(:start => Locale.by_location(pickup_location).first, :end => Locale.by_location(dropoff_location).first, :added_by => 'request')
+    Route.new(as_route)
+  end
+
+  def as_route
+    {
+      start_locale_id: Locale.by_location(pickup_location).first.try(:id),
+      end_locale_id: Locale.by_location(dropoff_location).first.try(:id),
+      added_by: 'request',
+      accuracy: 5
+    }
+  end
+
+  def update_routes
+    route = self.rider.routes.where(as_route.except(:added_by)).first || to_route
+    route.count += 1
+    route.user = self.rider
+    route.save
   end
 
   protected

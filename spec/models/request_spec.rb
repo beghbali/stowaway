@@ -43,6 +43,10 @@ describe Request do
         let(:user) { FactoryGirl.create :user, coupon_code: coupon.code }
         let(:request) { FactoryGirl.create :request, user: user }
 
+        before do
+          FactoryGirl.create :coupon, :lone_rider
+        end
+
         it 'should associate the coupon with the user' do
           expect(user.coupon).to eq(coupon)
         end
