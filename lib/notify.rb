@@ -8,7 +8,7 @@ module Notify
       }
     end
 
-    def notification_options(options = {})
+    def nullified_notification_options(options = {})
       alert = sound = nil
       yield(options) if block_given?
 
