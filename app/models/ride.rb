@@ -251,14 +251,12 @@ class Ride < ActiveRecord::Base
 
   protected
   def notification_options(status)
-    alert = sound = nil
-
-    if status == 'ride_cancelled'
-      who_canceled = self.captain.nil? ? 'cancelled_by_captain' : 'cancelled'
-      alert = I18n.t("notifications.ride.#{who_canceled}.alert", name: self.captain && self.captain.user.first_name)
-      sound = I18n.t("notifications.ride.#{who_canceled}.sound")
+    nullified_notification_options do
+      if status == 'ride_cancelled'
+        who_canceled = self.captain.nil? ? 'cancelled_by_captain' : 'cancelled'
+        alert = I18n.t("notifications.ride.#{who_canceled}.alert", name: self.captain && self.captain.user.first_name)
+        sound = I18n.t("notifications.ride.#{who_canceled}.sound")
+      end
     end
-
-    [alert, sound]
   end
 end

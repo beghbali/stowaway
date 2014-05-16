@@ -349,7 +349,7 @@ class Request < ActiveRecord::Base
   end
 
   def notification_options(options = {})
-    super do
+    nullified_notification_options(options) do
       if self.status == 'fulfilled' || self.status == 'initiated'
         alert = I18n.t("notifications.request.#{status}.#{designation}.alert",
           pickup_address: self.ride.reload.suggested_pickup_address, minutes: self.duration)
