@@ -17,5 +17,6 @@ class Route < ActiveRecord::Base
       alert = I18n.t("notifications.route.proposed.alert", from_locale: start_locale.name, to_locale: end_locale.name, time: options[:time] || 'now')
       sound = I18n.t("notifications.route.proposed.sound")
     end
+    [alert, sound]
   end
 end

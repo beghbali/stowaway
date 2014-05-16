@@ -254,7 +254,6 @@ class Request < ActiveRecord::Base
     return nil unless self.ride.nil?
     add_to(create_ride)
     update_ride
-    fulfilled!
     self.ride.finalize
     self.vicinity_count = Ride::MAX_CAPTAIN_VICINITY_COUNT
     checkedin!
@@ -349,7 +348,7 @@ class Request < ActiveRecord::Base
   end
 
   def notification_options(options = {})
-    nullified_notification_options(options) do
+    nullified_notification_options do |options|
       if self.status == 'fulfilled' || self.status == 'initiated'
         alert = I18n.t("notifications.request.#{status}.#{designation}.alert",
           pickup_address: self.ride.reload.suggested_pickup_address, minutes: self.duration)
@@ -358,6 +357,7 @@ class Request < ActiveRecord::Base
         alert = I18n.t("notifications.request.#{status}.alert", name: self.rider.first_name)
         sound = I18n.t("notifications.request.#{status}.sound")
       end
+      [alert, sound]
     end
   end
 
