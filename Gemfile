@@ -34,7 +34,7 @@ gem 'ruby-units'
 # gem "resque", "~> 2.0.0.pre.1", github: "resque/resque"
 gem 'resque'
 gem 'resque-web', require: 'resque_web'
-gem 'resque-scheduler'
+gem 'resque-scheduler', require: 'resque_scheduler'
 gem 'resque-retry'
 
 gem 'bootstrap-sass', '~> 3.1.0'
