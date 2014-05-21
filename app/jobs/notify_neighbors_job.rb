@@ -4,7 +4,7 @@ class NotifyNeighborsJob
   @retry_exceptions = [Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET]
 
   def self.perform(request_id)
-    request = Request.find(request_id)
+    request = Request.where(id: request_id).first
     unless request.nil?
       proposed_route = request.to_route
       #TODO: add commute time window as we know more about them
