@@ -251,6 +251,9 @@ GEM
       redis-namespace (~> 1.2)
       sinatra (>= 0.9.2)
       vegas (~> 0.1.2)
+    resque-retry (1.2.0)
+      resque (~> 1.25)
+      resque-scheduler (~> 2.5)
     resque-scheduler (2.5.5)
       mono_logger (~> 1.0)
       redis (~> 3.0.4)
@@ -383,6 +386,7 @@ DEPENDENCIES
   pushmeup
   rails (= 4.0.2)
   resque
+  resque-retry
   resque-scheduler
   resque-web
   rspec-rails (~> 3.0.0.beta)

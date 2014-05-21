@@ -35,6 +35,7 @@ gem 'ruby-units'
 gem 'resque'
 gem 'resque-web', require: 'resque_web'
 gem 'resque-scheduler'
+gem 'resque-retry'
 
 gem 'bootstrap-sass', '~> 3.1.0'
 gem 'slim-rails'

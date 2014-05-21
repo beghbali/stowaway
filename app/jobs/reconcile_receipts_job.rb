@@ -1,5 +1,6 @@
 class ReconcileReceiptsJob
   @queue = :reconcile_receipt
+  @retry_exceptions = [Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET]
 
   def self.perform(ride_public_id)
     ride = Ride.find_by_public_id(ride_public_id)

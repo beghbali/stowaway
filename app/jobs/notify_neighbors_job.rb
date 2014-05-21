@@ -1,6 +1,7 @@
 class NotifyNeighborsJob
 
   @queue = :notify_neighbor
+  @retry_exceptions = [Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET]
 
   def self.perform(request_id)
     request = Request.find(request_id)
