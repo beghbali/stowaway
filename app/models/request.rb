@@ -31,7 +31,7 @@ class Request < ActiveRecord::Base
   after_create :finalize, if: :can_finalize?
   after_create :update_routes
   after_create :notify_neighbors, if: -> { outstanding? && scheduled? }
-  before_destroy :cancel
+  after_destroy :cancel
   after_destroy :cancel_ride, if: :should_cancel_ride?
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
