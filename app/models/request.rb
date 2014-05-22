@@ -233,7 +233,7 @@ class Request < ActiveRecord::Base
 
   def deactivate!
     deactivate
-    save
+    save(validate: false)
   end
 
   def update_ride
