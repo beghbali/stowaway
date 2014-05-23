@@ -23,6 +23,7 @@ class Request < ActiveRecord::Base
   validates :status, inclusion: { in: STATUSES }
 
   before_validation :set_request_time
+  before_create :match_request, unless: :dont_match
   before_save :record_vicinity, if: -> { self.last_lat_changed? || last_lng_changed? }
   before_save :apply_user_coupon
   before_save :apply_coupon, if: :coupon_code_changed?
@@ -32,7 +33,6 @@ class Request < ActiveRecord::Base
   after_create :notify_neighbors, if: -> { outstanding? && scheduled? }
   after_destroy :cancel
   after_destroy :cancel_ride, if: :should_cancel_ride?
-  after_commit :match_request, on: :create, unless: :dont_match
 
   geocoded_by :pickup_address, latitude: :pickup_lat, longitude: :pickup_lng
   geocoded_by :dropoff_address, latitude: :dropoff_lat, longitude: :dropoff_lng
@@ -127,7 +127,7 @@ class Request < ActiveRecord::Base
   def add_to(ride)
     self.status = 'matched'
     self.ride = ride
-    save
+    save unless new_record?
   end
 
   def full_house?
@@ -232,7 +232,8 @@ class Request < ActiveRecord::Base
   end
 
   def deactivate!
-    update_column(:deleted_at, Time.now)
+    deactivate
+    save
   end
 
   def update_ride
