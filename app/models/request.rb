@@ -232,8 +232,7 @@ class Request < ActiveRecord::Base
   end
 
   def deactivate!
-    deactivate
-    save(validate: false)
+    update_column(:deleted_at, Time.now)
   end
 
   def update_ride
