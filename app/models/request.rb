@@ -13,7 +13,7 @@ class Request < ActiveRecord::Base
   DESIGNATIONS =  %w(stowaway captain)
 
   belongs_to :user
-  belongs_to :ride
+  belongs_to :ride, autosave: true
   belongs_to :receipt
   belongs_to :coupon, foreign_key: :coupon_code, primary_key: :code
 
@@ -27,10 +27,10 @@ class Request < ActiveRecord::Base
   before_save :record_vicinity, if: -> { self.last_lat_changed? || last_lng_changed? }
   before_save :apply_user_coupon
   before_save :apply_coupon, if: :coupon_code_changed?
-  after_create :update_ride, if: :ride
   after_create :finalize, if: :can_finalize?
   after_create :update_routes
   after_create :notify_neighbors, if: -> { outstanding? && scheduled? }
+  after_create :notify_other_riders, if: -> { status_was == 'outstanding' && ride.present? }
   after_destroy :cancel
   after_destroy :cancel_ride, if: :should_cancel_ride?
 
@@ -95,10 +95,6 @@ class Request < ActiveRecord::Base
 
   def match_request
     match_with_outstanding_requests || match_with_existing_rides
-
-    unless self.ride.nil?
-      notify_other_riders
-    end
   end
 
   def match_with_outstanding_requests
@@ -106,7 +102,11 @@ class Request < ActiveRecord::Base
 
     if matches.any?
       self.create_ride
-      (matches + [self]).map{ |request| request.add_to(self.ride) }
+      self.status = 'matched'
+      matches.each do |request|
+        request.update(status: 'matched', ride_id: self.ride.id)
+        self.ride.request_added(request)
+      end
     end
     ride
   end
@@ -118,16 +118,11 @@ class Request < ActiveRecord::Base
                 order('spaces_taken ASC')
 
     if matches.any?
-      ride = matches.first.ride
-      self.add_to(ride)
+      self.ride = matches.first.ride
+      self.status = 'matched'
+      self.ride.request_added(self)
     end
     ride
-  end
-
-  def add_to(ride)
-    self.status = 'matched'
-    self.ride = ride
-    save unless new_record?
   end
 
   def full_house?
@@ -236,10 +231,6 @@ class Request < ActiveRecord::Base
     save
   end
 
-  def update_ride
-    self.ride.request_added(self)
-  end
-
   def apply_user_coupon
     self.coupon_code = user.coupon.code if self.coupon_code.nil? && user.coupon.present?
   end
@@ -252,8 +243,9 @@ class Request < ActiveRecord::Base
 
   def ride_alone!
     return nil unless self.ride.nil?
-    add_to(create_ride)
-    update_ride
+    self.create_ride
+    save
+    self.ride.request_added(self)
     self.ride.finalize
     self.vicinity_count = Ride::MAX_CAPTAIN_VICINITY_COUNT
     checkedin!

@@ -231,6 +231,10 @@ class Ride < ActiveRecord::Base
     end
   end
 
+  def suggested_pickup_time
+    self[:suggested_pickup_time] || determine_suggested_pickup_time
+  end
+
   def schedule_finalization
     duration = requests.where.not(duration: nil).first.try(:duration)
     Resque.enqueue_at(self.suggested_pickup_time - duration, FinalizeRideJob, self.id) unless duration.nil?
