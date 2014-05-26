@@ -38,7 +38,7 @@ module Notify
     end
 
     def notify(options = {})
-      Resque.enqueue(NotificationJob, self.class, self.public_id, options)
+      Resque.enqueue(NotificationJob, self.class.to_s, self.public_id, options)
     end
 
     def notify!(options = {})
