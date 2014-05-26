@@ -227,8 +227,7 @@ class Request < ActiveRecord::Base
   end
 
   def deactivate!
-    deactivate
-    save
+    self.update_column(:deleted_at, Time.now)
   end
 
   def apply_user_coupon
