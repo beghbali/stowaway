@@ -28,9 +28,9 @@ class Request < ActiveRecord::Base
   before_save :apply_user_coupon
   before_save :apply_coupon, if: :coupon_code_changed?
   after_create :finalize, if: :can_finalize?
-  after_create :update_routes
   after_create :notify_neighbors, if: -> { outstanding? && scheduled? }
   after_create :notify_other_riders, if: -> { status_was == 'outstanding' && ride.present? }
+  after_commit :update_routes, on: :create
   after_destroy :cancel
   after_destroy :cancel_ride, if: :should_cancel_ride?
 
@@ -104,7 +104,7 @@ class Request < ActiveRecord::Base
       self.create_ride
       self.status = 'matched'
       matches.each do |request|
-        request.update_columns(status: 'matched', ride_id: self.ride.id)
+        request.update(status: 'matched', ride_id: self.ride.id)
         self.ride.request_added(request)
       end
     end
