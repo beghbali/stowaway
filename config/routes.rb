@@ -55,5 +55,5 @@ Stowaway::Application.routes.draw do
   match 'pusher/:user_id/auth' => 'pusher#auth', via: [:get, :post]
 
   mount API => '/'
-  mount ResqueWeb::Engine => "/admin/jobs"
+  mount ResqueWeb::Engine => "/resque_web"
 end
