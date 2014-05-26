@@ -104,7 +104,7 @@ class Request < ActiveRecord::Base
       self.create_ride
       self.status = 'matched'
       matches.each do |request|
-        request.update(status: 'matched', ride_id: self.ride.id)
+        request.update_columns(status: 'matched', ride_id: self.ride.id)
         self.ride.request_added(request)
       end
     end
