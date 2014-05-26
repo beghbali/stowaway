@@ -43,14 +43,14 @@ module Notify
 
     def notify!(options = {})
       return if cannot_be_notified?
-      Rails.logger.info "NOTIFICATION: #{options} TO: #{self.device_token}"
+      Resque.logger.info "NOTIFICATION: #{options} TO: #{self.device_token}"
       if device_type.to_sym == :ios
         APNS.send_notification(self.device_token, options)
       else
         # GCM.send_notification(self.device_token, options[:other])
       end
     rescue Exception => e
-      Rails.logger.error("NOTIFICATION: FAILED #{e.message}")
+      Resque.logger.error("NOTIFICATION: FAILED #{e.message}")
     end
   end
 end
