@@ -30,7 +30,6 @@ class Request < ActiveRecord::Base
   after_create :finalize, if: :can_finalize?
   after_create :notify_neighbors, if: -> { outstanding? && scheduled? }
   after_create :notify_other_riders, if: -> { status_was == 'outstanding' && ride.present? }
-  after_commit :update_routes, on: :create
   after_destroy :cancel
   after_destroy :cancel_ride, if: :should_cancel_ride?
 
@@ -220,7 +219,6 @@ class Request < ActiveRecord::Base
     miss
     save
   end
-
 
   def deactivate
     self.deleted_at = Time.now

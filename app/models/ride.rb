@@ -61,14 +61,12 @@ class Ride < ActiveRecord::Base
   end
 
   def finalize
-    self.class.transaction do
-      captain = determine_captain
-      captain.update(designation: :captain, status: 'fulfilled')
-      (self.requests - [captain]).map { |request| request.update(status: 'fulfilled', designation: :stowaway) }
-      set_pickup_to_captains
-      save
-      initiate
-    end
+    captain = determine_captain
+    captain.update(designation: :captain, status: 'fulfilled')
+    (self.requests - [captain]).map { |request| request.update(status: 'fulfilled', designation: :stowaway) }
+    set_pickup_to_captains
+    save
+    initiate
   end
 
   def request_added(request)
