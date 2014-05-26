@@ -25,7 +25,6 @@ class Ride < ActiveRecord::Base
   before_destroy -> { stop_checkin && notify_riders('ride_cancelled') }
   after_destroy :reset_requests
   after_destroy :delete_reminders
-  after_create :schedule_finalization
   after_save :generate_stowaway_receipts, if: :receipt_id_changed?
 
   scope :unreconciled, -> { where(receipt_id: nil) }
@@ -72,6 +71,7 @@ class Ride < ActiveRecord::Base
   def request_added(request)
     update_ride_route!
     update_ride_time!
+    schedule_finalization
   end
 
   def update_ride_route!
@@ -235,7 +235,10 @@ class Ride < ActiveRecord::Base
 
   def schedule_finalization
     duration = requests.where.not(duration: nil).first.try(:duration)
-    Resque.enqueue_at(self.suggested_pickup_time - duration, FinalizeRideJob, self.id) unless duration.nil?
+    if duration.present?
+      Resque::Job.destroy('finalize', FinalizeRideJob, self.id)
+      Resque.enqueue_at(self.suggested_pickup_time - duration, FinalizeRideJob, self.id)
+    end
   end
 
   def initiate
