@@ -1,6 +1,7 @@
 require 'resque'
 require 'resque_scheduler'
 require 'resque_scheduler/server'
+require "resque_web"
 
 Stowaway::Application.routes.draw do
   devise_for :admin_users, ActiveAdmin::Devise.config
