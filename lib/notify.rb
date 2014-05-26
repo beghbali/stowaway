@@ -38,6 +38,10 @@ module Notify
     end
 
     def notify(options = {})
+      Resque.enqueue(NotificationJob, self.class, self.public_id, options)
+    end
+
+    def notify!(options = {})
       return if cannot_be_notified?
       Rails.logger.info "NOTIFICATION: #{options} TO: #{self.device_token}"
       if device_type.to_sym == :ios
