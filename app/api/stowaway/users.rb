@@ -83,11 +83,13 @@ module Stowaway
           post do
             user = User.find_by_public_id(params[:user_id])
             error!('User not found', 404) if user.nil?
-            user.requests.active.map(&:deactivate!)
-            Rails.logger.debug "DEACTIVATED"
-            request = user.requests.create!(new_request_params[:request])
-            Rails.logger.debug "REQUEST CREATED: #{request.inspect}"
-            request
+            Request.transaction do
+              user.requests.active.map(&:deactivate!)
+              Rails.logger.debug "DEACTIVATED"
+              request = user.requests.create!(new_request_params[:request])
+              Rails.logger.debug "REQUEST CREATED: #{request.inspect}"
+              request
+            end
           end
 
           desc "get request info"
