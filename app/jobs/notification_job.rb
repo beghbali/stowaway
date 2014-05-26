@@ -1,4 +1,4 @@
-class NotifyNeighborsJob
+class NotificationJob
 
   @queue = :notifications
   @retry_exceptions = [Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET]
