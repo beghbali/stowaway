@@ -15,7 +15,7 @@ class Ride < ActiveRecord::Base
   CAPTAIN_NOTIFICATION_TIME = 5.minutes #how long before the ride to remind them (if scheduled)
   STOWAWAY_NOTIFICATION_TIME = 10.minutes
 
-  has_many :requests, -> { available }, autosave: true, after_add: :request_added
+  has_many :requests, -> { available }
   has_many :riders, through: :requests, source: :user
   has_many :stowaways, -> { stowaways }, class_name: 'Request'
   has_one :captain, -> { captains }, class_name: 'Request'
