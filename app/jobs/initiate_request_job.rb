@@ -6,7 +6,7 @@ class InitiateRequestJob
   def self.perform(request_id)
     request = Request.where(id: request_id).first
     unless request.nil?
-      request.initiate
+      request.initiated
     end
   end
 end
