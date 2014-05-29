@@ -45,7 +45,7 @@ module Notify
       return if cannot_be_notified?
       Rails.logger.info "NOTIFICATION: #{options} TO: #{self.device_token}"
       if device_type.to_sym == :ios
-        APNS.send_notification(self.device_token, options)
+        APNS.send_notification(self.device_token, options.with_indifferent_access)
       else
         # GCM.send_notification(self.device_token, options[:other])
       end
