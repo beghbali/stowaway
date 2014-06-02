@@ -44,7 +44,7 @@ en:
           sound: 'you-are-captain.wav'
       initiated:
         stowaway:
-          alert: "Start walking to %{pickup_address}, your ride will arrive in approximately 5 minutes"
+          alert: "Start walking to the pickup location, your ride will arrive in approximately 5 minutes"
           sound: 'you-are-stowaway.wav'
         captain:
           alert: "Order the UberX now. Your crew will meet you at %{pickup_address} shortly"
