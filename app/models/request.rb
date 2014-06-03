@@ -184,8 +184,8 @@ class Request < ActiveRecord::Base
     notify_rider_about([self]) if scheduled?
   end
 
-  def initiated
-    self.status = 'initiated'
+  def initiated!
+    self.update(status: 'initiated')
     notify_rider_about([self]) if scheduled?
   end
 
