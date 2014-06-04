@@ -94,6 +94,14 @@ class Ride < ActiveRecord::Base
   end
 
   def determine_captain
+    self.requests.count <= 2 ? captain_for_two : captain_for_three_or_more
+  end
+
+  def captain_for_two
+    self.requests.sample
+  end
+
+  def captain_for_three_or_more
     self.requests.reduce([]) do |list, request|
       list << [request, self.requests.select("AVG(#{Request.distance_from_sql(request, latitude: :pickup_lat, longitude: :pickup_lng)}) as average_distance").first.average_distance]
     end.sort {|a,b| a[1] <=> b[1] }.first[0]
@@ -165,7 +173,7 @@ class Ride < ActiveRecord::Base
   end
 
   def collect_payments
-    Resque.enqueue_at(self.anticipated_end + 5.minutes, ReconcileReceiptsJob, self.public_id)
+    Resque.enqueue_at(self.anticipated_end + 5.minutes, ReconcileReceiptsJob, self.id)
   end
 
   def find_receipt
@@ -249,6 +257,8 @@ class Ride < ActiveRecord::Base
 
   def delete_reminders
     Resque::Job.destroy('finalize', FinalizeRideJob, self.id)
+    Resque::Job.destroy('autocheckin', CheckinRidersJob, self.id)
+    Resque::Job.destroy('close_ride', CloseRideJob, self.id)
     requests.with_deleted.each do |request|
       Resque::Job.destroy('initiate', InitiateRequestJob, request.id)
     end
