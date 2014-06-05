@@ -29,7 +29,7 @@ class Request < ActiveRecord::Base
   before_save :apply_coupon, if: :coupon_code_changed?
   after_create :finalize, if: :can_finalize?
   after_create :notify_neighbors, if: -> { outstanding? && scheduled? }
-  after_create :notify_other_riders, if: -> { status_was == 'outstanding' && ride.present? }
+  after_create :notify_other_riders, if: -> { matched? && ride.present? }
   after_destroy :cancel
   after_destroy :cancel_ride, if: :should_cancel_ride?
 
