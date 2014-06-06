@@ -259,6 +259,7 @@ class Ride < ActiveRecord::Base
     Resque::Job.destroy('finalize', FinalizeRideJob, self.id)
     Resque::Job.destroy('autocheckin', CheckinRidersJob, self.id)
     Resque::Job.destroy('close_ride', CloseRideJob, self.id)
+
     requests.with_deleted.each do |request|
       Resque::Job.destroy('initiate', InitiateRequestJob, request.id)
     end
