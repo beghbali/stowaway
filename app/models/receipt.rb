@@ -19,7 +19,7 @@ class Receipt < ActiveRecord::Base
     parser = ReceiptParser.parser_for(email)
     raise ReceiptParser::UnknownSenderError.new(email.from) if parser.nil?
 
-    parsed_email = parser.new(email).parse
+    parsed_email = parser.new(email.encoded).parse
     self.new(parsed_email)
   end
 
