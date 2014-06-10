@@ -9,8 +9,8 @@ class ReconcileReceiptsJob
     Ride.transaction do
       unless ride.reconciled?
         ride.reconcile_receipt
-        verify_in = Time.now < (ride.created_at + 1.hour) ? 5.minutes : 3.hours
-        Resque.enqueue_in(5.minutes, ReconcileReceiptsJob, ride.id) unless Time.now > (ride.created_at + 28.hours)
+        retry_in = Time.now < (ride.created_at + 1.hour) ? 10.minutes : 3.hours
+        Resque.enqueue_in(retry_in, ReconcileReceiptsJob, ride.id) unless Time.now > (ride.created_at + 28.hours) || ride.reconciled?
       end
     end
   end

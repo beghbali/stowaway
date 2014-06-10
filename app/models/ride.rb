@@ -188,6 +188,7 @@ class Ride < ActiveRecord::Base
   #reconcile stowaway receipts
   def reconcile_receipt
     self.class.transaction do
+      self.captain.rider.fetch_ride_receipts
       receipt = find_receipt
       unless receipt.blank?
         self.receipt = receipt

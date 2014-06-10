@@ -21,11 +21,11 @@ class ReceiptParser < Mail::Message
     RECEIPT_SENDERS[supported_senders.detect{|sender| mail.from.first.include? sender }]
   end
 
-  attr_accessor :email, :text
+  attr_accessor :text
 
   def initialize(mail)
-    self.email = mail
-    self.text = mail.text_part.body.to_s
+    self.text = text_part.body.to_s
+    super
   end
 
   def match(what, prefix=nil)
