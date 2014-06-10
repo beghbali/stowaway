@@ -172,7 +172,9 @@ class Request < ActiveRecord::Base
   end
 
   def try_checkin
-    if self.vicinity_count >= Ride::MAX_CAPTAIN_VICINITY_COUNT
+    if self.vicinity_count >= Ride::CLOSE_RIDE_VICINITY_COUNT && self.captain?
+      self.ride.close
+    elsif self.vicinity_count >= Ride::MAX_CAPTAIN_VICINITY_COUNT
       checkin
     elsif self.vicinity_count <= Ride::MIN_CAPTAIN_VICINITY_COUNT
       miss
@@ -201,7 +203,6 @@ class Request < ActiveRecord::Base
 
   def checkin
     checkedin
-    notify_all_riders
   end
 
   def checkin!
@@ -211,7 +212,6 @@ class Request < ActiveRecord::Base
 
   def miss
     self.missed
-    notify_all_riders
     self.deactivate
   end
 

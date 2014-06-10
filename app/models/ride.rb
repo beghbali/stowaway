@@ -10,6 +10,7 @@ class Ride < ActiveRecord::Base
   CHECKIN_PROXIMITY = 0.007
   MIN_CAPTAIN_VICINITY_COUNT = -5
   MAX_CAPTAIN_VICINITY_COUNT = 5
+  CLOSE_RIDE_VICINITY_COUNT = 30
   PRESUMED_SPEED = 25 #mph
   BASE_FEE = 1.00 #dollars
   CAPTAIN_NOTIFICATION_TIME = 5.minutes #how long before the ride to remind them (if scheduled)
@@ -145,6 +146,8 @@ class Ride < ActiveRecord::Base
 
   def close
     stop_checkin
+    self.requests.unclosed.map(&:miss!)
+    self.requests.with_deleted.closed.map { |request| request.notify_rider_about([request])}
     collect_payments
   end
 
