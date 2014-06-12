@@ -29,6 +29,15 @@ class ReceiptParser < Mail::Message
     text.match(/#{what}[:\s]+(#{prefix}[^\n]+)/i) && $1
   end
 
+  def match_date
+    text.match(/(#{Date::MONTHNAMES.compact.join('|')})\s+\d{1,2},\s*\d{4}/i) && $&
+  end
+
+  def match_time(occurence=1)
+    occurences = text.scan(/(\d{2}:\d{2}\s*(am|pm))/i)
+    occurences[occurence-1] && occurences[occurence-1]
+  end
+
   def match_datetime(what)
     match(what).try(:to_datetime)
   end

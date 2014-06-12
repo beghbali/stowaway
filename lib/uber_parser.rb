@@ -17,15 +17,19 @@ class UberParser < ReceiptParser
     'Uber'
   end
 
+  def match_requested_at
+    DateTime.parse("#{match_date} #{match_time}")
+  end
+
   def parse
     {
       generated_by:         name,
       billed_to:            to.first,
-      ride_requested_at:    match_datetime('request date'),
-      pickup_location:      match('pickup location'),
-      dropoff_location:     match('dropoff location'),
-      payment_card:         match('payment'),
-      total_amount:         match_currency('total fare'),
+      ride_requested_at:    match_requested_at,
+      pickup_location:      match('pickup location') || match(match_time(1)),
+      dropoff_location:     match('dropoff location') || match(match_time(2)),
+      payment_card:         match('payment') || match('charged'),
+      total_amount:         match_currency('total fare') || match_currency('') ,
       base_amount:          match_currency('base fare'),
       distance_amount:      match_currency('distance'),
       time_amount:          match_currency('time'),
