@@ -5,7 +5,7 @@ class ParseEmailJob
   def self.perform(user_public_id, message)
     user = User.find_by_public_id(user_public_id)
     return if user.nil?
-    email = Mail::Message.new(YAML.load(message)[:email])
+    email = Mail::Message.new(YAML.load(message))
 
     Receipt.transaction do
       receipt = Receipt.build_from_email(email)
