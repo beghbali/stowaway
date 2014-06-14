@@ -240,13 +240,15 @@ class Request < ActiveRecord::Base
 
   def ride_alone!
     return nil unless self.ride.nil?
-    self.create_ride
-    save
-    self.ride.request_added(self)
-    self.ride.finalize
-    self.vicinity_count = Ride::MAX_CAPTAIN_VICINITY_COUNT
-    checkedin!
-    self.ride.reload.close
+    without_notifications do
+      self.create_ride
+      save
+      self.ride.request_added(self)
+      self.ride.finalize
+      self.vicinity_count = Ride::MAX_CAPTAIN_VICINITY_COUNT
+      checkedin!
+      self.ride.reload.close
+    end
   end
 
   alias_method :rider, :user
@@ -334,6 +336,12 @@ class Request < ActiveRecord::Base
 
   def should_cancel_ride?
     self.ride && (self.captain? || (self.ride.requests - [self]).count <= 1)
+  end
+
+  def without_notifications(&block)
+    @dont_notify = true
+    yield
+    @dont_notify = false
   end
 
   def notification_options(options = {})

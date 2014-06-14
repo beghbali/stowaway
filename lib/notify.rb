@@ -34,7 +34,7 @@ module Notify
     class MisconfiguredDeviceError < ArgumentError; end
 
     def cannot_be_notified?
-      self.device_token.blank? || self.device_type.blank?
+      @dont_notify || self.device_token.blank? || self.device_type.blank?
     end
 
     def notify(options = {})
