@@ -279,6 +279,7 @@ describe Stowaway::Rides do
 
       it 'should create a ride' do
         expect(ride).to be_present
+        expect(Ride.find(request.ride_id)).to be_present
       end
 
     end
