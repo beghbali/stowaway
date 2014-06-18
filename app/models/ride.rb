@@ -176,7 +176,7 @@ class Ride < ActiveRecord::Base
   end
 
   def collect_payments
-    Resque.enqueue_at(self.anticipated_end + 5.minutes, ReconcileReceiptsJob, self.id)
+    Resque.enqueue_at([self.anticipated_end + 5.minutes, 30.minutes.from_now].min, ReconcileReceiptsJob, self.id)
   end
 
   def find_receipt
