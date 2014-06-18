@@ -60,13 +60,13 @@ class Ride < ActiveRecord::Base
     self.location_channel = "#{SecureRandom.hex(10)}"
   end
 
-  def finalize
+  def finalize(options = {initiate: true})
     captain = determine_captain
     captain.update(designation: :captain, status: 'fulfilled')
     (self.requests - [captain]).map { |request| request.update(status: 'fulfilled', designation: :stowaway) }
     set_pickup_to_captains
     save
-    initiate
+    initiate if options[:initiate]
   end
 
   def request_added(request)

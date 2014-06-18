@@ -243,8 +243,9 @@ class Request < ActiveRecord::Base
     without_notifications do
       self.create_ride
       save
-      self.ride.request_added(self)
-      self.ride.finalize
+      self.ride.update_ride_route!
+      self.ride.update_ride_time!
+      self.ride.finalize(initiate: false)
       self.vicinity_count = Ride::MAX_CAPTAIN_VICINITY_COUNT
       checkedin!
       self.ride.reload.close
