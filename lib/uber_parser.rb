@@ -18,7 +18,8 @@ class UberParser < ReceiptParser
   end
 
   def match_requested_at
-    DateTime.parse("#{match_date} #{match_time}")
+    #TODO: this will change to pst at some point
+    DateTime.parse("#{match_date} #{match_time} pdt")
   end
 
   def parse
