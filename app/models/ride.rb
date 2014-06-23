@@ -147,7 +147,6 @@ class Ride < ActiveRecord::Base
   def close
     stop_checkin
     self.requests.unclosed.map(&:miss!)
-    self.requests.with_deleted.closed.map { |request| request.notify_rider_about([request])}
     collect_payments
   end
 
