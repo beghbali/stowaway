@@ -29,7 +29,7 @@ class Receipt < ActiveRecord::Base
 
 
   def did_not_generate_same_receipt_before
-    errors.add(:base, "duplicate receipt") if self.duplicate?
+    errors.add(:base, "duplicate receipt #{self.billed_to}, #{self.total_amount}, #{self.around_requested_at}") if self.duplicate?
   end
 
   def duplicate?
