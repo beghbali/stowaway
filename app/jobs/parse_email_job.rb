@@ -1,4 +1,5 @@
 class ParseEmailJob
+  extend Resque::Plugins::Retry
   @queue = :email_parser
   @retry_exceptions = [Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET]
 
