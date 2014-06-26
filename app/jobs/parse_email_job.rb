@@ -1,7 +1,6 @@
 class ParseEmailJob
-  extend Resque::Plugins::Retry
+
   @queue = :email_parser
-  @retry_exceptions = [Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET]
 
   def self.perform(user_public_id, message)
     user = User.find_by_public_id(user_public_id)
