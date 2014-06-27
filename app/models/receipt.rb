@@ -49,8 +49,8 @@ class Receipt < ActiveRecord::Base
   end
 
   def correct_pickup_location
-    if pickup_location =~ /^\s*\d+\s*\-\s*\d+/
-      pickup_location = pickup_location.split(/^\s*\d+\s*\-/).last
+    if self.pickup_location =~ /^\s*\d+\s*\-\s*\d+/
+      self.pickup_location = self.pickup_location.split(/^\s*\d+\s*\-/).last
     end
   end
 
