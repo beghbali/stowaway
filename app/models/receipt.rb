@@ -41,9 +41,16 @@ class Receipt < ActiveRecord::Base
   def geocode(tries=1)
     begin
       super()
+      correct_pickup_location && geocode(tries+1) if pickup_lat.nil? && tries <= 3
     rescue Geocoder::OverQueryLimitError
       sleep tries*tries
       geocode(tries+1) unless tries > 3
+    end
+  end
+
+  def correct_pickup_location
+    if pickup_location =~ /^\s*\d+\s*\-\s*\d+/
+      pickup_location = pickup_location.split(/^\s*\d+\s*\-/).last
     end
   end
 

@@ -10,6 +10,8 @@ Geocoder.configure(
   :timeout => 5,
 
   # set default units to kilometers:
-  :units => :mi
+  :units => :mi,
+
+  :http_headers => {"User-Agent"=>"bashir@gmail.com"}
 
 )
