@@ -98,8 +98,7 @@
             <span class="style2">You saved <%= (@receipt.savings * 100).round %>% on this ride.<br>
             <br>
             <% if @receipt.credited_amount > 0.00 %>
-              Your Stowaway account has been <br>
-              credited with <%= number_to_currency(@receipt.credited_amount) %> for future rides. </span></h1>
+              Your Stowaway account has been credited with <%= number_to_currency(@receipt.credited_amount) %> for future rides. </span></h1>
             <% end %>
 
     <% if @receipt.request.ride.riders.count > 1 %>
