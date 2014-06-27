@@ -102,7 +102,7 @@
               credited with <%= number_to_currency(@receipt.credited_amount) %> for future rides. </span></h1>
             <% end %>
 
-    <% if @receipt.request.rider.riders.count > 1 %>
+    <% if @receipt.request.ride.riders.count > 1 %>
       <p style="color:#8a8b8d;padding:0 12px" align="center">Ride with <%= @receipt.request.ride.riders.map(&:first_name).join(',') %> on <%= l @receipt.request.ride.created_at, format: :long %></p>
     <% else %>
       <p style="color:#8a8b8d;padding:0 12px" align="center">Solo ride on <%= l @receipt.request.ride.created_at, format: :long %></p>
