@@ -33,7 +33,7 @@ class Receipt < ActiveRecord::Base
   end
 
   def duplicate?
-    self.class.exists?(billed_to: self.billed_to,
+    self.class.where('id != ?', self.id).exists?(billed_to: self.billed_to,
       total_amount: self.total_amount,
       ride_requested_at: self.around_requested_at)
   end
