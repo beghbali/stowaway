@@ -1,4 +1,5 @@
 class ReceiptMailer < ActionMailer::Base
+  include ActionView::Helpers::NumberHelper
 
   default from: 'support@getstowaway.com'
 
