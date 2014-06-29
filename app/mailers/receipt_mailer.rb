@@ -1,7 +1,7 @@
 class ReceiptMailer < ActionMailer::Base
   include ActionView::Helpers::NumberHelper
 
-  default from: 'support@getstowaway.com'
+  default from: 'Stowaway <support@getstowaway.com>'
 
   def captain_ride_receipt(receipt_id)
     @receipt = Receipt.find(receipt_id)

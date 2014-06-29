@@ -213,6 +213,7 @@ class Request < ActiveRecord::Base
 
   def miss
     self.missed
+    deactivate
   end
 
   def miss!
