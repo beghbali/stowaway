@@ -29,6 +29,7 @@ class Ride < ActiveRecord::Base
   after_save :generate_stowaway_receipts, if: :receipt_id_changed?
 
   scope :unreconciled, -> { where(receipt_id: nil) }
+  scope :around, -> (time) { joins(:requests).where('requests.checkedin_at' => (time - Receipt::REQUEST_TIME_PROXIMITY)..(time + Receipt::REQUEST_TIME_PROXIMITY)) }
 
   def has_captain?
     !self.captain.nil?
@@ -116,6 +117,14 @@ class Ride < ActiveRecord::Base
   def determine_suggested_pickup_location
     lat_lng = Geocoder::Calculations.geographic_center(self.requests.pluck(:pickup_lat, :pickup_lng))
     ["suggested pickup location"] + lat_lng
+  end
+
+  def suggested_pickup_location
+    [suggested_pickup_lat, suggested_pickup_lng]
+  end
+
+  def suggested_dropoff_location
+    [suggested_dropoff_lat, suggested_dropoff_lng]
   end
 
   def finalized?

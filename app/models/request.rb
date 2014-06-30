@@ -49,16 +49,16 @@ class Request < ActiveRecord::Base
   scope :closed, -> { where(status: CLOSED_STATUSES)}
   scope :scheduled, -> { where.not(requested_for: nil) }
 
-  scope :same_route_unscheduled, -> (as) {
-    near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: :pickup_lat, longitude: :pickup_lng).
-    near([as.dropoff_lat, as.dropoff_lng], PICKUP_RADIUS, latitude: :dropoff_lat, longitude: :dropoff_lng).
+  scope :same_route_unscheduled, -> (as, options = {}) {
+    near([as.pickup_lat, as.pickup_lng], PICKUP_RADIUS, latitude: options[:pickup_lat] || :pickup_lat, longitude: options[:pickup_lng] || :pickup_lng).
+    near([as.dropoff_lat, as.dropoff_lng], PICKUP_RADIUS, latitude: options[:dropoff_lat] || :dropoff_lat, longitude: options[:dropoff_lng] || :dropoff_lng).
     where.not(:id => as.id)
   }
-  scope :same_route_scheduled, ->(as) {
+  scope :same_route_scheduled, ->(as, options = {}) {
     same_route_unscheduled(as).where(requested_for: (as.requested_for - as.duration)..(as.requested_for + as.duration))
   }
 
-  scope :same_route, ->(as) {
+  scope :same_route, ->(as, options = {}) {
     as.requested_for.present? && as.requested_for > Time.now ? same_route_scheduled(as) : same_route_unscheduled(as)
   }
 
@@ -112,12 +112,13 @@ class Request < ActiveRecord::Base
   end
 
   def match_with_existing_rides
-    matches = self.class.matched.same_route(self).
+    matches = self.class.matched.joins('INNER JOIN rides on requests.ride_id = rides.id').
+                same_route(self, pickup_lat: :suggested_pickup_lat, pickup_lng: :suggested_pickup_lng, dropoff_lat: :suggested_dropoff_lat, dropoff_lng: :suggested_dropoff_lng).
                 select("requests.*, COUNT(requests.ride_id) as spaces_taken").
                 having('COUNT(requests.ride_id) < ?', Ride::CAPACITY).
-                order('spaces_taken ASC')
+                order('spaces_taken ASC').readonly(false)
 
-    if matches.any?
+    if matches.count > 0
       self.ride = matches.first.ride
       self.status = 'matched'
       self.ride.request_added(self)

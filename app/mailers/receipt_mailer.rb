@@ -9,7 +9,7 @@ class ReceiptMailer < ActionMailer::Base
          subject: I18n.t('mailers.receipt_mailer.captain_ride_receipt.subject',
           weekday: @receipt.request.ride.created_at.strftime("%A"),
           timeofday: @receipt.request.ride.created_at.to_datetime.time_of_day,
-          savings: "#{number_with_precision(@receipt.savings * 100, percision: 0)}%"))
+          savings: "#{@receipt.savings.to_i}%"))
   end
 
   def stowaway_ride_receipt(receipt_id)
@@ -18,6 +18,6 @@ class ReceiptMailer < ActionMailer::Base
          subject: I18n.t('mailers.receipt_mailer.stowaway_ride_receipt.subject',
           weekday: @receipt.request.ride.created_at.strftime("%A"),
           timeofday: @receipt.request.ride.created_at.to_datetime.time_of_day,
-          savings: "#{number_with_precision(@receipt.savings * 100, percision: 0)}%"))
+          savings: "#{@receipt.savings.to_i)}%"))
   end
 end
