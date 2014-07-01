@@ -55,7 +55,7 @@ class Request < ActiveRecord::Base
     where.not(:id => as.id)
   }
   scope :same_route_scheduled, ->(as, options = {}) {
-    same_route_unscheduled(as, options).where(requested_for: (as.requested_for - as.duration)..(as.requested_for + as.duration))
+    same_route_unscheduled(as, options).where((options[:requested_for] || :requested_for) => (as.requested_for - as.duration)..(as.requested_for + as.duration))
   }
 
   scope :same_route, ->(as, options = {}) {
@@ -113,7 +113,8 @@ class Request < ActiveRecord::Base
 
   def match_with_existing_rides
     matches = self.class.matched.joins('INNER JOIN rides on requests.ride_id = rides.id').
-                same_route(self, pickup_lat: :suggested_pickup_lat, pickup_lng: :suggested_pickup_lng, dropoff_lat: :suggested_dropoff_lat, dropoff_lng: :suggested_dropoff_lng).
+                same_route(self, pickup_lat: :suggested_pickup_lat, pickup_lng: :suggested_pickup_lng, dropoff_lat: :suggested_dropoff_lat, dropoff_lng: :suggested_dropoff_lng,
+                  requested_for: :suggested_pickup_time).
                 select("requests.*, COUNT(requests.ride_id) as spaces_taken").
                 having('COUNT(requests.ride_id) < ?', Ride::CAPACITY).
                 order('spaces_taken ASC').readonly(false)
