@@ -55,7 +55,7 @@ class Request < ActiveRecord::Base
     where.not(:id => as.id)
   }
   scope :same_route_scheduled, ->(as, options = {}) {
-    same_route_unscheduled(as).where(requested_for: (as.requested_for - as.duration)..(as.requested_for + as.duration))
+    same_route_unscheduled(as, options).where(requested_for: (as.requested_for - as.duration)..(as.requested_for + as.duration))
   }
 
   scope :same_route, ->(as, options = {}) {
