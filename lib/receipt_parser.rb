@@ -34,7 +34,7 @@ class ReceiptParser < Mail::Message
   end
 
   def match_time(occurence=1)
-    occurences = text.scan(/(\d{2}:\d{2}\s*(am|pm))/i)
+    occurences = text.scan(/(\d{1,2}:\d{2}\s*(am|pm))/i)
     occurences[occurence-1] && occurences[occurence-1][0]
   end
 

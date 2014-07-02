@@ -238,7 +238,11 @@ class Request < ActiveRecord::Base
   def apply_coupon
     return if coupon_code.nil?
 
-    ride_alone! if coupon_code == 'LONERIDER'
+    ride_alone! if lone_rider?
+  end
+
+  def lone_rider?
+    self.coupon_code == 'LONERIDER'
   end
 
   def ride_alone!

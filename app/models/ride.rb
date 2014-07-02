@@ -204,13 +204,15 @@ class Ride < ActiveRecord::Base
       unless receipt.blank?
         self.receipt = receipt
         save
-        self.captain.rider.credit(self.cost)
+        self.captain.rider.credit(self.cost - self.cost_of(self.captain.rider))
 
         self.riders.each do |rider|
           request = rider.request_for(self)
-          charges = self.cost_of(rider) + fee
+          charges = self.cost_of(rider)
+          charges += fee unless request.lone_rider?
           cost = request.coupon.present? ? request.coupon.apply(charges) : charges
           charged, credits_used, charge_ref = rider.charge(cost.round(2), request)
+          rider.save
           request.create_payment!(amount: cost, credits_used: credits_used, credit_card_charge: charged, fee: fee, reference: charge_ref)
         end
       end
