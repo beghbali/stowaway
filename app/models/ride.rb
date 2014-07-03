@@ -212,7 +212,6 @@ class Ride < ActiveRecord::Base
           charges += fee unless request.lone_rider?
           cost = request.coupon.present? ? request.coupon.apply(charges) : charges
           charged, credits_used, charge_ref = rider.charge(cost.round(2), request)
-          rider.save
           request.create_payment!(amount: cost, credits_used: credits_used, credit_card_charge: charged, fee: fee, reference: charge_ref)
         end
       end

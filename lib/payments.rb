@@ -24,6 +24,7 @@ module Payments
     remaining_credits = self.credits - amount
     used_credits = remaining_credits < 0.0 ? self.credits : self.credits - remaining_credits
     self.credits -= used_credits
+    save
     [amount - used_credits, used_credits]
   end
 
