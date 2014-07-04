@@ -199,12 +199,12 @@ class Ride < ActiveRecord::Base
   #reconcile stowaway receipts
   def reconcile_receipt
     self.class.transaction do
-      self.captain.rider.fetch_ride_receipts
+      captain = self.captain.rider
+      captain.fetch_ride_receipts
       receipt = find_receipt
       unless receipt.blank?
-        self.receipt = receipt
-        save
-        self.captain.rider.credit(self.cost - self.cost_of(self.captain.rider))
+        self.update_attributes(receipt_id: receipt.id)
+        captain.credit(self.cost - self.cost_of(self.captain.rider))
 
         self.riders.each do |rider|
           request = rider.request_for(self)
