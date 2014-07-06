@@ -204,7 +204,7 @@ class Ride < ActiveRecord::Base
       receipt = find_receipt
       unless receipt.blank?
         self.update_attributes(receipt_id: receipt.id)
-        captain.credit(self.cost - self.cost_of(self.captain.rider))
+        captain.credit(self.cost)
 
         self.riders.each do |rider|
           request = rider.request_for(self)
