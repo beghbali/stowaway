@@ -29,9 +29,8 @@ module Payments
   end
 
   def credit(amount)
-    ActiveRecord::Base.transaction do
-      self.credits += amount
-      save
+    self.class.transaction do
+      update_attributes!(credits: (self.credits + amount))
     end
   end
 end
