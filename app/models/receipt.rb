@@ -63,6 +63,10 @@ class Receipt < ActiveRecord::Base
     cost.nil? ? 0 : (cost - total_amount)/cost
   end
 
+  def savings_percentage
+    (savings * 100).round
+  end
+
   def credited_amount
     request.nil? ? 0.0 : (request.ride.cost - total_amount)
   end
