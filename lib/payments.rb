@@ -30,7 +30,7 @@ module Payments
 
   def credit(amount)
     self.class.transaction do
-      update_attributes!(credits: (self.credits + amount))
+      update!(credits: (self.credits + amount))
     end
   end
 end

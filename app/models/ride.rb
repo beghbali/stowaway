@@ -203,7 +203,7 @@ class Ride < ActiveRecord::Base
       captain.fetch_ride_receipts
       receipt = find_receipt
       unless receipt.blank?
-        self.update_attributes(receipt_id: receipt.id)
+        self.update!(receipt_id: receipt.id)
         captain.credit(cost)
 
         self.riders.each do |rider|
