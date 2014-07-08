@@ -50,7 +50,7 @@ class User < ActiveRecord::Base
   end
 
   def can_create_email?
-    self.email_changed? && self.email_was.nil?
+    self.email_changed?
   end
 
   def as_json(options={})
