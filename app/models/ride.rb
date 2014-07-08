@@ -204,14 +204,19 @@ class Ride < ActiveRecord::Base
       receipt = find_receipt
       unless receipt.blank?
         self.update!(receipt_id: receipt.id)
+        Rails.logger.debug ">>>>#{captain.credits}, #{cost}"
         captain.credit(cost)
+        Rails.logger.debug ">>>>#{captain.credits}"
 
         self.riders.each do |rider|
           request = rider.request_for(self)
           charges = self.cost_of(rider)
           charges += fee unless request.lone_rider?
+          Rails.logger.debug ">>>>#{charges}, #{rider.email}"
           final_cost = request.coupon.present? ? request.coupon.apply(charges) : charges
+          Rails.logger.debug ">>>>#{final_cost}, #{final_cost.round(2)}, #{captain.credits}"
           charged, credits_used, charge_ref = rider.charge(final_cost.round(2), request)
+          Rails.logger.debug ">>>>#{captain.credits}, #{charged}, #{credits_used}"
           request.create_payment!(amount: final_cost, credits_used: credits_used, credit_card_charge: charged, fee: fee, reference: charge_ref)
         end
       end
