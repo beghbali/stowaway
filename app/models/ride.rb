@@ -205,11 +205,10 @@ class Ride < ActiveRecord::Base
       unless receipt.blank?
         self.update!(receipt_id: receipt.id)
         Rails.logger.debug ">>>>#{captain.credits}, #{cost}"
-        debugger;2
         captain.credit(cost)
         Rails.logger.debug ">>>>#{captain.credits}, #{captain.reload.credits}"
 
-        self.riders.each do |rider|
+        self.riders(true).each do |rider|
           request = rider.request_for(self)
           charges = self.cost_of(rider)
           charges += fee unless request.lone_rider?
