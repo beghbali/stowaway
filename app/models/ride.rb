@@ -219,6 +219,7 @@ class Ride < ActiveRecord::Base
             charged, credits_used, charge_ref = rider.charge(final_cost.round(2), request)
             Rails.logger.debug ">>>>#{captain.credits}, #{charged}, #{credits_used}"
             request.create_payment!(amount: final_cost, credits_used: credits_used, credit_card_charge: charged, fee: fee, reference: charge_ref)
+            rider.save!
             Rails.logger.debug ">>>>#{captain.credits}, #{captain.reload.credits}"
           end
         end
