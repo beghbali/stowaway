@@ -114,7 +114,7 @@ class Request < ActiveRecord::Base
   def match_with_existing_rides
     matches = self.class.matched.joins('INNER JOIN rides on requests.ride_id = rides.id').
                 same_route(self, pickup_lat: 'rides.suggested_pickup_lat', pickup_lng: 'rides.suggested_pickup_lng', dropoff_lat: 'rides.suggested_dropoff_lat', dropoff_lng: 'rides.suggested_dropoff_lng',
-                  requested_for: :suggested_pickup_time).
+                  requested_for: 'rides.suggested_pickup_time').
                 select("requests.*, COUNT(requests.ride_id) as spaces_taken").
                 having('COUNT(requests.ride_id) < ?', Ride::CAPACITY).
                 order('spaces_taken ASC').readonly(false)
