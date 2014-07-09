@@ -203,7 +203,7 @@ class Ride < ActiveRecord::Base
       captain.fetch_ride_receipts
       receipt = find_receipt
       unless receipt.blank?
-        uncached do
+        Ride.uncached do
           self.update!(receipt_id: receipt.id)
           Rails.logger.debug ">>>>#{captain.credits}, #{cost}"
           captain.credit(cost)
