@@ -60,7 +60,11 @@ class Receipt < ActiveRecord::Base
 
   def savings
     cost = self.payment && payment.request.ride.cost
-    cost.nil? ? 0 : (cost - total_amount)/cost
+    cost.nil? ? 0 : (cost - base_amount)/cost
+  end
+
+  def base_amount
+    total_amount - other_amount
   end
 
   def savings_percentage
