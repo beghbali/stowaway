@@ -17,7 +17,7 @@ class ReceiptMailer < ActionMailer::Base
     mail(to: @receipt.billed_to,
          subject: I18n.t('mailers.receipt_mailer.stowaway_ride_receipt.subject',
           weekday: @receipt.request.ride.created_at.strftime("%A"),
-          timeofday: @receipt.request.ride.created_at.to_datetime.n_time_zone("Pacific Time (US & Canada)").time_of_day,
+          timeofday: @receipt.request.ride.created_at.to_datetime.in_time_zone("Pacific Time (US & Canada)").time_of_day,
           savings: "#{@receipt.savings_percentage }%"))
   end
 end
