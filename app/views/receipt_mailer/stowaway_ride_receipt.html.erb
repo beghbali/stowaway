@@ -126,6 +126,12 @@
     </table>
         <table cellspacing="0" style="width:100%;color:#717171;padding-top:3px">
         <tbody>
+          <% if @receipt.payment.fee > 0 %>
+            <tr>
+                <td><strong style="color:#7a7a7a">Stowaway grouping fee:</strong></td>
+                <td style="text-align:right"><strong style="color:#7a7a7a"></strong><span style="color:#7a7a7a"><%= number_to_currency(@receipt.payment.fee) %></td>
+            </tr>
+          <% end %>
             <tr>
                 <td><strong style="color:#7a7a7a">Total charged:</strong></td>
                 <td style="text-align:right"><strong style="color:#7a7a7a"></strong><span style="color:#7a7a7a"><%= number_to_currency(@receipt.total_amount) %></td>

@@ -64,7 +64,7 @@ class Receipt < ActiveRecord::Base
   end
 
   def base_amount
-    total_amount - other_amount
+    total_amount - (payment.try(:fee) || 0)
   end
 
   def savings_percentage
