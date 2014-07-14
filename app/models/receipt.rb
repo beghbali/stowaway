@@ -12,7 +12,7 @@ class Receipt < ActiveRecord::Base
   RIDESHARES = %w(Uber)
   REQUEST_TIME_PROXIMITY = 20.minutes
   scope :rideshares, -> { where(generated_by: RIDESHARES)}
-  scope :for, ->(ride) { geocoded.where(billed_to: ride.captain.rider.email).where(ride_requested_at: (ride.captain.checkedin_at - REQUEST_TIME_PROXIMITY)..(ride.captain.checkedin_at + REQUEST_TIME_PROXIMITY)).near(ride.pickup_location, Request::PICKUP_RADIUS)}
+  scope :for, ->(ride) { geocoded.where(billed_to: [ride.captain.rider.email, ride.captain.rider.stowaway_email]).where(ride_requested_at: (ride.captain.checkedin_at - REQUEST_TIME_PROXIMITY)..(ride.captain.checkedin_at + REQUEST_TIME_PROXIMITY)).near(ride.pickup_location, Request::PICKUP_RADIUS)}
 
   #ride requested at within 15 minutes + geocoded pickup location/dropoff location within 200 ft of the ride
   def self.build_from_email(email)
