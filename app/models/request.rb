@@ -11,6 +11,7 @@ class Request < ActiveRecord::Base
   PICKUP_RADIUS = 0.3
   DROPOFF_RADIUS = 0.5
   DESIGNATIONS =  %w(stowaway captain)
+  WINDOW = 15.minutes
 
   belongs_to :user
   belongs_to :ride, autosave: true
