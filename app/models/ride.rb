@@ -87,6 +87,7 @@ class Ride < ActiveRecord::Base
   end
 
   def update_ride_time!
+    Rails.logger.debug "#{determine_suggested_pickup_time} <<<<<<<<<< TIME UPDATE"
     update(suggested_pickup_time: determine_suggested_pickup_time)
   end
 
