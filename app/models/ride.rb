@@ -70,7 +70,7 @@ class Ride < ActiveRecord::Base
     initiate if options[:initiate]
   end
 
-  def request_added(request)
+  def request_added
     update_ride_route!
     update_ride_time!
     schedule_finalization

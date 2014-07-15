@@ -28,6 +28,7 @@ class Request < ActiveRecord::Base
   before_save :apply_user_coupon
   after_save :apply_coupon, if: :coupon_code_changed?
   after_save :destroy, if: -> { status == 'missed'}
+  after_create :update_ride, if: -> { matched? && status_was == 'outstanding' }
   after_create :finalize, if: :can_finalize?
   after_create :notify_neighbors, if: -> { outstanding? && scheduled? }
   after_create :notify_other_riders, if: -> { matched? && ride.present? }
@@ -105,8 +106,7 @@ class Request < ActiveRecord::Base
       self.status = 'matched'
       matches.each do |request|
         request.update(status: 'matched', ride_id: self.ride.id)
-        self.ride.request_added(request)
-      end
+       end
     end
     ride
   end
@@ -122,9 +122,12 @@ class Request < ActiveRecord::Base
     if matches.count > 0
       self.ride = matches.first.ride
       self.status = 'matched'
-      self.ride.request_added(self)
     end
     ride
+  end
+
+  def update_ride
+    self.ride.request_added
   end
 
   def full_house?
