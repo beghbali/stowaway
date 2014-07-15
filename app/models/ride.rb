@@ -83,8 +83,7 @@ class Ride < ActiveRecord::Base
   end
 
   def determine_suggested_pickup_time
-    earliest_request = requests.order(requested_for: :asc).pluck(:requested_for).first
-    earliest_request + Request::WINDOW
+    requests.order(requested_for: :desc).first.requested_for
   end
 
   def update_ride_time!
