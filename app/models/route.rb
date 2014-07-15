@@ -10,7 +10,7 @@ class Route < ActiveRecord::Base
   ADDERS = %w(user request system)
   #TODO: we might want to include less accurate locales that encompass the given locale as well.
   scope :similar_to, ->(route) { where(start_locale_id: route.start_locale_id, end_locale_id: route.end_locale_id).order(accuracy: :desc) }
-  scope :have_not_been_notified_in, ->(how_long) { where('last_notified_at IS NOT NULL').where('last_notified_at < ?', Time.now - how_long) }
+  scope :have_not_been_notified_in, ->(how_long) { where('last_notified_at IS NULL OR last_notified_at < ?', Time.now - how_long) }
 
   def notification_options
     nullified_notification_options do |options|
