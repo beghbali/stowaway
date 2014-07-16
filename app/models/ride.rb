@@ -141,7 +141,9 @@ class Ride < ActiveRecord::Base
   end
 
   def reset_requests
-    self.requests.available.map(&:outstanding!)
+    self.requests.available.each do |request|
+      request.outstanding! unless request.elapsed?
+    end
   end
 
   def start_checkin

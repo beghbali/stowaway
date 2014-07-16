@@ -311,6 +311,10 @@ class Request < ActiveRecord::Base
     requested_for.present?
   end
 
+  def elapsed?
+    ((requested_for || Time.at(0)) - Time.now) > 0
+  end
+
   def notify_neighbors
     Resque.enqueue(NotifyNeighborsJob, self.id)
   end
