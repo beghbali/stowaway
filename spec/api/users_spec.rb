@@ -1,4 +1,5 @@
 require 'spec_helper'
+include Requests::Mocks
 
 describe Stowaway::Users do
   let(:facebook_user_attributes) do
