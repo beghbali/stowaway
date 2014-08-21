@@ -4,7 +4,13 @@ class Receipt < ActiveRecord::Base
   has_one :request, through: :payment
   validate :did_not_generate_same_receipt_before
 
-  geocoded_by :pickup_location, latitude: :pickup_lat, longitude: :pickup_lng
+  geocoded_by :pickup_location, latitude: :pickup_lat, longitude: :pickup_lng do |obj, results|
+    if geo = results.first
+      debugger;2
+      obj.pickup_lat = geo.latitude
+      obj.pickup_lng = geo.longitude
+    end
+  end
 
   after_validation :geocode
   after_create :email_it, if: -> { generated_by == 'Stowaway' }
@@ -12,7 +18,7 @@ class Receipt < ActiveRecord::Base
   RIDESHARES = %w(Uber)
   REQUEST_TIME_PROXIMITY = 20.minutes
   scope :rideshares, -> { where(generated_by: RIDESHARES)}
-  scope :for, ->(ride) { geocoded.where(billed_to: [ride.captain.rider.email, ride.captain.rider.stowaway_email]).where(ride_requested_at: (ride.captain.checkedin_at - REQUEST_TIME_PROXIMITY)..(ride.captain.checkedin_at + REQUEST_TIME_PROXIMITY)).near(ride.pickup_location, Request::PICKUP_RADIUS)}
+  scope :for, ->(ride) { geocoded.where(billed_to: [ride.captain.rider.email, ride.captain.rider.stowaway_email]).where(ride_requested_at: (ride.captain.checkedin_at - REQUEST_TIME_PROXIMITY)..(ride.captain.checkedin_at + REQUEST_TIME_PROXIMITY)).near(ride.pickup_location, Request::PICKUP_RADIUS*2)}
 
   #ride requested at within 15 minutes + geocoded pickup location/dropoff location within 200 ft of the ride
   def self.build_from_email(email)
