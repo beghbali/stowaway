@@ -342,9 +342,11 @@ class Request < ActiveRecord::Base
 
   def update_routes
     route = self.rider.routes.where(as_route.except(:added_by)).first || to_route
-    route.count += 1
-    route.user = self.rider
-    route.save
+    if route.has_locales?
+      route.count += 1
+      route.user = self.rider
+      route.save
+    end
   end
 
   protected
