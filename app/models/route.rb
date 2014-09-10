@@ -17,10 +17,9 @@ class Route < ActiveRecord::Base
   end
 
   def notification_options(opts = {})
-    nullified_notification_options(opts) do |alert, sound, options|
+    nullified_notification_options(opts) do |options|
       alert = I18n.t("notifications.route.proposed.alert", from_locale: start_locale.name, to_locale: end_locale.name, time: options[:time] || 'now')
       sound = I18n.t("notifications.route.proposed.sound")
     end
-    [alert, sound]
   end
 end

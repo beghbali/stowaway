@@ -9,7 +9,7 @@ module Notify
     end
 
     def nullified_notification_options(options = {})
-      alert, sound = yield(alert, sound, options) if block_given?
+      alert, sound = yield(options) if block_given?
 
       alert = nillify_blank(alert)
       sound = nillify_blank(sound)
