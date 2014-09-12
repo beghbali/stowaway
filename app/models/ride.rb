@@ -208,7 +208,7 @@ class Ride < ActiveRecord::Base
         self.update!(receipt_id: receipt.id)
         captain.credit(cost)
 
-        self.riders(true).each do |rider|
+        self.requests.available.billable.map(&:user).each do |rider|
           request = rider.request_for(self)
           charges = self.cost_of(rider)
           fees = request.lone_rider? ? 0 : fee
@@ -286,7 +286,7 @@ class Ride < ActiveRecord::Base
   def notification_options(status)
     nullified_notification_options do |options|
       if status == 'ride_cancelled'
-        who_canceled = self.captain.present? ? 'cancelled_by_captain' : 'cancelled'
+        who_canceled = self.captain.present? ?  'cancelled' : 'cancelled_by_captain'
         alert = I18n.t("notifications.ride.#{who_canceled}.alert", name: self.captain && self.captain.user.first_name)
         sound = I18n.t("notifications.ride.#{who_canceled}.sound")
       end
