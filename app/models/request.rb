@@ -49,7 +49,7 @@ class Request < ActiveRecord::Base
   scope :available, -> { where(deleted_at: nil) }
   scope :unclosed, -> { where('status NOT IN (?)', CLOSED_STATUSES)}
   scope :closed, -> { where(status: CLOSED_STATUSES)}
-  scope :billable -> { where(status: BILLABLE_STATUSES) }
+  scope :billable, -> { where(status: BILLABLE_STATUSES) }
   scope :scheduled, -> { where.not(requested_for: nil) }
 
   scope :same_route_unscheduled, -> (as, options = {}) {
