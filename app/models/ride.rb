@@ -152,11 +152,11 @@ class Ride < ActiveRecord::Base
 
   def stop_checkin
     Rails.logger.debug "Stop checking in: #{self.location_channel_name}, #{self.public_id}"
-    Resque::Job.destroy(:autocheckin, CheckinRidersJob, self.id)
   end
 
   def close
     stop_checkin
+    delete_reminders
     self.requests.unclosed.map(&:miss!)
     collect_payments
   end

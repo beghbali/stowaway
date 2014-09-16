@@ -23,7 +23,7 @@ en:
   notifications:
     route:
       proposed:
-        alert: "There is a ride from %{from_locale} to %{to_locale} around %{time}. Reserve your spot now by requesting a ride"
+        alert: "There is a ride from %{from_locale} to %{to_locale} %{day} around %{time}. Reserve your spot now by requesting a ride"
         sound: ''
     request:
       outstanding:

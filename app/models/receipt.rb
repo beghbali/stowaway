@@ -6,7 +6,6 @@ class Receipt < ActiveRecord::Base
 
   geocoded_by :pickup_location, latitude: :pickup_lat, longitude: :pickup_lng do |obj, results|
     if geo = results.first
-      debugger;2
       obj.pickup_lat = geo.latitude
       obj.pickup_lng = geo.longitude
     end
