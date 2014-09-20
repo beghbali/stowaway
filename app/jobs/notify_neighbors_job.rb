@@ -12,7 +12,7 @@ class NotifyNeighborsJob
 
       Route.similar_to(proposed_route).have_not_been_notified_in(1.day).map do |route|
         relative_day = request.requested_for.to_date.today? ? 'today' : 'tomorrow'
-        route.user && route.user.notify(proposed_route.notification(day: relative_day, time: request.requested_for.to_s(:time)))
+        route.user && (route.user != request.user) && route.user.notify(proposed_route.notification(day: relative_day, time: request.requested_for.to_s(:time)))
       end
     end
   end
