@@ -12,6 +12,7 @@ class Request < ActiveRecord::Base
   PICKUP_RADIUS = 0.3
   DROPOFF_RADIUS = 0.5
   DESIGNATIONS =  %w(stowaway captain)
+  VICINITY_RADIUS = 0.005
 
   belongs_to :user
   belongs_to :ride, autosave: true
@@ -164,7 +165,7 @@ class Request < ActiveRecord::Base
   def getting_farther_from(another_request)
     current_distance = Geocoder::Calculations.distance_between(self.last_location, another_request.last_location)
     previous_distance = Geocoder::Calculations.distance_between([last_lat_was, last_lng_was], another_request.last_location)
-    current_distance > previous_distance
+    current_distance > previous_distance + VICINITY_RADIUS
   end
 
   def record_vicinity
@@ -196,6 +197,7 @@ class Request < ActiveRecord::Base
 
   def initiated!
     self.update(status: 'initiated')
+    Rails.logger.debug("UPDATED initiated should notify now")
     notify_rider_about([self]) if scheduled?
   end
 
