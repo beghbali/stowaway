@@ -14,7 +14,7 @@ class NotifyNeighborsJob
         relative_day = request.requested_for.to_date.today? ? 'today' : 'tomorrow'
         route.user && (route.user != request.user) &&
         route.user.notify(proposed_route.notification(day: relative_day, time: request.requested_for.in_time_zone('Pacific Time (US & Canada)').to_s(:time))) &&
-        route.update(:last_notified_at, Time.now)
+        route.update(last_notified_at: Time.now)
       end
     end
   end
