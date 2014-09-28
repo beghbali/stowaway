@@ -5,8 +5,8 @@ class FinalizeRideJob
 
   def self.perform(ride_id)
     ride = Ride.find(ride_id)
-    unless ride.nil?
-      ride.finalize
-    end
+    ride.finalize
+  rescue ActiveRecord::RecordNotFound
+    Rails.logger.info "WARNING: finalization failed. ride #{ride_id} not found"
   end
 end
