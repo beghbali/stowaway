@@ -61,10 +61,10 @@ en:
         sound: 'action_required.wav'
       cancelled:
         alert: "Your ride mates had to cancel the ride"
-        sound: ''
+        sound: 'ride_missed.wav'
       cancelled_by_captain:
         alert: "Captain %{name} had to cancel the ride"
-        sound: ''
+        sound: 'ride_missed.wav'
   models:
     ride:
       format:
