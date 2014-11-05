@@ -90,6 +90,7 @@ module Stowaway
               request.update_routes
               Rails.logger.debug "REQUEST CREATED: #{request.inspect}"
               request
+              error!('Service Unavailable', 503)
             end
           end
 
